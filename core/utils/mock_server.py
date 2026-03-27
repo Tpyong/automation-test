@@ -5,9 +5,9 @@ Mock 服务器模块
 
 import json
 import threading
-from collections import defaultdict
+import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional
 from urllib.parse import parse_qs, urlparse
 
 from core.utils.logger import get_logger
@@ -105,8 +105,6 @@ class MockRequestHandler(BaseHTTPRequestHandler):
 
     def _send_response(self, response: MockResponse):
         """发送响应"""
-        import time
-
         if response.delay > 0:
             time.sleep(response.delay)
 

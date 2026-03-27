@@ -4,7 +4,7 @@ API 测试客户端基类
 """
 
 import json
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 from urllib.parse import urljoin
 
 import allure
@@ -63,7 +63,7 @@ class APIClient:
         logger.info(f"API 响应: {response.status_code} {response.url}")
         try:
             logger.debug(f"响应体: {response.json()}")
-        except:
+        except json.JSONDecodeError:
             logger.debug(f"响应体: {response.text}")
 
     @allure.step("发送 GET 请求: {endpoint}")

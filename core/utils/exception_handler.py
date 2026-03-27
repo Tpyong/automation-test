@@ -1,4 +1,3 @@
-import sys
 import traceback
 import time
 from typing import Any, Optional
@@ -104,7 +103,7 @@ class ExceptionHandler:
             while retries < max_retries:
                 try:
                     return func(*args, **kwargs)
-                except Exception as e:
+                except Exception:
                     retries += 1
                     if retries >= max_retries:
                         raise
