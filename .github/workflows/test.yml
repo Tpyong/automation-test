@@ -115,9 +115,24 @@ jobs:
       run: |
         pip install allure-pytest
         # 安装allure命令行工具
+        echo "Downloading Allure..."
         wget -qO- https://github.com/allure-framework/allure2/releases/download/2.24.1/allure-2.24.1.tgz | tar -xz -C /tmp/
-        # 在同一个命令中设置PATH并运行allure
-        /tmp/allure-2.24.1/bin/allure generate allure-results --clean -o allure-report
+        
+        # 检查解压结果
+        echo "Checking Allure installation..."
+        ls -la /tmp/
+        ls -la /tmp/allure-2.24.1/
+        ls -la /tmp/allure-2.24.1/bin/
+        
+        # 确保使用绝对路径运行allure
+        ALLURE_BIN=/tmp/allure-2.24.1/bin/allure
+        if [ -f "$ALLURE_BIN" ]; then
+            echo "Allure found at: $ALLURE_BIN"
+            $ALLURE_BIN generate allure-results --clean -o allure-report
+        else
+            echo "Error: Allure binary not found"
+            exit 1
+        fi
 
     - name: Upload Allure Report
       uses: actions/upload-artifact@v4
