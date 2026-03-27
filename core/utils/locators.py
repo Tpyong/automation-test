@@ -114,15 +114,13 @@ class LocatorManager:
 
         if isinstance(locator, str):
             return locator
-        elif isinstance(locator, dict):
+        if isinstance(locator, dict):
             if strategy in locator:
                 return locator[strategy]
-            elif "default" in locator:
+            if "default" in locator:
                 return locator["default"]
-            else:
-                return locator
-        else:
-            raise ValueError(f"不支持的定位器格式: {locator}")
+            return locator
+        raise ValueError(f"不支持的定位器格式: {locator}")
 
     def __getattr__(self, element_name: str) -> Union[str, Dict]:
         """支持通过属性方式访问定位器"""

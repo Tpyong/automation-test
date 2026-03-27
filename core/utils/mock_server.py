@@ -296,7 +296,7 @@ class MockServer:
 
 
 # 全局 Mock 服务器实例
-_mock_server: Optional[MockServer] = None
+_MOCK_SERVER: Optional[MockServer] = None
 
 
 def get_mock_server(host: str = "localhost", port: int = 0) -> MockServer:
@@ -310,7 +310,7 @@ def get_mock_server(host: str = "localhost", port: int = 0) -> MockServer:
     Returns:
         MockServer 实例
     """
-    global _mock_server
-    if _mock_server is None:
-        _mock_server = MockServer(host=host, port=port)
-    return _mock_server
+    global _MOCK_SERVER
+    if _MOCK_SERVER is None:
+        _MOCK_SERVER = MockServer(host=host, port=port)
+    return _MOCK_SERVER

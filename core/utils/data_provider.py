@@ -105,13 +105,12 @@ class DataProvider:
 
         if ext == ".json":
             return DataProvider.load_json(file_path)
-        elif ext in [".yaml", ".yml"]:
+        if ext in [".yaml", ".yml"]:
             return DataProvider.load_yaml(file_path)
-        elif ext == ".csv":
+        if ext == ".csv":
             return DataProvider.load_csv(file_path)
-        else:
-            logger.error(f"不支持的文件格式: {ext}")
-            return []
+        logger.error(f"不支持的文件格式: {ext}")
+        return []
 
     @staticmethod
     def get_test_data(data_file: str) -> List[Dict[str, Any]]:

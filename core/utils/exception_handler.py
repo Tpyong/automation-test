@@ -109,5 +109,7 @@ class ExceptionHandler:
                         raise
                     logger.warning(f"执行 {func.__name__} 失败，{retries}/{max_retries} 重试中...")
                     time.sleep(delay)
+            # 确保函数有返回值
+            return None
 
         return wrapper

@@ -239,7 +239,7 @@ class ReportGenerator:
                 <div>执行时长: {s['duration']} 秒</div>
             </div>
         </div>
-        
+
         <div class="stats">
             <div class="stat-card total">
                 <div class="number">{s['total']}</div>
@@ -258,12 +258,12 @@ class ReportGenerator:
                 <div class="label">跳过</div>
             </div>
         </div>
-        
+
         <div class="pass-rate">
             <div class="value">{s['pass_rate']}%</div>
             <div class="label">通过率</div>
         </div>
-        
+
         <div class="section">
             <h2>📦 按模块统计</h2>
             <table class="module-table">
@@ -342,7 +342,7 @@ class ReportGenerator:
 
 
 # 全局报告生成器实例
-_report_generator = None
+_REPORT_GENERATOR = None
 
 
 def get_report_generator(output_dir: str = "reports") -> ReportGenerator:
@@ -355,7 +355,7 @@ def get_report_generator(output_dir: str = "reports") -> ReportGenerator:
     Returns:
         报告生成器实例
     """
-    global _report_generator
-    if _report_generator is None:
-        _report_generator = ReportGenerator(output_dir)
-    return _report_generator
+    global _REPORT_GENERATOR
+    if _REPORT_GENERATOR is None:
+        _REPORT_GENERATOR = ReportGenerator(output_dir)
+    return _REPORT_GENERATOR

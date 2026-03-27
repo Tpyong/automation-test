@@ -311,7 +311,7 @@ class DataFactory:
 
 
 # 全局数据工厂实例
-_factory = None
+_FACTORY = None
 
 
 def get_data_factory(locale: str = "zh_CN") -> DataFactory:
@@ -324,7 +324,7 @@ def get_data_factory(locale: str = "zh_CN") -> DataFactory:
     Returns:
         数据工厂实例
     """
-    global _factory
-    if _factory is None:
-        _factory = DataFactory(locale)
-    return _factory
+    global _FACTORY
+    if _FACTORY is None:
+        _FACTORY = DataFactory(locale)
+    return _FACTORY

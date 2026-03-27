@@ -218,7 +218,7 @@ class SecretsManager:
 
 
 # 全局 SecretsManager 实例
-_secrets_manager: Optional[SecretsManager] = None
+_SECRETS_MANAGER: Optional[SecretsManager] = None
 
 
 def get_secrets_manager() -> SecretsManager:
@@ -228,10 +228,10 @@ def get_secrets_manager() -> SecretsManager:
     Returns:
         SecretsManager 实例
     """
-    global _secrets_manager
-    if _secrets_manager is None:
-        _secrets_manager = SecretsManager()
-    return _secrets_manager
+    global _SECRETS_MANAGER
+    if _SECRETS_MANAGER is None:
+        _SECRETS_MANAGER = SecretsManager()
+    return _SECRETS_MANAGER
 
 
 def decrypt_value(value: str) -> str:
