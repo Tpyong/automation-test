@@ -39,16 +39,13 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.lock
 
-    - name: Install Playwright browsers and Allure CLI
+    - name: Install Playwright browsers
       run: |
         playwright install --with-deps
-        # 安装Allure命令行工具
-        wget -qO- https://github.com/allure-framework/allure2/releases/download/2.24.1/allure-2.24.1.tgz | tar -xz -C /tmp/
-        echo "export PATH=$PATH:/tmp/allure-2.24.1/bin" >> $GITHUB_ENV
 
     - name: Run tests
       run: |
-        pytest tests/ -v --browser=${{ matrix.browser }}
+        pytest tests/ -v --browser=${{ matrix.browser }} --alluredir=allure-results
       env:
         TEST_ENV: testing
         HEADLESS: true
