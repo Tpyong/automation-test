@@ -43,7 +43,7 @@ class TestResult:
             "error_msg": self.error_msg,
             "file_path": self.file_path,
             "class_name": self.class_name,
-            "test_name": self.test_name
+            "test_name": self.test_name,
         }
 
     @classmethod
@@ -89,14 +89,14 @@ class ReportGenerator:
     def end_session(self):
         """结束测试会话"""
         self.stop_time = datetime.now()
-        
+
         # 保存当前worker的结果到临时文件
         if self.worker_id != "master":
             self._save_worker_results()
         else:
             # 主进程合并所有worker的结果
             self._merge_worker_results()
-            
+
         logger.info("测试会话结束")
 
     def add_result(self, nodeid: str, outcome: str, duration: float = 0.0, error_msg: Optional[str] = None):
@@ -385,12 +385,12 @@ class ReportGenerator:
         data = {
             "start_time": self.start_time.isoformat() if self.start_time else None,
             "stop_time": self.stop_time.isoformat() if self.stop_time else None,
-            "results": results_data
+            "results": results_data,
         }
-        
+
         with open(worker_file, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
-        
+
         logger.info(f"Worker {self.worker_id} 结果已保存到: {worker_file}")
 
     def _merge_worker_results(self):
@@ -398,71 +398,71 @@ class ReportGenerator:
         merged_results = []
         min_start_time = None
         max_stop_time = None
-        
+
         # 收集所有worker的结果文件
         worker_files = list(self.temp_dir.glob("worker_*.json"))
         logger.info(f"发现 {len(worker_files)} 个worker结果文件")
-        
+
         for worker_file in worker_files:
             try:
                 with open(worker_file, "r", encoding="utf-8") as f:
                     data = json.load(f)
-                
+
                 # 解析开始和结束时间
                 if data.get("start_time"):
                     start_time = datetime.fromisoformat(data["start_time"])
                     if min_start_time is None or start_time < min_start_time:
                         min_start_time = start_time
-                
+
                 if data.get("stop_time"):
                     stop_time = datetime.fromisoformat(data["stop_time"])
                     if max_stop_time is None or stop_time > max_stop_time:
                         max_stop_time = stop_time
-                
+
                 # 解析测试结果
                 for result_data in data.get("results", []):
                     result = TestResult.from_dict(result_data)
                     merged_results.append(result)
-                
+
                 logger.info(f"已合并 {worker_file} 的结果")
             except Exception as e:
                 logger.error(f"合并 {worker_file} 结果时出错: {e}")
-        
+
         # 更新合并后的结果
         self.results = merged_results
         self.start_time = min_start_time
         self.stop_time = max_stop_time
-        
+
         # 清理临时文件
         for worker_file in worker_files:
             try:
                 worker_file.unlink()
             except Exception as e:
                 logger.error(f"删除临时文件 {worker_file} 时出错: {e}")
-        
+
         logger.info(f"合并完成，共 {len(merged_results)} 个测试结果")
 
     def save_history(self):
         """保存测试结果到历史记录"""
         history_dir = self.output_dir / "history"
         history_dir.mkdir(exist_ok=True)
-        
+
         # 生成历史记录文件名
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         history_file = history_dir / f"history_{timestamp}.json"
-        
+
         # 构建历史记录数据
         summary = self.get_summary()
         history_data = {
             "timestamp": datetime.now().isoformat(),
             "summary": summary,
-            "results": [result.to_dict() for result in self.results]
+            "results": [result.to_dict() for result in self.results],
         }
-        
+
         # 保存到历史文件
         with open(history_file, "w", encoding="utf-8") as f:
             json.dump(history_data, f, ensure_ascii=False, indent=2)
-        
+
         logger.info(f"测试结果已保存到历史记录: {history_file}")
         return str(history_file)
 
@@ -479,25 +479,25 @@ class ReportGenerator:
         history_dir = self.output_dir / "history"
         if not history_dir.exists():
             return []
-        
+
         history_files = list(history_dir.glob("history_*.json"))
         history_data = []
-        
+
         # 计算时间范围
         cutoff_time = datetime.now() - timedelta(days=days)
-        
+
         for history_file in history_files:
             try:
                 with open(history_file, "r", encoding="utf-8") as f:
                     data = json.load(f)
-                
+
                 # 检查时间是否在范围内
                 timestamp = datetime.fromisoformat(data["timestamp"])
                 if timestamp >= cutoff_time:
                     history_data.append(data)
             except Exception as e:
                 logger.error(f"读取历史文件 {history_file} 时出错: {e}")
-        
+
         # 按时间排序
         history_data.sort(key=lambda x: x["timestamp"])
         return history_data
@@ -517,14 +517,14 @@ class ReportGenerator:
         if not history_data:
             logger.warning("没有足够的历史数据生成趋势报告")
             return ""
-        
+
         # 准备趋势数据
         timestamps = []
         pass_rates = []
         total_tests = []
         failed_tests = []
         durations = []
-        
+
         for data in history_data:
             timestamps.append(data["timestamp"])
             summary = data["summary"]["summary"]
@@ -532,9 +532,9 @@ class ReportGenerator:
             total_tests.append(summary["total"])
             failed_tests.append(summary["failed"])
             durations.append(summary["duration"])
-        
+
         # 构建HTML内容
-        html_template = '''<!DOCTYPE html>
+        html_template = """<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -787,25 +787,26 @@ class ReportGenerator:
     </script>
 </body>
 </html>
-'''
-        
+"""
+
         # 计算统计数据
         avg_pass_rate = round(sum(pass_rates) / len(pass_rates), 2) if pass_rates else 0
         avg_total_tests = round(sum(total_tests) / len(total_tests), 0) if total_tests else 0
         avg_failed_tests = round(sum(failed_tests) / len(failed_tests), 0) if failed_tests else 0
         avg_duration = round(sum(durations) / len(durations), 2) if durations else 0
-        
+
         # 生成时间
-        generate_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        
+        generate_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
         # 转换数据为JSON
         import json
+
         timestamps_json = json.dumps(timestamps)
         pass_rates_json = json.dumps(pass_rates)
         total_tests_json = json.dumps(total_tests)
         failed_tests_json = json.dumps(failed_tests)
         durations_json = json.dumps(durations)
-        
+
         # 填充模板
         html = html_template.format(
             generate_time=generate_time,
@@ -819,14 +820,14 @@ class ReportGenerator:
             pass_rates_json=pass_rates_json,
             total_tests_json=total_tests_json,
             failed_tests_json=failed_tests_json,
-            durations_json=durations_json
+            durations_json=durations_json,
         )
-        
+
         # 保存趋势报告
         report_path = self.output_dir / filename
         with open(report_path, "w", encoding="utf-8") as f:
             f.write(html)
-        
+
         logger.info(f"测试趋势报告已生成: {report_path}")
         return str(report_path)
 
