@@ -110,14 +110,19 @@ API_KEY=ENC:xxx
 
 ```bash
 # 快速反馈（PR 检查）
-pytest -m smoke -n auto
+pytest -m smoke
 
 # 完整测试（每日构建）
 pytest -v --cov=core --cov-report=xml
 
 # 特定环境测试
 TEST_ENV=staging pytest -m regression
+
+# 并行测试（注意：可能影响自定义报告收集）
+pytest -n auto
 ```
+
+**注意**：当前CI配置默认使用串行测试，以确保自定义HTML/JSON测试报告能够正确收集所有测试结果。如需启用并行测试，请在本地环境或特定CI作业中使用。
 
 ### 4. 报告归档
 
