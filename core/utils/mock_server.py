@@ -50,19 +50,19 @@ class MockRequestHandler(BaseHTTPRequestHandler):
         self.mock_server = kwargs.pop("mock_server")
         super().__init__(*args, **kwargs)
 
-    def do_GET(self):
+    def do_GET(self):  # pylint: disable=invalid-name
         self._handle_request("GET")
 
-    def do_POST(self):
+    def do_POST(self):  # pylint: disable=invalid-name
         self._handle_request("POST")
 
-    def do_PUT(self):
+    def do_PUT(self):  # pylint: disable=invalid-name
         self._handle_request("PUT")
 
-    def do_DELETE(self):
+    def do_DELETE(self):  # pylint: disable=invalid-name
         self._handle_request("DELETE")
 
-    def do_PATCH(self):
+    def do_PATCH(self):  # pylint: disable=invalid-name
         self._handle_request("PATCH")
 
     def _handle_request(self, method: str):
@@ -199,7 +199,7 @@ class MockServer:
         headers: Optional[Dict[str, str]] = None,
         delay: float = 0.0,
         name: Optional[str] = None,
-    ) -> MockEndpoint:
+    ) -> MockEndpoint:  # pylint: disable=too-many-arguments
         """
         添加 Mock 端点
 

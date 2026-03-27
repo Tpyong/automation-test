@@ -159,7 +159,7 @@ class SmartLocator:
             # 传统 CSS/XPath 选择器
             return self.page.locator(self.config)
 
-        elif isinstance(self.config, dict):
+        if isinstance(self.config, dict):
             # 语义化定位方式
             return self._get_semantic_locator(self.config)
 

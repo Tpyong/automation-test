@@ -1,5 +1,5 @@
-import traceback
 import time
+import traceback
 from typing import Any, Optional
 
 from core.utils.allure_helper import AllureHelper
