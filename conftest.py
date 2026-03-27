@@ -36,7 +36,9 @@ logger = get_logger(__name__)
 
 
 def pytest_configure(config):
-    config.option.allure_report_dir = "reports/allure-report"
+    # 不设置allure_report_dir，避免pytest自动生成Allure报告
+    # 报告生成由专门的allure-report作业处理
+    pass
 
 
 def pytest_sessionstart(session):
