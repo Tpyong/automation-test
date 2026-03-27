@@ -15,6 +15,7 @@ from core.utils.path_helper import PathHelper
 # 延迟导入可选模块，按需加载
 _allure_helper = None
 _report_generator = None
+_browser_pool = None
 
 def _get_allure_helper():
     """延迟加载 AllureHelper"""
@@ -31,6 +32,14 @@ def _get_report_generator():
         from core.utils.report_generator import get_report_generator
         _report_generator = get_report_generator()
     return _report_generator
+
+def _get_browser_pool():
+    """延迟加载 BrowserPool"""
+    global _browser_pool
+    if _browser_pool is None:
+        from core.utils.browser_pool import get_browser_pool
+        _browser_pool = get_browser_pool()
+    return _browser_pool
 
 logger = get_logger(__name__)
 
@@ -79,6 +88,11 @@ def pytest_sessionfinish(session, exitstatus):
     # 生成测试趋势报告
     trend_report = report_gen.generate_trend_report()
     
+    # 清理浏览器实例池
+    pool = _get_browser_pool()
+    pool.cleanup()
+    logger.info("浏览器实例池已清理")
+    
     logger.info(f"测试汇总报告已生成:")
     logger.info(f"  - HTML: {html_report}")
     logger.info(f"  - JSON: {json_report}")
@@ -108,35 +122,30 @@ def playwright() -> Generator[Playwright, None, None]:
 
 @pytest.fixture(scope="session")
 def browser(playwright: Playwright, settings: Settings) -> Generator[Browser, None, None]:
+    """使用浏览器实例池的浏览器fixture"""
     browser_type = settings.browser_type
     headless = settings.headless
     slow_mo = settings.slow_mo
     viewport = settings.viewport
 
-    logger.info(f"启动浏览器: {browser_type}, headless: {headless}, viewport: {viewport}")
+    logger.info(f"初始化浏览器池: {browser_type}, headless: {headless}, viewport: {viewport}")
 
-    if browser_type == "chromium":
-        browser = playwright.chromium.launch(
-            headless=headless,
-            slow_mo=slow_mo
-        )
-    elif browser_type == "firefox":
-        browser = playwright.firefox.launch(
-            headless=headless,
-            slow_mo=slow_mo
-        )
-    elif browser_type == "webkit":
-        browser = playwright.webkit.launch(
-            headless=headless,
-            slow_mo=slow_mo
-        )
-    else:
-        raise ValueError(f"不支持的浏览器类型: {browser_type}")
+    # 初始化浏览器池
+    pool = _get_browser_pool()
+    pool.initialize(playwright, browser_type, headless, slow_mo)
 
+    # 获取浏览器实例
+    browser = pool.acquire_browser()
+    if not browser:
+        raise RuntimeError("无法获取浏览器实例")
+
+    logger.info(f"成功获取浏览器实例: {id(browser)}")
+    
     yield browser
 
-    logger.info("关闭浏览器")
-    browser.close()
+    # 释放浏览器实例回池中
+    pool.release_browser(browser)
+    logger.info(f"浏览器实例已释放: {id(browser)}")
 
 
 @pytest.fixture(scope="function")
