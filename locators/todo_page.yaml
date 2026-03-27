@@ -1,0 +1,12 @@
+# TodoMVC 页面定位器示例
+new_todo_input: ".new-todo"
+todo_list: ".todo-list"
+todo_item: ".todo-list li"
+todo_label: ".todo-list li label"
+todo_toggle: ".todo-list li .toggle"
+todo_destroy: ".todo-list li .destroy"
+todo_count: ".todo-count"
+filter_all: "a[href='#/all']"
+filter_active: "a[href='#/active']"
+filter_completed: "a[href='#/completed']"
+clear_completed: ".clear-completed"

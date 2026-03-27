@@ -1,0 +1,24 @@
+# 开发依赖
+pip-tools
+
+# 代码检查工具
+pylint
+flake8
+black
+isort
+
+# 类型检查
+mypy
+
+# 文档生成
+sphinx
+sphinx-rtd-theme
+
+# 预提交钩子
+pre-commit
+
+# 测试工具（开发时使用）
+pytest-watch
+
+# 代码覆盖率报告增强
+coverage-badge

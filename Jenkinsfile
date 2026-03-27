@@ -1,0 +1,190 @@
+pipeline {
+    agent any
+    
+    parameters {
+        choice(
+            name: 'TEST_ENV',
+            choices: ['testing', 'staging'],
+            description: '选择测试环境'
+        )
+        choice(
+            name: 'BROWSER',
+            choices: ['chromium', 'firefox', 'webkit'],
+            description: '选择浏览器'
+        )
+        booleanParam(
+            name: 'RUN_SMOKE_ONLY',
+            defaultValue: false,
+            description: '仅运行冒烟测试'
+        )
+    }
+    
+    environment {
+        PIP_CACHE_DIR = "${env.WORKSPACE}/.cache/pip"
+        PLAYWRIGHT_BROWSERS_PATH = "${env.WORKSPACE}/.cache/playwright"
+        TEST_ENV = "${params.TEST_ENV}"
+        BROWSER = "${params.BROWSER}"
+    }
+    
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '20'))
+        timestamps()
+        ansiColor('xterm')
+    }
+    
+    triggers {
+        cron('H 2 * * *')
+        pollSCM('H/15 * * * *')
+    }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+        
+        stage('Setup Python Environment') {
+            steps {
+                sh '''
+                    python3 -m venv venv
+                    . venv/bin/activate
+                    pip install --upgrade pip
+                    pip install -r requirements.txt
+                '''
+            }
+            post {
+                success {
+                    cache(path: '.cache/pip', key: "pip-\${checksum 'requirements.txt'}")
+                }
+            }
+        }
+        
+        stage('Install Playwright Browsers') {
+            steps {
+                sh '''
+                    . venv/bin/activate
+                    playwright install --with-deps ${BROWSER}
+                '''
+            }
+            post {
+                success {
+                    cache(path: '.cache/playwright', key: "playwright-\${BROWSER}")
+                }
+            }
+        }
+        
+        stage('Create Environment File') {
+            steps {
+                sh '''
+                    cat > .env << EOF
+                    BASE_URL=https://demo.playwright.dev/todomvc
+                    BROWSER=${BROWSER}
+                    HEADLESS=true
+                    SLOW_MO=0
+                    TIMEOUT=30000
+                    VIEWPORT_WIDTH=1920
+                    VIEWPORT_HEIGHT=1080
+                    API_BASE_URL=https://api.example.com
+                    API_TIMEOUT=30000
+                    VIDEO_ENABLED=false
+                    EOF
+                '''
+            }
+        }
+        
+        stage('Run Tests') {
+            steps {
+                script {
+                    def testMarkers = params.RUN_SMOKE_ONLY ? 'smoke' : 'smoke or ui'
+                    sh '''
+                        . venv/bin/activate
+                        pytest -v -m "''' + testMarkers + '''" \
+                            --html=reports/pytest-report.html \
+                            --self-contained-html
+                    '''
+                }
+            }
+            post {
+                always {
+                    junit 'reports/pytest-report.html'
+                    archiveArtifacts(
+                        artifacts: 'reports/allure-results/, reports/test-summary.html, reports/test-summary.json, screenshots/',
+                        allowEmptyArchive: true,
+                        fingerprint: true
+                    )
+                }
+            }
+        }
+        
+        stage('Generate Allure Report') {
+            steps {
+                allure([
+                    includeProperties: false,
+                    jdk: '',
+                    properties: [],
+                    reportBuildPolicy: 'ALWAYS',
+                    results: [[path: 'reports/allure-results']]
+                ])
+            }
+        }
+        
+        stage('Run Coverage') {
+            when {
+                not {
+                    environment name: 'RUN_SMOKE_ONLY', value: 'true'
+                }
+            }
+            steps {
+                sh '''
+                    . venv/bin/activate
+                    pytest -v \
+                        --cov=core \
+                        --cov=config \
+                        --cov-report=term \
+                        --cov-report=html:reports/coverage-html \
+                        --cov-report=xml:reports/coverage.xml
+                '''
+            }
+            post {
+                always {
+                    publishHTML(target: [
+                        reportDir: 'reports/coverage-html',
+                        reportFiles: 'index.html',
+                        reportName: 'Code Coverage Report',
+                        keepAll: true
+                    ])
+                    cobertura coberturaReportFile: 'reports/coverage.xml'
+                }
+            }
+        }
+    }
+    
+    post {
+        always {
+            cleanWs()
+        }
+        success {
+            echo '✅ 测试执行成功！'
+        }
+        failure {
+            echo '❌ 测试执行失败！'
+            emailext(
+                subject: "Jenkins 构建失败: ${env.JOB_NAME} - ${env.BUILD_NUMBER}",
+                body: """
+                    构建失败！
+                    
+                    项目: ${env.JOB_NAME}
+                    构建号: ${env.BUILD_NUMBER}
+                    状态: 失败
+                    
+                    查看详情: ${env.BUILD_URL}
+                """,
+                to: 'dev-team@example.com'
+            )
+        }
+        unstable {
+            echo '⚠️  测试执行不稳定！'
+        }
+    }
+}

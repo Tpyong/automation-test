@@ -1,0 +1,98 @@
+# 登录页面元素定位器 - 使用 Playwright 官方推荐的语义化定位方式
+# 定位优先级（按 Playwright 官方推荐顺序）:
+# 1. role - 按 ARIA 角色定位（最推荐）
+# 2. label - 按标签文本定位
+# 3. placeholder - 按 placeholder 定位
+# 4. text - 按文本内容定位
+# 5. title - 按 title 属性定位
+# 6. alt - 按 alt 属性定位
+# 7. test_id - 按 test id 定位
+# 8. css - CSS 选择器
+# 9. xpath - XPath 选择器
+
+# 1. 使用 role 定位（最推荐）- 适用于按钮、链接等
+login_button:
+  role: button
+  name: "登录"
+
+submit_button:
+  role: button
+  name: "提交"
+
+cancel_button:
+  role: button
+  name: "取消"
+
+# 2. 使用 label 定位 - 适用于表单元素
+username_input:
+  label: "用户名"
+
+password_input:
+  label: "密码"
+
+email_input:
+  label: "邮箱"
+
+# 3. 使用 placeholder 定位 - 适用于没有 label 的输入框
+search_input:
+  placeholder: "请输入搜索内容"
+
+phone_input:
+  placeholder: "请输入手机号"
+
+# 4. 使用 text 定位 - 适用于链接、按钮等可见文本
+forgot_password_link:
+  text: "忘记密码？"
+  exact: false
+
+register_link:
+  text: "立即注册"
+  exact: true
+
+# 5. 使用 title 定位 - 适用于有 title 属性的元素
+help_icon:
+  title: "帮助"
+
+user_avatar:
+  title: "用户头像"
+
+# 6. 使用 alt 定位 - 适用于图片
+logo_image:
+  alt: "公司Logo"
+
+banner_image:
+  alt: "活动横幅"
+
+# 7. 使用 test_id 定位 - 最稳定的定位方式（需要开发配合添加 data-testid 属性）
+submit_btn:
+  test_id: "submit-button"
+
+username_field:
+  test_id: "username-input"
+
+password_field:
+  test_id: "password-input"
+
+# 8. 传统 CSS 选择器（备用）
+error_message:
+  css: ".error-message"
+
+success_message:
+  css: ".success-message"
+
+loading_spinner:
+  css: ".loading-spinner"
+
+# 9. XPath 选择器（特殊情况使用）
+complex_element:
+  xpath: "//div[@class='form-group'][1]/input"
+
+# 混合使用示例 - 一个元素可以有多种定位方式
+login_form:
+  # 首选：role 定位
+  role: form
+  name: "登录表单"
+  # 备选：CSS 选择器
+  css: "#login-form"
+  # 备选：test_id
+  test_id: "login-form"

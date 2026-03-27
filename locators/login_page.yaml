@@ -1,0 +1,28 @@
+# 登录页面元素定位器
+# 支持 CSS 选择器、XPath、ID 等多种定位方式
+
+# 表单元素
+username_input: "#username"
+password_input: "#password"
+login_button: "button[type='submit']"
+remember_me: "#remember-me"
+
+# 提示信息
+error_message: ".error-message"
+success_message: ".success-message"
+loading_spinner: ".loading-spinner"
+
+# 链接
+forgot_password_link: "a[href='/forgot-password']"
+register_link: "a[href='/register']"
+
+# 页面标题
+page_title: "h1.login-title"
+welcome_text: ".welcome-message"
+
+# 多定位器策略示例（可选）
+submit_button:
+  default: "button[type='submit']"
+  css: ".btn-login"
+  xpath: "//button[@type='submit']"
+  text: "button:has-text('登录')"
