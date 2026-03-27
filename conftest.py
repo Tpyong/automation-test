@@ -56,6 +56,7 @@ def pytest_sessionstart(session):
     # 开始收集测试结果
     report_gen = _get_report_generator()
     report_gen.start_session()
+    logger.info("报告生成器会话已开始")
 
 
 def pytest_sessionfinish(session, exitstatus):
@@ -66,6 +67,7 @@ def pytest_sessionfinish(session, exitstatus):
     # 生成测试结果汇总报告
     report_gen = _get_report_generator()
     report_gen.end_session()
+    logger.info("报告生成器会话已结束")
     
     # 生成 HTML 和 JSON 报告
     html_report = report_gen.generate_html_report()
@@ -198,6 +200,7 @@ def pytest_runtest_makereport(item, call):
     
     # 记录测试结果到报告生成器
     if rep.when == "call":
+        logger.info(f"收集测试结果: {item.nodeid} - {rep.outcome}")
         report_gen = _get_report_generator()
         error_msg = str(rep.longrepr) if rep.failed else None
         duration = rep.duration if rep.duration else 0.0
@@ -207,6 +210,7 @@ def pytest_runtest_makereport(item, call):
             duration=duration,
             error_msg=error_msg
         )
+        logger.info(f"测试结果已添加到报告生成器")
 
 
 @pytest.fixture(autouse=True)
