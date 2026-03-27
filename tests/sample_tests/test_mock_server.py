@@ -140,7 +140,9 @@ class TestMockServer:
 
         with allure.step("发送带参数的请求"):
             test_data = {"message": "Hello, Mock!"}
-            response = requests.post(f"{base_url}/api/echo", json=test_data, headers={"X-Custom-Header": "test-value"}, timeout=10)
+            response = requests.post(
+                f"{base_url}/api/echo", json=test_data, headers={"X-Custom-Header": "test-value"}, timeout=10
+            )
             assert response.status_code == 200
 
         with allure.step("验证请求记录"):

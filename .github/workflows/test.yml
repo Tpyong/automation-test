@@ -41,7 +41,8 @@ jobs:
 
     - name: Install Playwright browsers
       run: |
-        playwright install --with-deps ${{ matrix.browser }}
+        playwright install ${{ matrix.browser }}
+        playwright install-deps
 
     - name: Run tests
       run: |
