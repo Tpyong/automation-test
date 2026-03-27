@@ -7,12 +7,12 @@
     "xfailed": 0,
     "xpassed": 0,
     "pass_rate": 0.0,
-    "duration": 48.02
+    "duration": 12.96
   },
   "module_stats": {},
   "failed_tests": [],
   "time": {
-    "start": "2026-03-27 11:01:56",
-    "stop": "2026-03-27 11:02:44"
+    "start": "2026-03-27 23:31:27",
+    "stop": "2026-03-27 23:31:40"
   }
 }

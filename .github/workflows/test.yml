@@ -9,6 +9,9 @@ on:
     # 每天凌晨2点运行
     - cron: '0 2 * * *'
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   test:
     runs-on: ubuntu-latest

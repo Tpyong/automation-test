@@ -1,0 +1,22 @@
+{
+  "timestamp": "2026-03-27T23:31:30.655514",
+  "summary": {
+    "summary": {
+      "total": 0,
+      "passed": 0,
+      "failed": 0,
+      "skipped": 0,
+      "xfailed": 0,
+      "xpassed": 0,
+      "pass_rate": 0.0,
+      "duration": 1.03
+    },
+    "module_stats": {},
+    "failed_tests": [],
+    "time": {
+      "start": "2026-03-27 23:31:29",
+      "stop": "2026-03-27 23:31:30"
+    }
+  },
+  "results": []
+}

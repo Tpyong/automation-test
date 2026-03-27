@@ -73,9 +73,18 @@ def pytest_sessionfinish(session, exitstatus):
     html_report = report_gen.generate_html_report()
     json_report = report_gen.generate_json_report()
     
+    # 保存测试结果到历史记录
+    history_file = report_gen.save_history()
+    
+    # 生成测试趋势报告
+    trend_report = report_gen.generate_trend_report()
+    
     logger.info(f"测试汇总报告已生成:")
     logger.info(f"  - HTML: {html_report}")
     logger.info(f"  - JSON: {json_report}")
+    logger.info(f"  - 历史记录: {history_file}")
+    if trend_report:
+        logger.info(f"  - 趋势报告: {trend_report}")
 
 
 def pytest_runtest_makereport(item, call):

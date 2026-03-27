@@ -4,7 +4,9 @@
 """
 
 import json
-from datetime import datetime
+import os
+import tempfile
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -30,6 +32,31 @@ class TestResult:
         self.class_name = parts[1] if len(parts) > 1 else ""
         self.test_name = parts[-1] if len(parts) > 2 else nodeid
 
+    def to_dict(self) -> Dict[str, Any]:
+        """转换为字典"""
+        return {
+            "nodeid": self.nodeid,
+            "outcome": self.outcome,
+            "duration": self.duration,
+            "start_time": self.start_time.isoformat() if self.start_time else None,
+            "stop_time": self.stop_time.isoformat() if self.stop_time else None,
+            "error_msg": self.error_msg,
+            "file_path": self.file_path,
+            "class_name": self.class_name,
+            "test_name": self.test_name
+        }
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "TestResult":
+        """从字典创建实例"""
+        result = cls(data["nodeid"], data["outcome"], data.get("duration", 0.0))
+        if data.get("start_time"):
+            result.start_time = datetime.fromisoformat(data["start_time"])
+        if data.get("stop_time"):
+            result.stop_time = datetime.fromisoformat(data["stop_time"])
+        result.error_msg = data.get("error_msg")
+        return result
+
 
 class ReportGenerator:
     """测试结果汇总报告生成器"""
@@ -47,8 +74,11 @@ class ReportGenerator:
         self.results: List[TestResult] = []
         self.start_time: Optional[datetime] = None
         self.stop_time: Optional[datetime] = None
+        self.worker_id: Optional[str] = os.environ.get("PYTEST_XDIST_WORKER", "master")
+        self.temp_dir = self.output_dir / "temp"
+        self.temp_dir.mkdir(exist_ok=True)
 
-        logger.info(f"报告生成器初始化完成，输出目录: {output_dir}")
+        logger.info(f"报告生成器初始化完成，输出目录: {output_dir}, worker_id: {self.worker_id}")
 
     def start_session(self):
         """开始测试会话"""
@@ -59,6 +89,14 @@ class ReportGenerator:
     def end_session(self):
         """结束测试会话"""
         self.stop_time = datetime.now()
+        
+        # 保存当前worker的结果到临时文件
+        if self.worker_id != "master":
+            self._save_worker_results()
+        else:
+            # 主进程合并所有worker的结果
+            self._merge_worker_results()
+            
         logger.info("测试会话结束")
 
     def add_result(self, nodeid: str, outcome: str, duration: float = 0.0, error_msg: Optional[str] = None):
@@ -339,6 +377,458 @@ class ReportGenerator:
 </html>
 """
         return html
+
+    def _save_worker_results(self):
+        """保存当前worker的结果到临时文件"""
+        worker_file = self.temp_dir / f"worker_{self.worker_id}.json"
+        results_data = [result.to_dict() for result in self.results]
+        data = {
+            "start_time": self.start_time.isoformat() if self.start_time else None,
+            "stop_time": self.stop_time.isoformat() if self.stop_time else None,
+            "results": results_data
+        }
+        
+        with open(worker_file, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+        
+        logger.info(f"Worker {self.worker_id} 结果已保存到: {worker_file}")
+
+    def _merge_worker_results(self):
+        """合并所有worker的结果"""
+        merged_results = []
+        min_start_time = None
+        max_stop_time = None
+        
+        # 收集所有worker的结果文件
+        worker_files = list(self.temp_dir.glob("worker_*.json"))
+        logger.info(f"发现 {len(worker_files)} 个worker结果文件")
+        
+        for worker_file in worker_files:
+            try:
+                with open(worker_file, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                
+                # 解析开始和结束时间
+                if data.get("start_time"):
+                    start_time = datetime.fromisoformat(data["start_time"])
+                    if min_start_time is None or start_time < min_start_time:
+                        min_start_time = start_time
+                
+                if data.get("stop_time"):
+                    stop_time = datetime.fromisoformat(data["stop_time"])
+                    if max_stop_time is None or stop_time > max_stop_time:
+                        max_stop_time = stop_time
+                
+                # 解析测试结果
+                for result_data in data.get("results", []):
+                    result = TestResult.from_dict(result_data)
+                    merged_results.append(result)
+                
+                logger.info(f"已合并 {worker_file} 的结果")
+            except Exception as e:
+                logger.error(f"合并 {worker_file} 结果时出错: {e}")
+        
+        # 更新合并后的结果
+        self.results = merged_results
+        self.start_time = min_start_time
+        self.stop_time = max_stop_time
+        
+        # 清理临时文件
+        for worker_file in worker_files:
+            try:
+                worker_file.unlink()
+            except Exception as e:
+                logger.error(f"删除临时文件 {worker_file} 时出错: {e}")
+        
+        logger.info(f"合并完成，共 {len(merged_results)} 个测试结果")
+
+    def save_history(self):
+        """保存测试结果到历史记录"""
+        history_dir = self.output_dir / "history"
+        history_dir.mkdir(exist_ok=True)
+        
+        # 生成历史记录文件名
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        history_file = history_dir / f"history_{timestamp}.json"
+        
+        # 构建历史记录数据
+        summary = self.get_summary()
+        history_data = {
+            "timestamp": datetime.now().isoformat(),
+            "summary": summary,
+            "results": [result.to_dict() for result in self.results]
+        }
+        
+        # 保存到历史文件
+        with open(history_file, "w", encoding="utf-8") as f:
+            json.dump(history_data, f, ensure_ascii=False, indent=2)
+        
+        logger.info(f"测试结果已保存到历史记录: {history_file}")
+        return str(history_file)
+
+    def get_history(self, days: int = 7) -> List[Dict[str, Any]]:
+        """
+        获取历史测试结果
+
+        Args:
+            days: 历史天数
+
+        Returns:
+            历史测试结果列表
+        """
+        history_dir = self.output_dir / "history"
+        if not history_dir.exists():
+            return []
+        
+        history_files = list(history_dir.glob("history_*.json"))
+        history_data = []
+        
+        # 计算时间范围
+        cutoff_time = datetime.now() - timedelta(days=days)
+        
+        for history_file in history_files:
+            try:
+                with open(history_file, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                
+                # 检查时间是否在范围内
+                timestamp = datetime.fromisoformat(data["timestamp"])
+                if timestamp >= cutoff_time:
+                    history_data.append(data)
+            except Exception as e:
+                logger.error(f"读取历史文件 {history_file} 时出错: {e}")
+        
+        # 按时间排序
+        history_data.sort(key=lambda x: x["timestamp"])
+        return history_data
+
+    def generate_trend_report(self, days: int = 7, filename: str = "test-trend.html") -> str:
+        """
+        生成测试趋势报告
+
+        Args:
+            days: 历史天数
+            filename: 报告文件名
+
+        Returns:
+            报告文件路径
+        """
+        history_data = self.get_history(days)
+        if not history_data:
+            logger.warning("没有足够的历史数据生成趋势报告")
+            return ""
+        
+        # 准备趋势数据
+        timestamps = []
+        pass_rates = []
+        total_tests = []
+        failed_tests = []
+        durations = []
+        
+        for data in history_data:
+            timestamps.append(data["timestamp"])
+            summary = data["summary"]["summary"]
+            pass_rates.append(summary["pass_rate"])
+            total_tests.append(summary["total"])
+            failed_tests.append(summary["failed"])
+            durations.append(summary["duration"])
+        
+        # 构建HTML内容
+        html_template = '''<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试趋势报告</title>
+    <style>
+        * {{
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }}
+        body {{
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f7fa;
+            padding: 20px;
+        }}
+        .container {{
+            max-width: 1200px;
+            margin: 0 auto;
+        }}
+        .header {{
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }}
+        .header h1 {{
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }}
+        .header .time {{
+            color: #666;
+            font-size: 14px;
+        }}
+        .section {{
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }}
+        .section h2 {{
+            color: #333;
+            font-size: 20px;
+            margin-bottom: 20px;
+        }}
+        .chart-container {{
+            width: 100%;
+            height: 400px;
+            margin-bottom: 30px;
+        }}
+        .stats-grid {{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }}
+        .stat-card {{
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }}
+        .stat-card .number {{
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }}
+        .stat-card .label {{
+            color: #666;
+            font-size: 14px;
+        }}
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📈 测试趋势报告</h1>
+            <div class="time">
+                <div>生成时间: {generate_time}</div>
+                <div>历史数据范围: {days} 天</div>
+                <div>历史记录数量: {history_count}</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📊 通过率趋势</h2>
+            <div class="chart-container">
+                <canvas id="passRateChart"></canvas>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📊 测试数量趋势</h2>
+            <div class="chart-container">
+                <canvas id="testCountChart"></canvas>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📊 执行时长趋势</h2>
+            <div class="chart-container">
+                <canvas id="durationChart"></canvas>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📦 统计概览</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="number">{avg_pass_rate}%</div>
+                    <div class="label">平均通过率</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number">{avg_total_tests}</div>
+                    <div class="label">平均测试数量</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number">{avg_failed_tests}</div>
+                    <div class="label">平均失败数量</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number">{avg_duration}s</div>
+                    <div class="label">平均执行时长</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 处理时间标签
+        const timestamps = {timestamps_json};
+        const formattedLabels = timestamps.map(t => {{
+            const date = new Date(t);
+            return date.toLocaleString('zh-CN', {{"month": "numeric", "day": "numeric", "hour": "2-digit", "minute": "2-digit" }});
+        }});
+
+        // 通过率趋势图
+        const passRateCtx = document.getElementById('passRateChart').getContext('2d');
+        new Chart(passRateCtx, {{
+            type: 'line',
+            data: {{
+                labels: formattedLabels,
+                datasets: [{{
+                    label: '通过率 (%)',
+                    data: {pass_rates_json},
+                    borderColor: '#28a745',
+                    backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                    tension: 0.3,
+                    fill: true
+                }}]
+            }},
+            options: {{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {{
+                    title: {{
+                        display: true,
+                        text: '测试通过率趋势'
+                    }}
+                }},
+                scales: {{
+                    y: {{
+                        beginAtZero: true,
+                        max: 100,
+                        title: {{
+                            display: true,
+                            text: '通过率 (%)'
+                        }}
+                    }}
+                }}
+            }}
+        }});
+
+        // 测试数量趋势图
+        const testCountCtx = document.getElementById('testCountChart').getContext('2d');
+        new Chart(testCountCtx, {{
+            type: 'bar',
+            data: {{
+                labels: formattedLabels,
+                datasets: [{{
+                    label: '总测试数',
+                    data: {total_tests_json},
+                    backgroundColor: '#17a2b8'
+                }}, {{
+                    label: '失败测试数',
+                    data: {failed_tests_json},
+                    backgroundColor: '#dc3545'
+                }}]
+            }},
+            options: {{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {{
+                    title: {{
+                        display: true,
+                        text: '测试数量趋势'
+                    }}
+                }},
+                scales: {{
+                    y: {{
+                        beginAtZero: true,
+                        title: {{
+                            display: true,
+                            text: '测试数量'
+                        }}
+                    }}
+                }}
+            }}
+        }});
+
+        // 执行时长趋势图
+        const durationCtx = document.getElementById('durationChart').getContext('2d');
+        new Chart(durationCtx, {{
+            type: 'line',
+            data: {{
+                labels: formattedLabels,
+                datasets: [{{
+                    label: '执行时长 (秒)',
+                    data: {durations_json},
+                    borderColor: '#ffc107',
+                    backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                    tension: 0.3,
+                    fill: true
+                }}]
+            }},
+            options: {{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {{
+                    title: {{
+                        display: true,
+                        text: '执行时长趋势'
+                    }}
+                }},
+                scales: {{
+                    y: {{
+                        beginAtZero: true,
+                        title: {{
+                            display: true,
+                            text: '执行时长 (秒)'
+                        }}
+                    }}
+                }}
+            }}
+        }});
+    </script>
+</body>
+</html>
+'''
+        
+        # 计算统计数据
+        avg_pass_rate = round(sum(pass_rates) / len(pass_rates), 2) if pass_rates else 0
+        avg_total_tests = round(sum(total_tests) / len(total_tests), 0) if total_tests else 0
+        avg_failed_tests = round(sum(failed_tests) / len(failed_tests), 0) if failed_tests else 0
+        avg_duration = round(sum(durations) / len(durations), 2) if durations else 0
+        
+        # 生成时间
+        generate_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        
+        # 转换数据为JSON
+        import json
+        timestamps_json = json.dumps(timestamps)
+        pass_rates_json = json.dumps(pass_rates)
+        total_tests_json = json.dumps(total_tests)
+        failed_tests_json = json.dumps(failed_tests)
+        durations_json = json.dumps(durations)
+        
+        # 填充模板
+        html = html_template.format(
+            generate_time=generate_time,
+            days=days,
+            history_count=len(history_data),
+            avg_pass_rate=avg_pass_rate,
+            avg_total_tests=avg_total_tests,
+            avg_failed_tests=avg_failed_tests,
+            avg_duration=avg_duration,
+            timestamps_json=timestamps_json,
+            pass_rates_json=pass_rates_json,
+            total_tests_json=total_tests_json,
+            failed_tests_json=failed_tests_json,
+            durations_json=durations_json
+        )
+        
+        # 保存趋势报告
+        report_path = self.output_dir / filename
+        with open(report_path, "w", encoding="utf-8") as f:
+            f.write(html)
+        
+        logger.info(f"测试趋势报告已生成: {report_path}")
+        return str(report_path)
 
 
 # 全局报告生成器实例

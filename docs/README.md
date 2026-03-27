@@ -184,6 +184,23 @@ pip install -r requirements.lock
 pip-compile requirements.in -o requirements.lock
 ```
 
+### 5. 测试结果历史存储
+
+框架会自动存储测试结果到历史记录，方便后续分析：
+
+- 历史记录存储在 `reports/history/` 目录
+- 每个测试会话生成一个历史文件
+- 支持查看历史测试结果
+
+### 6. 测试趋势分析
+
+框架会自动生成测试趋势报告：
+
+- 趋势报告存储在 `reports/test-trend.html`
+- 包含通过率、测试数量、执行时长等趋势图表
+- 支持查看最近7天的测试趋势
+- 提供统计概览数据
+
 ## 下一步
 
 - 查看 [完整指南](GUIDE.md) 了解详细用法
