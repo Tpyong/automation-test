@@ -38,9 +38,20 @@ pytest -v
 
 ### 4. 查看报告
 
+**Allure报告**：
 ```bash
-allure serve reports/allure-results
+# 运行测试并收集Allure结果数据
+pytest --alluredir=allure-results
+
+# 生成Allure报告
+allure generate allure-results -o allure-report
+
+# 在浏览器中查看报告
+allure serve allure-report
 ```
+
+**自定义HTML报告**：
+直接在浏览器中打开 `reports/test-summary.html` 文件
 
 ## 文档
 

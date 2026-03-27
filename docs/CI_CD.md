@@ -11,15 +11,15 @@
 
 ## GitHub Actions
 
-配置文件：`.github/workflows/ci.yml`
+配置文件：`.github/workflows/test.yml`
 
 ### 功能特性
 
-- 多 Python 版本（3.10/3.11/3.12）矩阵测试
-- 多浏览器（Chromium/Firefox）矩阵测试
+- 多 Python 版本（3.11/3.12）矩阵测试
+- 多浏览器（Chromium/Firefox/WebKit）矩阵测试
 - 定时任务（每天凌晨 2 点）
 - 自动上传 Allure 报告、测试摘要、失败截图
-- 代码覆盖率统计并上传 Codecov
+- 代码覆盖率统计
 - 自动部署 Allure 报告到 GitHub Pages
 
 ### 使用方法
