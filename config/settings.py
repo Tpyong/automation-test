@@ -1,5 +1,5 @@
 import os
-from typing import Dict, Any, List, Tuple
+from typing import Callable, Dict, Any, List, Optional, Tuple
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -8,14 +8,26 @@ from core.utils.logger import get_logger
 logger = get_logger(__name__)
 
 
-def load_env_file(env_file: str = '.env'):
-    """手动加载 .env 文件，自动解密加密值"""
+def load_env_file(env_file: str = '.env') -> None:
+    """手动加载 .env 文件，自动解密加密值
+    
+    优先从项目根目录加载，如果不存在则从 config/envs/ 目录加载
+    """
+    decrypt_func: Callable[[str], str]
     try:
         from core.utils.secrets_manager import decrypt_value
+        decrypt_func = decrypt_value
     except ImportError:
-        decrypt_value = lambda x: x
+        decrypt_func = lambda x: x
     
-    env_path = Path(__file__).parent.parent / env_file
+    # 优先从项目根目录加载
+    project_root = Path(__file__).parent.parent
+    env_path = project_root / env_file
+    
+    # 如果根目录不存在，尝试从 config/envs/ 目录加载
+    if not env_path.exists():
+        env_path = project_root / 'config' / 'envs' / env_file
+    
     if env_path.exists():
         with open(env_path, 'r', encoding='utf-8') as f:
             for line in f:
@@ -23,7 +35,7 @@ def load_env_file(env_file: str = '.env'):
                 if line and not line.startswith('#') and '=' in line:
                     key, value = line.split('=', 1)
                     # 自动解密加密的值
-                    decrypted_value = decrypt_value(value)
+                    decrypted_value = decrypt_func(value)
                     os.environ[key] = decrypted_value
 
 
@@ -33,7 +45,7 @@ class ConfigValidationError(Exception):
 
 
 class Settings:
-    def __init__(self, env: str = None, validate: bool = True):
+    def __init__(self, env: Optional[str] = None, validate: bool = True):
         """
         初始化配置
         
@@ -76,7 +88,7 @@ class Settings:
         if validate:
             self._validate_config()
     
-    def _load_env_files(self):
+    def _load_env_files(self) -> None:
         """加载环境配置文件，优先级：.env.{env} > .env"""
         # 首先加载基础 .env 文件
         load_env_file('.env')
@@ -85,9 +97,9 @@ class Settings:
         env_file = f'.env.{self.env}'
         load_env_file(env_file)
     
-    def _validate_config(self):
+    def _validate_config(self) -> None:
         """验证配置的正确性"""
-        errors = []
+        errors: List[str] = []
         
         # 验证环境名称
         valid_envs = ['development', 'testing', 'staging', 'production']

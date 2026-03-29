@@ -22,3 +22,13 @@ pytest-watch
 
 # 代码覆盖率报告增强
 coverage-badge
+
+# 安全扫描工具
+safety>=2.3.0
+bandit>=1.7.0
+
+# 依赖漏洞扫描
+pip-audit>=2.0.0
+
+# 代码安全分析
+semgrep>=1.0.0

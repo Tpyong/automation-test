@@ -4,6 +4,7 @@
 """
 
 import base64
+import binascii
 import os
 from pathlib import Path
 from typing import Optional
@@ -112,14 +113,14 @@ class SecretsManager:
             return ciphertext
 
         try:
-            encrypted_b64 = ciphertext[len(self.ENCRYPTED_PREFIX) :]
+            encrypted_b64 = ciphertext[len(self.ENCRYPTED_PREFIX):]
             encrypted = base64.urlsafe_b64decode(encrypted_b64)
             plaintext = self.cipher.decrypt(encrypted).decode()
             return plaintext
         except InvalidToken:
             logger.error("解密失败: 无效的加密令牌")
             raise ValueError("解密失败: 无效的加密令牌，请检查密钥是否正确")
-        except (base64.binascii.Error, ValueError) as e:
+        except (binascii.Error, ValueError) as e:
             logger.error(f"解密失败: 数据格式错误 - {e}")
             raise ValueError(f"解密失败: 数据格式错误 - {e}")
         except Exception as e:

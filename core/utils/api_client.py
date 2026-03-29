@@ -4,7 +4,7 @@ API 测试客户端基类
 """
 
 import json
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 from urllib.parse import urljoin
 
 import allure
@@ -67,7 +67,7 @@ class APIClient:
             logger.debug(f"响应体: {response.text}")
 
     @allure.step("发送 GET 请求: {endpoint}")
-    def get(self, endpoint: str, params: Dict = None, headers: Dict = None) -> requests.Response:
+    def get(self, endpoint: str, params: Optional[Dict[Any, Any]] = None, headers: Optional[Dict[Any, Any]] = None) -> requests.Response:
         """发送 GET 请求"""
         url = self._make_url(endpoint)
         self._log_request("GET", url, params=params)
@@ -78,7 +78,7 @@ class APIClient:
         return response
 
     @allure.step("发送 POST 请求: {endpoint}")
-    def post(self, endpoint: str, data: Dict = None, json_data: Dict = None, headers: Dict = None) -> requests.Response:
+    def post(self, endpoint: str, data: Optional[Dict[Any, Any]] = None, json_data: Optional[Dict[Any, Any]] = None, headers: Optional[Dict[Any, Any]] = None) -> requests.Response:
         """发送 POST 请求"""
         url = self._make_url(endpoint)
         self._log_request("POST", url, json=json_data, data=data)
@@ -89,7 +89,7 @@ class APIClient:
         return response
 
     @allure.step("发送 PUT 请求: {endpoint}")
-    def put(self, endpoint: str, data: Dict = None, json_data: Dict = None, headers: Dict = None) -> requests.Response:
+    def put(self, endpoint: str, data: Optional[Dict[Any, Any]] = None, json_data: Optional[Dict[Any, Any]] = None, headers: Optional[Dict[Any, Any]] = None) -> requests.Response:
         """发送 PUT 请求"""
         url = self._make_url(endpoint)
         self._log_request("PUT", url, json=json_data, data=data)
@@ -100,7 +100,7 @@ class APIClient:
         return response
 
     @allure.step("发送 DELETE 请求: {endpoint}")
-    def delete(self, endpoint: str, headers: Dict = None) -> requests.Response:
+    def delete(self, endpoint: str, headers: Optional[Dict[Any, Any]] = None) -> requests.Response:
         """发送 DELETE 请求"""
         url = self._make_url(endpoint)
         self._log_request("DELETE", url)
@@ -110,22 +110,22 @@ class APIClient:
         self._log_response(response)
         return response
 
-    def set_token(self, token: str, token_type: str = "Bearer"):
+    def set_token(self, token: str, token_type: str = "Bearer") -> None:
         """设置认证 Token"""
         self.session.headers["Authorization"] = f"{token_type} {token}"
         logger.info(f"设置认证 Token: {token_type}")
 
-    def clear_token(self):
+    def clear_token(self) -> None:
         """清除认证 Token"""
         if "Authorization" in self.session.headers:
             del self.session.headers["Authorization"]
             logger.info("清除认证 Token")
 
-    def set_header(self, key: str, value: str):
+    def set_header(self, key: str, value: str) -> None:
         """设置请求头"""
         self.session.headers[key] = value
 
-    def close(self):
+    def close(self) -> None:
         """关闭会话"""
         self.session.close()
         logger.info("API 客户端会话已关闭")
@@ -136,14 +136,14 @@ class APIAssertions:
 
     @staticmethod
     @allure.step("验证状态码: {expected}")
-    def assert_status_code(response: requests.Response, expected: int):
+    def assert_status_code(response: requests.Response, expected: int) -> None:
         """验证响应状态码"""
         actual = response.status_code
         Assertions.assert_equal(actual, expected, f"期望状态码: {expected}, 实际状态码: {actual}")
 
     @staticmethod
     @allure.step("验证响应包含字段: {field}")
-    def assert_response_has_field(response: requests.Response, field: str):
+    def assert_response_has_field(response: requests.Response, field: str) -> None:
         """验证响应 JSON 包含指定字段"""
         try:
             data = response.json()
@@ -153,7 +153,7 @@ class APIAssertions:
 
     @staticmethod
     @allure.step("验证响应字段值: {field} = {expected}")
-    def assert_response_field_equals(response: requests.Response, field: str, expected: Any):
+    def assert_response_field_equals(response: requests.Response, field: str, expected: Any) -> None:
         """验证响应 JSON 字段值"""
         try:
             data = response.json()
@@ -164,7 +164,7 @@ class APIAssertions:
 
     @staticmethod
     @allure.step("验证响应时间小于 {max_time}ms")
-    def assert_response_time(response: requests.Response, max_time: int = 2000):
+    def assert_response_time(response: requests.Response, max_time: int = 2000) -> None:
         """验证响应时间"""
         elapsed_ms = response.elapsed.total_seconds() * 1000
         Assertions.assert_true(elapsed_ms < max_time, f"响应时间 {elapsed_ms}ms 超过阈值 {max_time}ms")

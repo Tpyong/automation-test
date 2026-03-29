@@ -5,7 +5,6 @@
 
 import hashlib
 import json
-import os
 import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -121,7 +120,10 @@ class DataCache:
         # 检查内存缓存
         if cache_key in self._memory_cache:
             logger.debug(f"从内存缓存加载: {file_path}")
-            return self._memory_cache[cache_key]
+            data: Any = self._memory_cache[cache_key]
+            if isinstance(data, dict):
+                return data
+            return {}
 
         # 检查文件缓存
         cache_file = self._get_cache_file_path(cache_key)
@@ -131,7 +133,9 @@ class DataCache:
                     data = json.load(f)
                 self._memory_cache[cache_key] = data
                 logger.debug(f"从文件缓存加载: {file_path}")
-                return data
+                if isinstance(data, dict):
+                    return data
+                return {}
             except Exception as e:
                 logger.warning(f"加载缓存文件失败: {e}")
 
@@ -152,7 +156,9 @@ class DataCache:
                 logger.warning(f"保存缓存文件失败: {e}")
 
             logger.info(f"成功加载并缓存测试数据文件: {file_path}")
-            return data
+            if isinstance(data, dict):
+                return data
+            return {}
         except Exception as e:
             logger.error(f"加载测试数据文件失败: {e}")
             return {}
@@ -169,14 +175,17 @@ class DataCache:
             测试数据列表
         """
         data = self.load_yaml_with_cache(file_path)
-        return data.get(section, [])
+        result: Any = data.get(section, [])
+        if isinstance(result, list):
+            return result
+        return []
 
-    def clear_memory_cache(self):
+    def clear_memory_cache(self) -> None:
         """清除内存缓存"""
         self._memory_cache.clear()
         logger.info("内存缓存已清除")
 
-    def clear_file_cache(self):
+    def clear_file_cache(self) -> None:
         """清除文件缓存"""
         try:
             for cache_file in self.cache_dir.glob("*.json"):
@@ -185,7 +194,7 @@ class DataCache:
         except Exception as e:
             logger.error(f"清除文件缓存失败: {e}")
 
-    def clear_all_cache(self):
+    def clear_all_cache(self) -> None:
         """清除所有缓存"""
         self.clear_memory_cache()
         self.clear_file_cache()
@@ -201,7 +210,7 @@ class DataCache:
         return {
             "memory_cache_size": len(self._memory_cache),
             "file_cache_count": len(list(self.cache_dir.glob("*.json"))),
-            "cache_ttl": self.cache_ttl
+            "cache_ttl": self.cache_ttl,
         }
 
 

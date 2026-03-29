@@ -4,8 +4,9 @@
 """
 
 import threading
-from typing import Dict, List, Optional
-from playwright.sync_api import Browser, BrowserContext, Playwright
+from typing import Any, Dict, List, Optional, Set
+
+from playwright.sync_api import Browser, Playwright
 
 from core.utils.logger import get_logger
 
@@ -24,7 +25,7 @@ class BrowserPool:
         """
         self.max_pool_size = max_pool_size
         self._pool: List[Browser] = []
-        self._in_use: set = set()
+        self._in_use: Set[int] = set()
         self._lock = threading.Lock()
         self._playwright: Optional[Playwright] = None
         self._browser_type: str = "chromium"
@@ -33,8 +34,9 @@ class BrowserPool:
 
         logger.info(f"浏览器实例池初始化完成，最大池大小: {max_pool_size}")
 
-    def initialize(self, playwright: Playwright, browser_type: str = "chromium",
-                   headless: bool = True, slow_mo: int = 0):
+    def initialize(
+        self, playwright: Playwright, browser_type: str = "chromium", headless: bool = True, slow_mo: int = 0
+    ) -> None:
         """
         初始化浏览器池
 
@@ -52,7 +54,7 @@ class BrowserPool:
         # 预创建浏览器实例
         self._pre_create_browsers()
 
-    def _pre_create_browsers(self):
+    def _pre_create_browsers(self) -> None:
         """预创建浏览器实例"""
         if not self._playwright:
             logger.error("Playwright实例未初始化")
@@ -75,20 +77,11 @@ class BrowserPool:
 
         try:
             if self._browser_type == "chromium":
-                return self._playwright.chromium.launch(
-                    headless=self._headless,
-                    slow_mo=self._slow_mo
-                )
+                return self._playwright.chromium.launch(headless=self._headless, slow_mo=self._slow_mo)
             elif self._browser_type == "firefox":
-                return self._playwright.firefox.launch(
-                    headless=self._headless,
-                    slow_mo=self._slow_mo
-                )
+                return self._playwright.firefox.launch(headless=self._headless, slow_mo=self._slow_mo)
             elif self._browser_type == "webkit":
-                return self._playwright.webkit.launch(
-                    headless=self._headless,
-                    slow_mo=self._slow_mo
-                )
+                return self._playwright.webkit.launch(headless=self._headless, slow_mo=self._slow_mo)
             else:
                 raise ValueError(f"不支持的浏览器类型: {self._browser_type}")
         except Exception as e:
@@ -114,13 +107,13 @@ class BrowserPool:
                     logger.warning("池中的浏览器实例已断开连接，创建新实例")
 
             # 池为空，创建新实例
-            browser = self._create_browser()
-            if browser:
-                self._in_use.add(id(browser))
-                logger.debug(f"创建新浏览器实例: {id(browser)}")
-            return browser
+            new_browser: Optional[Browser] = self._create_browser()
+            if new_browser:
+                self._in_use.add(id(new_browser))
+                logger.debug(f"创建新浏览器实例: {id(new_browser)}")
+            return new_browser
 
-    def release_browser(self, browser: Browser):
+    def release_browser(self, browser: Browser) -> None:
         """
         释放浏览器实例回池中
 
@@ -150,13 +143,9 @@ class BrowserPool:
             池状态信息
         """
         with self._lock:
-            return {
-                "pool_size": len(self._pool),
-                "in_use": len(self._in_use),
-                "max_size": self.max_pool_size
-            }
+            return {"pool_size": len(self._pool), "in_use": len(self._in_use), "max_size": self.max_pool_size}
 
-    def cleanup(self):
+    def cleanup(self) -> None:
         """清理所有浏览器实例"""
         with self._lock:
             logger.info("开始清理浏览器实例池")

@@ -171,15 +171,16 @@ class DataFactory:
         """
         items = []
         for _ in range(count):
+            quantity: int = random.randint(1, 5)
+            unit_price: float = round(random.uniform(10.0, 1000.0), 2)
             item = {
                 "item_id": self.fake.uuid4(),
                 "product_id": self.fake.uuid4(),
                 "product_name": self.fake.word().title() + " " + self.fake.word().title(),
-                "quantity": random.randint(1, 5),
-                "unit_price": round(random.uniform(10.0, 1000.0), 2),
-                "subtotal": 0.0,
+                "quantity": quantity,
+                "unit_price": unit_price,
+                "subtotal": round(quantity * unit_price, 2),
             }
-            item["subtotal"] = round(item["quantity"] * item["unit_price"], 2)
             items.append(item)
         return items
 

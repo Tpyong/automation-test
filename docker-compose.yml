@@ -1,0 +1,167 @@
+# 自动化测试框架 Docker Compose 配置
+version: '3.8'
+
+services:
+  # 主测试服务
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: automation-test
+    volumes:
+      - ./reports:/app/reports
+      - ./screenshots:/app/screenshots
+      - ./videos:/app/videos
+      - ./logs:/app/logs
+      - ./.env:/app/.env:ro
+    environment:
+      - TEST_ENV=${TEST_ENV:-testing}
+      - HEADLESS=true
+      - BROWSER=chromium
+    command: >
+      sh -c "pytest tests/ -v --tb=short 
+      --html=reports/report.html 
+      --self-contained-html"
+    networks:
+      - test-network
+
+  # 测试服务（仅运行单元测试）
+  test-unit:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: automation-test-unit
+    volumes:
+      - ./reports:/app/reports
+      - ./.env:/app/.env:ro
+    environment:
+      - TEST_ENV=${TEST_ENV:-testing}
+    command: pytest tests/unit/ -v --tb=short
+    networks:
+      - test-network
+
+  # 测试服务（仅运行集成测试）
+  test-integration:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: automation-test-integration
+    volumes:
+      - ./reports:/app/reports
+      - ./.env:/app/.env:ro
+    environment:
+      - TEST_ENV=${TEST_ENV:-testing}
+    command: pytest tests/integration/ -v --tb=short
+    networks:
+      - test-network
+    depends_on:
+      - mysql
+      - redis
+
+  # 测试服务（仅运行 API 测试）
+  test-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: automation-test-api
+    volumes:
+      - ./reports:/app/reports
+      - ./.env:/app/.env:ro
+    environment:
+      - TEST_ENV=${TEST_ENV:-testing}
+    command: pytest tests/api/ -v --tb=short
+    networks:
+      - test-network
+
+  # 测试服务（仅运行 E2E 测试）
+  test-e2e:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: automation-test-e2e
+    volumes:
+      - ./reports:/app/reports
+      - ./screenshots:/app/screenshots
+      - ./videos:/app/videos
+      - ./.env:/app/.env:ro
+    environment:
+      - TEST_ENV=${TEST_ENV:-testing}
+      - HEADLESS=true
+      - BROWSER=chromium
+    command: pytest tests/e2e/ -v --tb=short
+    networks:
+      - test-network
+
+  # MySQL 数据库（用于集成测试）
+  mysql:
+    image: mysql:8.0
+    container_name: automation-test-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: test_db
+      MYSQL_USER: testuser
+      MYSQL_PASSWORD: testpassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - test-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # Redis 缓存（用于集成测试）
+  redis:
+    image: redis:7-alpine
+    container_name: automation-test-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - test-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      timeout: 10s
+      retries: 5
+
+  # Allure 报告服务
+  allure:
+    image: frankescobar/allure-docker-service:latest
+    container_name: automation-test-allure
+    environment:
+      CHECK_RESULTS_EVERY_SECONDS: 5
+      KEEP_HISTORY: 1
+    ports:
+      - "5050:5050"
+    volumes:
+      - ./reports/allure-results:/app/allure-results
+      - ./reports/allure-reports:/app/default-reports
+    networks:
+      - test-network
+
+  # 安全扫描服务
+  security-scan:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: automation-test-security
+    volumes:
+      - ./reports:/app/reports
+    command: >
+      sh -c "pip install safety bandit &&
+             safety check --json --output reports/safety-report.json || true &&
+             bandit -r . -f json -o reports/bandit-report.json || true"
+    networks:
+      - test-network
+
+volumes:
+  mysql-data:
+  redis-data:
+
+networks:
+  test-network:
+    driver: bridge

@@ -3,7 +3,8 @@ import sys
 import allure
 import pytest
 from datetime import datetime
-from typing import Generator, Callable, Optional
+from pathlib import Path
+from typing import Any, Dict, Generator, Callable, List, Optional
 from playwright.sync_api import Playwright, Browser, BrowserContext, Page, sync_playwright
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -13,11 +14,13 @@ from core.utils.logger import get_logger
 from core.utils.path_helper import PathHelper
 
 # 延迟导入可选模块，按需加载
-_allure_helper = None
-_report_generator = None
-_browser_pool = None
+_allure_helper: Any = None
+_report_generator: Any = None
+_browser_pool: Any = None
+_db_manager: Any = None
+_test_data_manager: Any = None
 
-def _get_allure_helper():
+def _get_allure_helper() -> Any:
     """延迟加载 AllureHelper"""
     global _allure_helper
     if _allure_helper is None:
@@ -25,7 +28,7 @@ def _get_allure_helper():
         _allure_helper = AllureHelper()
     return _allure_helper
 
-def _get_report_generator():
+def _get_report_generator() -> Any:
     """延迟加载 ReportGenerator"""
     global _report_generator
     if _report_generator is None:
@@ -33,7 +36,7 @@ def _get_report_generator():
         _report_generator = get_report_generator()
     return _report_generator
 
-def _get_browser_pool():
+def _get_browser_pool() -> Any:
     """延迟加载 BrowserPool"""
     global _browser_pool
     if _browser_pool is None:
@@ -41,17 +44,33 @@ def _get_browser_pool():
         _browser_pool = get_browser_pool()
     return _browser_pool
 
+def _get_db_manager() -> Any:
+    """延迟加载 DatabaseManager"""
+    global _db_manager
+    if _db_manager is None:
+        from core.utils.db_manager import get_db_manager
+        _db_manager = get_db_manager()
+    return _db_manager
+
+def _get_test_data_manager() -> Any:
+    """延迟加载 TestDataManager"""
+    global _test_data_manager
+    if _test_data_manager is None:
+        from core.utils.test_data_manager import TestDataManager
+        _test_data_manager = TestDataManager(_get_db_manager())
+    return _test_data_manager
+
 logger = get_logger(__name__)
 
 
-def pytest_configure(config):
+def pytest_configure(config: Any) -> None:
     # config.option.allure_report_dir = "reports/allure-report"
     # 不设置allure_report_dir，避免pytest自动生成Allure报告
     # 报告生成由专门的allure-report作业处理
     pass
 
 
-def pytest_sessionstart(session):
+def pytest_sessionstart(session: Any) -> None:
     logger.info("=" * 50)
     logger.info("测试会话开始")
     logger.info("=" * 50)
@@ -68,7 +87,7 @@ def pytest_sessionstart(session):
     logger.info("报告生成器会话已开始")
 
 
-def pytest_sessionfinish(session, exitstatus):
+def pytest_sessionfinish(session: Any, exitstatus: int) -> None:
     logger.info("=" * 50)
     logger.info(f"测试会话结束，退出码: {exitstatus}")
     logger.info("=" * 50)
@@ -93,20 +112,20 @@ def pytest_sessionfinish(session, exitstatus):
     pool.cleanup()
     logger.info("浏览器实例池已清理")
     
+    # 关闭数据库连接池
+    try:
+        db_manager = _get_db_manager()
+        db_manager.close()
+        logger.info("数据库连接池已关闭")
+    except Exception as e:
+        logger.warning(f"关闭数据库连接池时出错: {e}")
+    
     logger.info(f"测试汇总报告已生成:")
     logger.info(f"  - HTML: {html_report}")
     logger.info(f"  - JSON: {json_report}")
     logger.info(f"  - 历史记录: {history_file}")
     if trend_report:
         logger.info(f"  - 趋势报告: {trend_report}")
-
-
-def pytest_runtest_makereport(item, call):
-    if call.when == "call":
-        if call.excinfo is not None:
-            logger.error(f"测试用例 {item.nodeid} 执行失败: {call.excinfo.value}")
-        else:
-            logger.info(f"测试用例 {item.nodeid} 执行成功")
 
 
 @pytest.fixture(scope="session")
@@ -135,22 +154,22 @@ def browser(playwright: Playwright, settings: Settings) -> Generator[Browser, No
     pool.initialize(playwright, browser_type, headless, slow_mo)
 
     # 获取浏览器实例
-    browser = pool.acquire_browser()
-    if not browser:
+    browser_obj = pool.acquire_browser()
+    if not browser_obj:
         raise RuntimeError("无法获取浏览器实例")
 
-    logger.info(f"成功获取浏览器实例: {id(browser)}")
+    logger.info(f"成功获取浏览器实例: {id(browser_obj)}")
     
-    yield browser
+    yield browser_obj
 
     # 释放浏览器实例回池中
-    pool.release_browser(browser)
-    logger.info(f"浏览器实例已释放: {id(browser)}")
+    pool.release_browser(browser_obj)
+    logger.info(f"浏览器实例已释放: {id(browser_obj)}")
 
 
 @pytest.fixture(scope="function")
 def context(browser: Browser, settings: Settings) -> Generator[BrowserContext, None, None]:
-    context_options = {
+    context_options: Dict[str, Any] = {
         "viewport": settings.viewport,
         "ignore_https_errors": True,
         "locale": "zh-CN",
@@ -173,28 +192,28 @@ def context(browser: Browser, settings: Settings) -> Generator[BrowserContext, N
 
 
 @pytest.fixture(scope="function")
-def page(context: BrowserContext, request, settings) -> Generator[Page, None, None]:
-    page = context.new_page()
-    page.set_default_timeout(30000)
+def page(context: BrowserContext, request: Any, settings: Settings) -> Generator[Page, None, None]:
+    page_obj = context.new_page()
+    page_obj.set_default_timeout(30000)
 
-    yield page
+    yield page_obj
 
     # 测试失败时截图
-    if request.node.rep_call.failed:
+    if hasattr(request.node, 'rep_call') and request.node.rep_call.failed:
         try:
             screenshot_path = PathHelper.get_screenshot_path(request.node.name)
-            page.screenshot(path=screenshot_path, full_page=True)
+            page_obj.screenshot(path=screenshot_path, full_page=True)
             _get_allure_helper().attach_screenshot(screenshot_path, name="失败截图")
             logger.info(f"失败截图已保存: {screenshot_path}")
         except Exception as e:
             logger.error(f"保存失败截图时出错: {e}")
 
-    page.close()
+    page_obj.close()
     
     # 如果启用了录屏，重命名视频文件并附加到 Allure 报告
-    if settings.video_enabled and hasattr(page, 'video') and page.video:
+    if settings.video_enabled and hasattr(page_obj, 'video') and page_obj.video:
         try:
-            original_video_path = page.video.path()
+            original_video_path = page_obj.video.path()
             if original_video_path and os.path.exists(original_video_path):
                 # 重命名视频文件为更友好的名称
                 video_dir = os.path.dirname(original_video_path)
@@ -202,7 +221,7 @@ def page(context: BrowserContext, request, settings) -> Generator[Page, None, No
                 new_video_path = os.path.join(video_dir, new_video_name)
                 
                 # 使用安全重命名（带重试）
-                if PathHelper.safe_rename(original_video_path, new_video_path):
+                if PathHelper.safe_rename(str(original_video_path), new_video_path):
                     # 附加到 Allure 报告
                     _get_allure_helper().attach_video(new_video_path, name=f"测试视频-{request.node.name}")
                     logger.info(f"测试视频已保存: {new_video_path}")
@@ -211,7 +230,7 @@ def page(context: BrowserContext, request, settings) -> Generator[Page, None, No
 
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
-def pytest_runtest_makereport(item, call):
+def pytest_runtest_makereport(item: Any, call: Any) -> Any:
     outcome = yield
     rep = outcome.get_result()
     setattr(item, f"rep_{rep.when}", rep)
@@ -232,7 +251,7 @@ def pytest_runtest_makereport(item, call):
 
 
 @pytest.fixture(autouse=True)
-def allure_step(request):
+def allure_step(request: Any) -> Generator[None, None, None]:
     with allure.step(f"开始执行测试: {request.node.name}"):
         yield
     with allure.step(f"结束执行测试: {request.node.name}"):
@@ -242,7 +261,7 @@ def allure_step(request):
 # ==================== 测试数据清理机制 ====================
 
 @pytest.fixture(scope="function")
-def test_data_cleanup(request) -> Generator[dict, None, None]:
+def test_data_cleanup(request: Any) -> Generator[Dict[str, Any], None, None]:
     """
     测试数据清理 fixture
     
@@ -253,7 +272,7 @@ def test_data_cleanup(request) -> Generator[dict, None, None]:
             test_data_cleanup['cleanup_func'] = delete_user
             # 测试代码...
     """
-    cleanup_data = {
+    cleanup_data: Dict[str, Any] = {
         'items': [],  # 存储需要清理的数据项
         'cleanup_funcs': []  # 存储清理函数
     }
@@ -275,7 +294,7 @@ def test_data_cleanup(request) -> Generator[dict, None, None]:
 
 
 @pytest.fixture(scope="function")
-def setup_teardown(request) -> Generator[Callable, None, None]:
+def setup_teardown(request: Any) -> Generator[Callable[..., None], None, None]:
     """
     通用 setup/teardown fixture
     
@@ -285,9 +304,9 @@ def setup_teardown(request) -> Generator[Callable, None, None]:
             setup_teardown(lambda: print("setup"), lambda: print("teardown"))
             # 测试代码...
     """
-    teardown_funcs = []
+    teardown_funcs: List[Callable[..., None]] = []
     
-    def register_setup_teardown(setup_func=None, teardown_func=None):
+    def register_setup_teardown(setup_func: Optional[Callable[..., None]] = None, teardown_func: Optional[Callable[..., None]] = None) -> None:
         """注册 setup 和 teardown 函数"""
         if setup_func:
             try:
@@ -311,10 +330,70 @@ def setup_teardown(request) -> Generator[Callable, None, None]:
             logger.error(f"Teardown 执行失败: {e}")
 
 
+# ==================== 数据库测试 Fixtures ====================
+
+@pytest.fixture(scope="session")
+def db_manager() -> Generator[Any, None, None]:
+    """
+    数据库管理器 fixture
+    
+    使用示例:
+        def test_with_db(db_manager):
+            # 执行 SQL
+            result = db_manager.execute("SELECT * FROM users WHERE id = :id", {"id": 1})
+            # 使用结果...
+    """
+    manager = _get_db_manager()
+    yield manager
+
+
+@pytest.fixture(scope="function")
+def db_session(db_manager: Any) -> Generator[Any, None, None]:
+    """
+    数据库会话 fixture（自动事务回滚）
+    
+    使用示例:
+        def test_with_transaction(db_session):
+            # 插入数据
+            db_session.execute("INSERT INTO users (name) VALUES (:name)", {"name": "test"})
+            # 查询数据
+            result = db_session.execute("SELECT * FROM users WHERE name = :name", {"name": "test"})
+            # 测试结束后自动回滚
+    """
+    with db_manager.get_session() as session:
+        yield session
+        # 测试结束后自动回滚
+        session.rollback()
+
+
+@pytest.fixture(scope="function")
+def test_data_manager(db_manager: Any) -> Generator[Any, None, None]:
+    """
+    测试数据管理器 fixture
+    
+    使用示例:
+        def test_with_data(test_data_manager):
+            # 创建测试数据
+            builder = test_data_manager.get_builder()
+            user_id = builder.with_defaults("users").with_field("email", "test@example.com").insert("users")
+            
+            # 跟踪记录用于清理
+            test_data_manager.track_record("users", user_id)
+            
+            # 测试代码...
+            
+        # 测试结束后自动清理
+    """
+    manager = _get_test_data_manager()
+    yield manager
+    # 测试结束后自动清理
+    manager.cleanup()
+
+
 # ==================== Mock 服务器 Fixture ====================
 
 @pytest.fixture(scope="function")
-def mock_server():
+def mock_server() -> Generator[Any, None, None]:
     """
     Mock 服务器 fixture
     

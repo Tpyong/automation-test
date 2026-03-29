@@ -7,7 +7,7 @@ import json
 import threading
 import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from typing import Any, Dict, Optional
+from typing import Any, Callable, Dict, Optional, Tuple
 from urllib.parse import parse_qs, urlparse
 
 from core.utils.logger import get_logger
@@ -140,15 +140,15 @@ class MockServer:
         self._thread: Optional[threading.Thread] = None
         self._running = False
 
-    def start(self):
+    def start(self) -> None:
         """启动 Mock 服务器"""
         if self._running:
             logger.warning("Mock 服务器已经在运行中")
             return
 
         # 创建服务器
-        def handler_factory(*args, **kwargs):
-            MockRequestHandler(*args, mock_server=self, **kwargs)
+        def handler_factory(*args: Any, **kwargs: Any) -> MockRequestHandler:
+            return MockRequestHandler(*args, mock_server=self, **kwargs)  # type: ignore[no-untyped-call]
 
         self._server = HTTPServer((self.host, self.port), handler_factory)
 
@@ -163,7 +163,7 @@ class MockServer:
 
         logger.info(f"Mock 服务器已启动: http://{self.host}:{self.port}")
 
-    def stop(self):
+    def stop(self) -> None:
         """停止 Mock 服务器"""
         if not self._running:
             return
@@ -285,12 +285,12 @@ class MockServer:
 
         return True
 
-    def __enter__(self):
+    def __enter__(self) -> "MockServer":
         """支持 with 语句"""
         self.start()
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         """支持 with 语句"""
         self.stop()
 

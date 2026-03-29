@@ -6,6 +6,7 @@
 import sys
 import os
 from pathlib import Path
+from typing import Optional
 
 # 添加项目根目录到路径
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -16,7 +17,7 @@ from core.utils.logger import get_logger
 logger = get_logger(__name__)
 
 
-def print_usage():
+def print_usage() -> None:
     """打印使用说明"""
     print("""
 敏感信息管理工具
@@ -45,7 +46,7 @@ def print_usage():
 """)
 
 
-def main():
+def main() -> None:
     if len(sys.argv) < 2:
         print_usage()
         sys.exit(1)

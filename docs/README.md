@@ -1,224 +1,61 @@
-# 快速开始指南
+# 测试框架文档
 
-本文档提供框架的快速入门指南。详细文档请查看其他文件。
+本文档是测试框架的导航中心，包含框架的所有文档资源。
 
-## 目录
+## 文档结构
 
-- [安装](#安装)
-- [快速开始](#快速开始)
-- [常用命令](#常用命令)
-- [新功能](#新功能)
-- [下一步](#下一步)
+### 入门指南
+- [快速开始](getting-started/README.md) - 框架的快速入门指南
+- [完整使用指南](getting-started/GUIDE.md) - 框架的详细使用指南
 
-## 安装
+### 核心功能
+- [功能特性](core-features/FEATURES.md) - 框架的各项功能特性
 
-### 1. 环境要求
+### CI/CD 配置
+- [CI/CD 配置指南](ci-cd/CI_CD.md) - 各平台 CI/CD 配置指南
+- [GitHub Actions 配置](ci-cd/GITHUB_SETUP.md) - GitHub Actions 详细配置指南
 
-- Python 3.10+
-- Allure 命令行工具（可选，用于生成报告）
+### 最佳实践
+- [定位器使用指南](best-practices/LOCATORS_GUIDE.md) - 元素定位器的最佳使用实践
 
-### 2. 安装依赖
+### 参考文档
+- [API 参考](reference/API.md) - 框架 API 参考文档（待更新）
+- [配置参考](reference/CONFIG.md) - 框架配置参考文档（待更新）
 
-```bash
-# 安装运行依赖
-pip install -r requirements.lock
+## 框架概述
 
-# 安装开发依赖（可选）
-pip install -r requirements-dev.txt
-```
+本测试框架基于以下技术栈：
 
-### 3. 安装浏览器
+- **测试框架**：Pytest + Playwright
+- **报告工具**：Allure + 自定义报告
+- **代码质量**：pylint + flake8 + black + isort
+- **依赖管理**：pip-tools
+- **CI/CD**：GitHub Actions + GitLab CI + Jenkins
 
-```bash
-playwright install
-```
+## 核心特性
+
+- ✅ 页面对象模式 (POM)
+- ✅ 多环境配置管理
+- ✅ 数据驱动测试
+- ✅ API 测试支持
+- ✅ Allure 报告集成
+- ✅ 测试覆盖率报告
+- ✅ Mock 服务支持
+- ✅ 敏感信息加密
+- ✅ 并行测试
+- ✅ 测试数据管理
+- ✅ 统一异常处理
+- ✅ 代码质量工具集成
 
 ## 快速开始
 
-### 1. 配置环境
+1. **安装依赖**：`pip install -r requirements.lock`
+2. **安装浏览器**：`playwright install`
+3. **运行测试**：`pytest tests/sample_tests/test_sample.py -v`
+4. **查看报告**：`allure serve allure-results`
 
-复制示例配置文件：
+## 联系与支持
 
-```bash
-cp .env.minimal .env
-```
-
-最小配置示例：
-
-```bash
-BASE_URL=https://demo.playwright.dev/todomvc
-BROWSER=chromium
-HEADLESS=false
-```
-
-### 2. 运行第一个测试
-
-```bash
-pytest tests/sample_tests/test_sample.py -v
-```
-
-### 3. 查看报告
-
-**Allure报告**：
-```bash
-# 运行测试并收集Allure结果数据
-pytest --alluredir=allure-results
-
-# 生成Allure报告
-allure generate allure-results -o allure-report
-
-# 在浏览器中查看报告
-allure serve allure-report
-```
-
-**自定义HTML报告**：
-直接在浏览器中打开 `reports/test-summary.html` 文件
-
-## 常用命令
-
-```bash
-# 运行所有测试
-pytest
-
-# 运行冒烟测试
-pytest -m smoke
-
-# 并行运行（注意：并行测试时报告生成器可能无法正确收集测试结果）
-pytest -n auto
-
-# 生成覆盖率报告
-pytest --cov=core --cov-report=html:reports/coverage-html
-
-# 代码检查
-pylint core/
-flake8 core/
-
-# 代码格式化
-black core/
-tests/
-isort core/
-tests/
-```
-
-### 并行测试说明
-
-默认情况下，测试以串行方式执行，以确保测试报告生成器能够正确收集所有测试结果。
-
-如果需要启用并行测试以提高执行速度，可以使用以下命令：
-
-```bash
-# 使用所有可用的CPU核心并行运行
-pytest -n auto
-
-# 指定并行worker数量
-pytest -n 4
-
-# 按文件分发测试（确保同一文件的测试在同一个worker中执行）
-pytest -n auto --dist=loadfile
-```
-
-**注意**：启用并行测试后，自定义的HTML/JSON测试报告可能无法正确收集所有测试结果。Allure报告不受影响。
-
-## 新功能
-
-### 1. 测试数据管理
-
-使用 YAML 文件管理测试数据：
-
-```bash
-# 查看测试数据文件
-data/test_data/login_data.yaml
-
-# 在测试中使用
-from core.utils.test_data_loader import TestDataLoader
-
-data = TestDataLoader.get_login_data('login_success')
-```
-
-### 2. 统一异常处理
-
-使用 ExceptionHandler 处理异常：
-
-```python
-from core.utils.exception_handler import ExceptionHandler, retry_on_exception
-
-# 安全执行
-result = ExceptionHandler.safe_execute(some_function, arg1, arg2)
-
-# 异常重试
-@retry_on_exception(max_retries=3, delay=1)
-def flaky_function():
-    # 可能失败的操作
-    pass
-```
-
-### 3. 增强的 Allure 报告
-
-使用 AllureHelper 增强测试报告：
-
-```python
-from core.utils.allure_helper import AllureHelper
-
-# 添加测试参数
-AllureHelper.add_parameters({
-    "browser": "chromium",
-    "environment": "test"
-})
-
-# 添加链接
-AllureHelper.add_issue("https://example.com/issue/123", "Bug #123")
-
-# 附加文件
-AllureHelper.attach_json({"key": "value"}, "测试数据")
-```
-
-### 4. 依赖管理优化
-
-使用锁定版本的依赖：
-
-```bash
-# 安装锁定版本依赖
-pip install -r requirements.lock
-
-# 更新依赖
-pip-compile requirements.in -o requirements.lock
-```
-
-### 5. 测试结果历史存储
-
-框架会自动存储测试结果到历史记录，方便后续分析：
-
-- 历史记录存储在 `reports/history/` 目录
-- 每个测试会话生成一个历史文件
-- 支持查看历史测试结果
-
-### 6. 测试趋势分析
-
-框架会自动生成测试趋势报告：
-
-- 趋势报告存储在 `reports/test-trend.html`
-- 包含通过率、测试数量、执行时长等趋势图表
-- 支持查看最近7天的测试趋势
-- 提供统计概览数据
-
-## 下一步
-
-- 查看 [完整指南](GUIDE.md) 了解详细用法
-- 查看 [功能特性](FEATURES.md) 了解框架能力
-- 查看 [CI/CD 配置](CI_CD.md) 了解持续集成
-- 查看 [API 文档](API.md) 了解 API 参考
-
-## 项目结构
-
-```
-.
-├── config/          # 配置管理
-├── core/            # 核心模块
-│   ├── pages/       # 页面对象
-│   └── utils/       # 工具类
-├── data/            # 测试数据
-│   └── test_data/   # 测试数据文件
-├── tests/           # 测试用例
-├── docs/            # 文档
-└── reports/         # 测试报告
-```
+- **问题反馈**：在 GitHub 仓库创建 Issue
+- **贡献代码**：提交 Pull Request
+- **文档更新**：修改相应的 Markdown 文件

@@ -6,7 +6,7 @@
 
 import json
 from pathlib import Path
-from typing import Dict, Union
+from typing import Any, Dict, Optional, Union
 
 from playwright.sync_api import Locator, Page
 
@@ -35,10 +35,10 @@ class LocatorManager:
         """
         self.page_name = page_name
         self.locators_dir = Path(__file__).parent.parent.parent / locators_dir
-        self.locators = {}
+        self.locators: Dict[str, Any] = {}
         self._load_locators()
 
-    def _load_locators(self):
+    def _load_locators(self) -> None:
         """加载定位器文件"""
         # 尝试加载 YAML 文件
         yaml_file = self.locators_dir / f"{self.page_name}.yaml"
@@ -60,16 +60,16 @@ class LocatorManager:
 
         logger.warning(f"未找到定位器文件: {self.page_name}")
 
-    def _load_yaml(self, file_path: Path):
+    def _load_yaml(self, file_path: Path) -> None:
         """加载 YAML 定位器文件"""
         try:
             with open(file_path, "r", encoding="utf-8") as f:
-                self.locators = yaml.safe_load(f)
+                self.locators = yaml.safe_load(f) or {}
             logger.info(f"成功加载 YAML 定位器: {file_path}")
         except Exception as e:
             logger.error(f"加载 YAML 定位器失败: {file_path}, 错误: {e}")
 
-    def _load_json(self, file_path: Path):
+    def _load_json(self, file_path: Path) -> None:
         """加载 JSON 定位器文件"""
         try:
             with open(file_path, "r", encoding="utf-8") as f:
@@ -78,7 +78,7 @@ class LocatorManager:
         except Exception as e:
             logger.error(f"加载 JSON 定位器失败: {file_path}, 错误: {e}")
 
-    def get(self, element_name: str) -> Union[str, Dict]:
+    def get(self, element_name: str) -> Union[str, Dict[str, Any]]:
         """
         获取元素定位器
 
@@ -94,9 +94,12 @@ class LocatorManager:
         if element_name not in self.locators:
             raise KeyError(f"元素 '{element_name}' 在 '{self.page_name}' 中未定义")
 
-        return self.locators[element_name]
+        locator: Any = self.locators[element_name]
+        if isinstance(locator, (str, dict)):
+            return locator
+        raise TypeError(f"定位器类型错误: {type(locator)}")
 
-    def get_by_strategy(self, element_name: str, strategy: str = "default") -> Union[str, Dict]:
+    def get_by_strategy(self, element_name: str, strategy: str = "default") -> Union[str, Dict[str, Any]]:
         """
         按策略获取元素定位器
 
@@ -110,23 +113,27 @@ class LocatorManager:
         if element_name not in self.locators:
             raise KeyError(f"元素 '{element_name}' 在 '{self.page_name}' 中未定义")
 
-        locator = self.locators[element_name]
+        locator: Any = self.locators[element_name]
 
         if isinstance(locator, str):
             return locator
         if isinstance(locator, dict):
             if strategy in locator:
-                return locator[strategy]
+                result: Any = locator[strategy]
+                if isinstance(result, (str, dict)):
+                    return result
             if "default" in locator:
-                return locator["default"]
+                result = locator["default"]
+                if isinstance(result, (str, dict)):
+                    return result
             return locator
         raise ValueError(f"不支持的定位器格式: {locator}")
 
-    def __getattr__(self, element_name: str) -> Union[str, Dict]:
+    def __getattr__(self, element_name: str) -> Union[str, Dict[str, Any]]:
         """支持通过属性方式访问定位器"""
         return self.get(element_name)
 
-    def __getitem__(self, element_name: str) -> Union[str, Dict]:
+    def __getitem__(self, element_name: str) -> Union[str, Dict[str, Any]]:
         """支持通过字典方式访问定位器"""
         return self.get(element_name)
 
@@ -137,7 +144,7 @@ class SmartLocator:
     支持 Playwright 官方推荐的语义化定位方式
     """
 
-    def __init__(self, page: Page, locator_config: Union[str, Dict]):
+    def __init__(self, page: Page, locator_config: Union[str, Dict[str, Any]]):
         """
         初始化智能定位器
 
@@ -166,7 +173,7 @@ class SmartLocator:
         else:
             raise ValueError(f"不支持的定位器配置: {self.config}")
 
-    def _get_semantic_locator(self, config: Dict) -> Locator:
+    def _get_semantic_locator(self, config: Dict[str, Any]) -> Locator:
         """
         根据语义化配置获取 Locator
 
@@ -246,7 +253,7 @@ class SmartPage:
     支持语义化定位方式
     """
 
-    def __init__(self, page: Page, page_name: str = None):
+    def __init__(self, page: Page, page_name: Optional[str] = None):
         """
         初始化智能页面对象
 
@@ -255,7 +262,7 @@ class SmartPage:
             page_name: 页面名称（用于加载定位器文件）
         """
         self.page = page
-        self.locators = None
+        self.locators: Optional[LocatorManager] = None
 
         if page_name:
             self.locators = LocatorManager(page_name)
@@ -272,67 +279,67 @@ class SmartPage:
         """获取 Playwright Locator 对象"""
         return self.get_smart_locator(element_name).get_locator()
 
-    def click(self, element_name: str, **kwargs):
+    def click(self, element_name: str, **kwargs: Any) -> None:
         """点击元素"""
         locator = self.get_playwright_locator(element_name)
         locator.click(**kwargs)
 
-    def fill(self, element_name: str, value: str, **kwargs):
+    def fill(self, element_name: str, value: str, **kwargs: Any) -> None:
         """填充输入框"""
         locator = self.get_playwright_locator(element_name)
         locator.fill(value, **kwargs)
 
-    def get_text(self, element_name: str, **kwargs) -> str:
+    def get_text(self, element_name: str, **kwargs: Any) -> Optional[str]:
         """获取元素文本"""
         locator = self.get_playwright_locator(element_name)
         return locator.text_content(**kwargs)
 
-    def is_visible(self, element_name: str, **kwargs) -> bool:
+    def is_visible(self, element_name: str, **kwargs: Any) -> bool:
         """检查元素是否可见"""
         locator = self.get_playwright_locator(element_name)
         return locator.is_visible(**kwargs)
 
-    def is_enabled(self, element_name: str, **kwargs) -> bool:
+    def is_enabled(self, element_name: str, **kwargs: Any) -> bool:
         """检查元素是否可用"""
         locator = self.get_playwright_locator(element_name)
         return locator.is_enabled(**kwargs)
 
-    def is_checked(self, element_name: str, **kwargs) -> bool:
+    def is_checked(self, element_name: str, **kwargs: Any) -> bool:
         """检查复选框/单选框是否选中"""
         locator = self.get_playwright_locator(element_name)
         return locator.is_checked(**kwargs)
 
-    def check(self, element_name: str, **kwargs):
+    def check(self, element_name: str, **kwargs: Any) -> None:
         """勾选复选框"""
         locator = self.get_playwright_locator(element_name)
         locator.check(**kwargs)
 
-    def uncheck(self, element_name: str, **kwargs):
+    def uncheck(self, element_name: str, **kwargs: Any) -> None:
         """取消勾选复选框"""
         locator = self.get_playwright_locator(element_name)
         locator.uncheck(**kwargs)
 
-    def select_option(self, element_name: str, value: str, **kwargs):
+    def select_option(self, element_name: str, value: str, **kwargs: Any) -> None:
         """选择下拉框选项"""
         locator = self.get_playwright_locator(element_name)
         locator.select_option(value, **kwargs)
 
-    def hover(self, element_name: str, **kwargs):
+    def hover(self, element_name: str, **kwargs: Any) -> None:
         """鼠标悬停"""
         locator = self.get_playwright_locator(element_name)
         locator.hover(**kwargs)
 
-    def scroll_into_view(self, element_name: str, **kwargs):
+    def scroll_into_view(self, element_name: str, **kwargs: Any) -> None:
         """滚动到元素可见"""
         locator = self.get_playwright_locator(element_name)
         locator.scroll_into_view_if_needed(**kwargs)
 
-    def wait_for_visible(self, element_name: str, timeout: int = 30000):
+    def wait_for_visible(self, element_name: str, timeout: int = 30000) -> None:
         """等待元素可见"""
         locator = self.get_playwright_locator(element_name)
         locator.wait_for(state="visible", timeout=timeout)
 
-    def wait_for_hidden(self, element_name: str, timeout: int = 30000):
+    def wait_for_hidden(self, element_name: str, timeout: int = 30000) -> None:
         """等待元素隐藏"""
         locator = self.get_playwright_locator(element_name)
         locator.wait_for(state="hidden", timeout=timeout)

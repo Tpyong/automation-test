@@ -5,7 +5,6 @@
 
 import json
 import os
-import tempfile
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -80,13 +79,13 @@ class ReportGenerator:
 
         logger.info(f"报告生成器初始化完成，输出目录: {output_dir}, worker_id: {self.worker_id}")
 
-    def start_session(self):
+    def start_session(self) -> None:
         """开始测试会话"""
         self.start_time = datetime.now()
         self.results = []
         logger.info("测试会话开始")
 
-    def end_session(self):
+    def end_session(self) -> None:
         """结束测试会话"""
         self.stop_time = datetime.now()
 
@@ -99,7 +98,7 @@ class ReportGenerator:
 
         logger.info("测试会话结束")
 
-    def add_result(self, nodeid: str, outcome: str, duration: float = 0.0, error_msg: Optional[str] = None):
+    def add_result(self, nodeid: str, outcome: str, duration: float = 0.0, error_msg: Optional[str] = None) -> None:
         """
         添加测试结果
 
@@ -378,7 +377,7 @@ class ReportGenerator:
 """
         return html
 
-    def _save_worker_results(self):
+    def _save_worker_results(self) -> None:
         """保存当前worker的结果到临时文件"""
         worker_file = self.temp_dir / f"worker_{self.worker_id}.json"
         results_data = [result.to_dict() for result in self.results]
@@ -393,11 +392,11 @@ class ReportGenerator:
 
         logger.info(f"Worker {self.worker_id} 结果已保存到: {worker_file}")
 
-    def _merge_worker_results(self):
+    def _merge_worker_results(self) -> None:
         """合并所有worker的结果"""
-        merged_results = []
-        min_start_time = None
-        max_stop_time = None
+        merged_results: List[TestResult] = []
+        min_start_time: Optional[datetime] = None
+        max_stop_time: Optional[datetime] = None
 
         # 收集所有worker的结果文件
         worker_files = list(self.temp_dir.glob("worker_*.json"))
@@ -406,7 +405,7 @@ class ReportGenerator:
         for worker_file in worker_files:
             try:
                 with open(worker_file, "r", encoding="utf-8") as f:
-                    data = json.load(f)
+                    data: Dict[str, Any] = json.load(f)
 
                 # 解析开始和结束时间
                 if data.get("start_time"):
@@ -442,7 +441,7 @@ class ReportGenerator:
 
         logger.info(f"合并完成，共 {len(merged_results)} 个测试结果")
 
-    def save_history(self):
+    def save_history(self) -> str:
         """保存测试结果到历史记录"""
         history_dir = self.output_dir / "history"
         history_dir.mkdir(exist_ok=True)
@@ -524,6 +523,10 @@ class ReportGenerator:
         total_tests = []
         failed_tests = []
         durations = []
+        skipped_tests = []
+
+        # 收集模块级数据
+        module_data = {}
 
         for data in history_data:
             timestamps.append(data["timestamp"])
@@ -532,6 +535,15 @@ class ReportGenerator:
             total_tests.append(summary["total"])
             failed_tests.append(summary["failed"])
             durations.append(summary["duration"])
+            skipped_tests.append(summary["skipped"])
+
+            # 收集模块数据
+            for module, module_stats in data["summary"].get("module_stats", {}).items():
+                if module not in module_data:
+                    module_data[module] = {"pass_rates": [], "durations": []}
+                module_pass_rate = (module_stats["passed"] / module_stats["total"] * 100) if module_stats["total"] > 0 else 0
+                module_data[module]["pass_rates"].append(module_pass_rate)
+                module_data[module]["durations"].append(summary["duration"])
 
         # 构建HTML内容
         html_template = """<!DOCTYPE html>
@@ -552,7 +564,7 @@ class ReportGenerator:
             padding: 20px;
         }}
         .container {{
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
         }}
         .header {{
@@ -588,6 +600,17 @@ class ReportGenerator:
             height: 400px;
             margin-bottom: 30px;
         }}
+        .chart-row {{
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }}
+        @media (max-width: 768px) {{
+            .chart-row {{
+                grid-template-columns: 1fr;
+            }}
+        }}
         .stats-grid {{
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -599,6 +622,11 @@ class ReportGenerator:
             padding: 20px;
             border-radius: 8px;
             text-align: center;
+            transition: transform 0.2s;
+        }}
+        .stat-card:hover {{
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }}
         .stat-card .number {{
             font-size: 24px;
@@ -608,6 +636,46 @@ class ReportGenerator:
         .stat-card .label {{
             color: #666;
             font-size: 14px;
+        }}
+        .stat-card.success .number {{
+            color: #28a745;
+        }}
+        .stat-card.warning .number {{
+            color: #ffc107;
+        }}
+        .stat-card.danger .number {{
+            color: #dc3545;
+        }}
+        .stat-card.info .number {{
+            color: #17a2b8;
+        }}
+        .tab-container {{
+            margin-top: 20px;
+        }}
+        .tabs {{
+            display: flex;
+            border-bottom: 1px solid #dee2e6;
+            margin-bottom: 20px;
+        }}
+        .tab {{
+            padding: 10px 20px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-bottom: none;
+            background: #f8f9fa;
+            margin-right: 5px;
+            border-radius: 4px 4px 0 0;
+        }}
+        .tab.active {{
+            background: white;
+            border-color: #dee2e6;
+            font-weight: 600;
+        }}
+        .tab-content {{
+            display: none;
+        }}
+        .tab-content.active {{
+            display: block;
         }}
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -624,45 +692,62 @@ class ReportGenerator:
         </div>
 
         <div class="section">
-            <h2>📊 通过率趋势</h2>
-            <div class="chart-container">
-                <canvas id="passRateChart"></canvas>
-            </div>
-        </div>
-
-        <div class="section">
-            <h2>📊 测试数量趋势</h2>
-            <div class="chart-container">
-                <canvas id="testCountChart"></canvas>
-            </div>
-        </div>
-
-        <div class="section">
-            <h2>📊 执行时长趋势</h2>
-            <div class="chart-container">
-                <canvas id="durationChart"></canvas>
-            </div>
-        </div>
-
-        <div class="section">
             <h2>📦 统计概览</h2>
             <div class="stats-grid">
-                <div class="stat-card">
+                <div class="stat-card success">
                     <div class="number">{avg_pass_rate}%</div>
                     <div class="label">平均通过率</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card info">
                     <div class="number">{avg_total_tests}</div>
                     <div class="label">平均测试数量</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card danger">
                     <div class="number">{avg_failed_tests}</div>
                     <div class="label">平均失败数量</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card warning">
+                    <div class="number">{avg_skipped_tests}</div>
+                    <div class="label">平均跳过数量</div>
+                </div>
+                <div class="stat-card info">
                     <div class="number">{avg_duration}s</div>
                     <div class="label">平均执行时长</div>
                 </div>
+                <div class="stat-card success">
+                    <div class="number">{max_pass_rate}%</div>
+                    <div class="label">最高通过率</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📊 核心指标趋势</h2>
+            <div class="chart-row">
+                <div class="chart-container">
+                    <canvas id="passRateChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <canvas id="testCountChart"></canvas>
+                </div>
+            </div>
+            <div class="chart-row">
+                <div class="chart-container">
+                    <canvas id="durationChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>📊 模块级分析</h2>
+            <div class="tab-container">
+                <div class="tabs">
+                    {module_tabs}
+                </div>
+                {module_tab_contents}
             </div>
         </div>
     </div>
@@ -687,7 +772,9 @@ class ReportGenerator:
                     borderColor: '#28a745',
                     backgroundColor: 'rgba(40, 167, 69, 0.1)',
                     tension: 0.3,
-                    fill: true
+                    fill: true,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
                 }}]
             }},
             options: {{
@@ -697,6 +784,10 @@ class ReportGenerator:
                     title: {{
                         display: true,
                         text: '测试通过率趋势'
+                    }},
+                    tooltip: {{
+                        mode: 'index',
+                        intersect: false
                     }}
                 }},
                 scales: {{
@@ -761,7 +852,9 @@ class ReportGenerator:
                     borderColor: '#ffc107',
                     backgroundColor: 'rgba(255, 193, 7, 0.1)',
                     tension: 0.3,
-                    fill: true
+                    fill: true,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
                 }}]
             }},
             options: {{
@@ -784,6 +877,50 @@ class ReportGenerator:
                 }}
             }}
         }});
+
+        // 测试状态分布
+        const statusCtx = document.getElementById('statusChart').getContext('2d');
+        new Chart(statusCtx, {{
+            type: 'doughnut',
+            data: {{
+                labels: ['通过', '失败', '跳过'],
+                datasets: [{{
+                    data: [{last_passed}, {last_failed}, {last_skipped}],
+                    backgroundColor: ['#28a745', '#dc3545', '#ffc107']
+                }}]
+            }},
+            options: {{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {{
+                    title: {{
+                        display: true,
+                        text: '最近测试状态分布'
+                    }},
+                    legend: {{
+                        position: 'bottom'
+                    }}
+                }}
+            }}
+        }});
+
+        // 标签切换功能
+        document.querySelectorAll('.tab').forEach(tab => {{
+            tab.addEventListener('click', () => {{
+                // 移除所有active类
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                // 添加active类到当前标签
+                tab.classList.add('active');
+                const tabId = tab.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            }});
+        }});
+
+        // 初始化第一个标签为active
+        document.querySelector('.tab').classList.add('active');
+        document.querySelector('.tab-content').classList.add('active');
     </script>
 </body>
 </html>
@@ -793,10 +930,117 @@ class ReportGenerator:
         avg_pass_rate = round(sum(pass_rates) / len(pass_rates), 2) if pass_rates else 0
         avg_total_tests = round(sum(total_tests) / len(total_tests), 0) if total_tests else 0
         avg_failed_tests = round(sum(failed_tests) / len(failed_tests), 0) if failed_tests else 0
+        avg_skipped_tests = round(sum(skipped_tests) / len(skipped_tests), 0) if skipped_tests else 0
         avg_duration = round(sum(durations) / len(durations), 2) if durations else 0
+        max_pass_rate = round(max(pass_rates), 2) if pass_rates else 0
+
+        # 最近一次测试的状态分布
+        last_summary = history_data[-1]["summary"]["summary"] if history_data else {}
+        last_passed = last_summary.get("passed", 0)
+        last_failed = last_summary.get("failed", 0)
+        last_skipped = last_summary.get("skipped", 0)
 
         # 生成时间
         generate_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        # 生成模块标签和内容
+        module_tabs = []
+        module_tab_contents = []
+        
+        for i, (module, data) in enumerate(module_data.items()):
+            tab_id = f"module-tab-{i}"
+            module_tabs.append(f'<div class="tab" data-tab="{tab_id}">{module}</div>')
+            
+            # 生成模块图表
+            module_pass_rates_json = json.dumps(data["pass_rates"])
+            module_durations_json = json.dumps(data["durations"])
+            
+            module_tab_contents.append(f"""
+            <div class="tab-content" id="{tab_id}">
+                <div class="chart-row">
+                    <div class="chart-container">
+                        <canvas id="module-pass-rate-{i}"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="module-duration-{i}"></canvas>
+                    </div>
+                </div>
+                <script>
+                    // 模块通过率趋势
+                    const modulePassRateCtx{i} = document.getElementById('module-pass-rate-{i}').getContext('2d');
+                    new Chart(modulePassRateCtx{i}, {{
+                        type: 'line',
+                        data: {{
+                            labels: formattedLabels,
+                            datasets: [{{
+                                label: '通过率 (%)',
+                                data: {module_pass_rates_json},
+                                borderColor: '#28a745',
+                                backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                                tension: 0.3,
+                                fill: true
+                            }}]
+                        }},
+                        options: {{
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {{
+                                title: {{
+                                    display: true,
+                                    text: '{module} 通过率趋势'
+                                }}
+                            }},
+                            scales: {{
+                                y: {{
+                                    beginAtZero: true,
+                                    max: 100,
+                                    title: {{
+                                        display: true,
+                                        text: '通过率 (%)'
+                                    }}
+                                }}
+                            }}
+                        }}
+                    }});
+
+                    // 模块执行时长趋势
+                    const moduleDurationCtx{i} = document.getElementById('module-duration-{i}').getContext('2d');
+                    new Chart(moduleDurationCtx{i}, {{
+                        type: 'line',
+                        data: {{
+                            labels: formattedLabels,
+                            datasets: [{{
+                                label: '执行时长 (秒)',
+                                data: {module_durations_json},
+                                borderColor: '#ffc107',
+                                backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                                tension: 0.3,
+                                fill: true
+                            }}]
+                        }},
+                        options: {{
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {{
+                                title: {{
+                                    display: true,
+                                    text: '{module} 执行时长趋势'
+                                }}
+                            }},
+                            scales: {{
+                                y: {{
+                                    beginAtZero: true,
+                                    title: {{
+                                        display: true,
+                                        text: '执行时长 (秒)'
+                                    }}
+                                }}
+                            }}
+                        }}
+                    }});
+                </script>
+            </div>
+            """)
 
         # 转换数据为JSON
         import json
@@ -815,12 +1059,19 @@ class ReportGenerator:
             avg_pass_rate=avg_pass_rate,
             avg_total_tests=avg_total_tests,
             avg_failed_tests=avg_failed_tests,
+            avg_skipped_tests=avg_skipped_tests,
             avg_duration=avg_duration,
+            max_pass_rate=max_pass_rate,
+            last_passed=last_passed,
+            last_failed=last_failed,
+            last_skipped=last_skipped,
             timestamps_json=timestamps_json,
             pass_rates_json=pass_rates_json,
             total_tests_json=total_tests_json,
             failed_tests_json=failed_tests_json,
             durations_json=durations_json,
+            module_tabs="".join(module_tabs),
+            module_tab_contents="".join(module_tab_contents)
         )
 
         # 保存趋势报告
