@@ -36,7 +36,7 @@ class SecurityScanner:
         
         try:
             result = subprocess.run(
-                ["safety", "check", "--json", "--full-report"],
+                ["safety", "check", "--json"],
                 capture_output=True,
                 text=True,
                 timeout=300
