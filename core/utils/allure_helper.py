@@ -15,7 +15,9 @@ class AllureHelper:
 
     @staticmethod
     def attach_text(text: str, name: str = "text", attachment_type: Optional[str] = None) -> None:
-        allure.attach(text, name=name, attachment_type=attachment_type or allure.attachment_type.TEXT)
+        allure.attach(
+            text, name=name, attachment_type=attachment_type or allure.attachment_type.TEXT
+        )
 
     @staticmethod
     def attach_json(json_data: Any, name: str = "json") -> None:
@@ -44,7 +46,7 @@ class AllureHelper:
     @staticmethod
     def add_tags(*tags: str) -> None:
         for tag in tags:
-            allure.tag(tag)  # type: ignore[no-untyped-call]
+            allure.tag(tag)
 
     @staticmethod
     def add_severity(severity: str) -> None:
@@ -55,35 +57,35 @@ class AllureHelper:
             "minor": allure.severity_level.MINOR,
             "trivial": allure.severity_level.TRIVIAL,
         }
-        allure.severity(severity_map.get(severity, allure.severity_level.NORMAL))  # type: ignore[no-untyped-call]
+        allure.severity(severity_map.get(severity, allure.severity_level.NORMAL))
 
     @staticmethod
     def add_feature(feature: str) -> None:
-        allure.feature(feature)  # type: ignore[no-untyped-call]
+        allure.feature(feature)
 
     @staticmethod
     def add_story(story: str) -> None:
-        allure.story(story)  # type: ignore[no-untyped-call]
+        allure.story(story)
 
     @staticmethod
     def add_description(description: str) -> None:
-        allure.description(description)  # type: ignore[no-untyped-call]
+        allure.description(description)
 
     @staticmethod
     def add_description_html(description: str) -> None:
-        allure.description_html(description)  # type: ignore[no-untyped-call]
+        allure.description_html(description)
 
     @staticmethod
     def add_link(url: str, name: str, link_type: str = "link") -> None:
-        allure.link(url, name=name, link_type=link_type)  # type: ignore[no-untyped-call]
+        allure.link(url, name=name, link_type=link_type)
 
     @staticmethod
     def add_issue(url: str, name: str) -> None:
-        allure.issue(url, name=name)  # type: ignore[no-untyped-call]
+        allure.issue(url, name=name)
 
     @staticmethod
     def add_test_case(url: str, name: str) -> None:
-        allure.testcase(url, name=name)  # type: ignore[no-untyped-call]
+        allure.testcase(url, name=name)
 
     @staticmethod
     def add_parameter(name: str, value: Any) -> None:
@@ -100,16 +102,16 @@ class AllureHelper:
 
     @staticmethod
     def epic(name: str) -> None:
-        allure.epic(name)  # type: ignore[no-untyped-call]
+        allure.epic(name)
 
     @staticmethod
     def suite(name: str) -> None:
-        allure.suite(name)  # type: ignore[no-untyped-call]
+        allure.suite(name)
 
     @staticmethod
     def parent_suite(name: str) -> None:
-        allure.parent_suite(name)  # type: ignore[no-untyped-call]
+        allure.parent_suite(name)
 
     @staticmethod
     def sub_suite(name: str) -> None:
-        allure.sub_suite(name)  # type: ignore[no-untyped-call]
+        allure.sub_suite(name)

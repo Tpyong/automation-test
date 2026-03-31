@@ -62,7 +62,9 @@ class ExceptionHandler:
         logger.error(f"堆栈信息:\n{stack_trace}")
 
         # 添加到Allure报告
-        error_details = f"异常类型: {exception_type}\n异常消息: {exception_message}\n堆栈信息:\n{stack_trace}"
+        error_details = (
+            f"异常类型: {exception_type}\n异常消息: {exception_message}\n堆栈信息:\n{stack_trace}"
+        )
         AllureHelper.attach_text(error_details, name=f"{context}错误", attachment_type="text/plain")
 
     @staticmethod

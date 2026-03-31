@@ -113,7 +113,7 @@ class SecretsManager:
             return ciphertext
 
         try:
-            encrypted_b64 = ciphertext[len(self.ENCRYPTED_PREFIX):]
+            encrypted_b64 = ciphertext[len(self.ENCRYPTED_PREFIX) :]
             encrypted = base64.urlsafe_b64decode(encrypted_b64)
             plaintext = self.cipher.decrypt(encrypted).decode()
             return plaintext

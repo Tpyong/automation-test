@@ -3,8 +3,9 @@
 演示如何使用 SmartPage 和语义化定位器
 """
 
-import allure
 from typing import Any, Dict, Optional
+
+import allure
 from playwright.sync_api import Page
 
 from core.utils.locators import SmartPage

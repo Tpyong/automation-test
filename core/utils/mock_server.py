@@ -7,7 +7,7 @@ import json
 import threading
 import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from typing import Any, Callable, Dict, Optional, Tuple
+from typing import Any, Dict, Optional
 from urllib.parse import parse_qs, urlparse
 
 from core.utils.logger import get_logger
@@ -27,7 +27,10 @@ class MockResponse:
     ):
         self.status_code = status_code
         self.body = body or {}
-        self.headers = headers or {"Content-Type": "application/json", "Access-Control-Allow-Origin": "*"}
+        self.headers = headers or {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+        }
         self.delay = delay
 
 
@@ -99,7 +102,10 @@ class MockRequestHandler(BaseHTTPRequestHandler):
             self._send_response(
                 MockResponse(
                     status_code=404,
-                    body={"error": "Not Found", "message": f"No mock endpoint found for {method} {path}"},
+                    body={
+                        "error": "Not Found",
+                        "message": f"No mock endpoint found for {method} {path}",
+                    },
                 )
             )
 
@@ -148,7 +154,7 @@ class MockServer:
 
         # 创建服务器
         def handler_factory(*args: Any, **kwargs: Any) -> MockRequestHandler:
-            return MockRequestHandler(*args, mock_server=self, **kwargs)  # type: ignore[no-untyped-call]
+            return MockRequestHandler(*args, mock_server=self, **kwargs)
 
         self._server = HTTPServer((self.host, self.port), handler_factory)
 

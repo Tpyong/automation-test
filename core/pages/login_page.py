@@ -3,8 +3,9 @@
 演示如何使用元素定位器管理
 """
 
-import allure
 from typing import Any, Optional, Union
+
+import allure
 from playwright.sync_api import Page
 
 from core.utils.locators import LocatorManager
@@ -141,7 +142,9 @@ class LoginPage:
         self.page.wait_for_selector(str(locator), state="hidden", timeout=10000)
         logger.info("加载完成")
 
-    def get_locator_by_strategy(self, element_name: str, strategy: str = "default") -> Union[str, dict[Any, Any]]:
+    def get_locator_by_strategy(
+        self, element_name: str, strategy: str = "default"
+    ) -> Union[str, dict[Any, Any]]:
         """
         使用特定策略获取定位器
 

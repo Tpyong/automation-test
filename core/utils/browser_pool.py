@@ -35,7 +35,11 @@ class BrowserPool:
         logger.info(f"浏览器实例池初始化完成，最大池大小: {max_pool_size}")
 
     def initialize(
-        self, playwright: Playwright, browser_type: str = "chromium", headless: bool = True, slow_mo: int = 0
+        self,
+        playwright: Playwright,
+        browser_type: str = "chromium",
+        headless: bool = True,
+        slow_mo: int = 0,
     ) -> None:
         """
         初始化浏览器池
@@ -77,11 +81,17 @@ class BrowserPool:
 
         try:
             if self._browser_type == "chromium":
-                return self._playwright.chromium.launch(headless=self._headless, slow_mo=self._slow_mo)
+                return self._playwright.chromium.launch(
+                    headless=self._headless, slow_mo=self._slow_mo
+                )
             elif self._browser_type == "firefox":
-                return self._playwright.firefox.launch(headless=self._headless, slow_mo=self._slow_mo)
+                return self._playwright.firefox.launch(
+                    headless=self._headless, slow_mo=self._slow_mo
+                )
             elif self._browser_type == "webkit":
-                return self._playwright.webkit.launch(headless=self._headless, slow_mo=self._slow_mo)
+                return self._playwright.webkit.launch(
+                    headless=self._headless, slow_mo=self._slow_mo
+                )
             else:
                 raise ValueError(f"不支持的浏览器类型: {self._browser_type}")
         except Exception as e:
@@ -143,7 +153,11 @@ class BrowserPool:
             池状态信息
         """
         with self._lock:
-            return {"pool_size": len(self._pool), "in_use": len(self._in_use), "max_size": self.max_pool_size}
+            return {
+                "pool_size": len(self._pool),
+                "in_use": len(self._in_use),
+                "max_size": self.max_pool_size,
+            }
 
     def cleanup(self) -> None:
         """清理所有浏览器实例"""

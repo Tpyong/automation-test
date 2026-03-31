@@ -17,7 +17,12 @@ class WorkerMerger:
     def __init__(self, temp_dir: Path):
         self.temp_dir = temp_dir
 
-    def merge(self, results: List[TestResult], start_time: Optional[datetime], stop_time: Optional[datetime]) -> tuple[List[TestResult], Optional[datetime], Optional[datetime]]:
+    def merge(
+        self,
+        results: List[TestResult],
+        start_time: Optional[datetime],
+        stop_time: Optional[datetime],
+    ) -> tuple[List[TestResult], Optional[datetime], Optional[datetime]]:
         """合并所有 worker 的结果"""
         merged_results: List[TestResult] = []
         min_start_time: Optional[datetime] = start_time

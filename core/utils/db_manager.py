@@ -15,7 +15,7 @@ logger = get_logger(__name__)
 
 class DatabaseConfig:
     """数据库配置"""
-    
+
     def __init__(
         self,
         host: str = "localhost",
@@ -39,7 +39,7 @@ class DatabaseConfig:
         self.max_overflow = max_overflow
         self.pool_timeout = pool_timeout
         self.pool_recycle = pool_recycle
-    
+
     @classmethod
     def from_env(cls) -> "DatabaseConfig":
         """从环境变量创建配置"""
@@ -50,7 +50,7 @@ class DatabaseConfig:
             password=os.getenv("DB_PASSWORD", ""),
             database=os.getenv("DB_NAME", "test_db"),
         )
-    
+
     def to_connection_string(self) -> str:
         """生成连接字符串"""
         return (
@@ -62,29 +62,31 @@ class DatabaseConfig:
 
 class DatabaseManager:
     """数据库管理器"""
-    
+
     _instance: Optional["DatabaseManager"] = None
     _engine: Any = None
-    
+
     def __new__(cls, *args, **kwargs):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
         return cls._instance
-    
+
     def __init__(self, config: Optional[DatabaseConfig] = None):
-        if hasattr(self, '_initialized'):
+        if hasattr(self, "_initialized"):
             return
-        
+
         self.config = config or DatabaseConfig.from_env()
         self._initialized = True
-        logger.info(f"DatabaseManager 初始化完成: {self.config.host}:{self.config.port}/{self.config.database}")
-    
+        logger.info(
+            f"DatabaseManager 初始化完成: {self.config.host}:{self.config.port}/{self.config.database}"
+        )
+
     def initialize(self) -> None:
         """初始化数据库连接池"""
         try:
             from sqlalchemy import create_engine
             from sqlalchemy.pool import QueuePool
-            
+
             self._engine = create_engine(
                 self.config.to_connection_string(),
                 poolclass=QueuePool,
@@ -98,31 +100,31 @@ class DatabaseManager:
         except ImportError:
             logger.warning("SQLAlchemy 未安装，数据库功能不可用")
             self._engine = None
-    
+
     @property
     def engine(self) -> Any:
         """获取数据库引擎"""
         if self._engine is None:
             self.initialize()
         return self._engine
-    
+
     @contextmanager
     def get_connection(self) -> Generator[Any, None, None]:
         """获取数据库连接（上下文管理器）"""
         if self._engine is None:
             raise RuntimeError("数据库未初始化")
-        
+
         conn = self._engine.connect()
         try:
             yield conn
         finally:
             conn.close()
-    
+
     @contextmanager
     def get_session(self) -> Generator[Any, None, None]:
         """获取数据库会话（上下文管理器）"""
         from sqlalchemy.orm import sessionmaker
-        
+
         Session = sessionmaker(bind=self.engine)
         session = Session()
         try:
@@ -133,19 +135,19 @@ class DatabaseManager:
             raise
         finally:
             session.close()
-    
+
     def execute(self, sql: str, params: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
         """执行 SQL 查询"""
         with self.get_connection() as conn:
             result = conn.execute(sql, params or {})
             return [dict(row) for row in result.mappings()]
-    
+
     def execute_many(self, sql: str, params_list: List[Dict[str, Any]]) -> int:
         """批量执行 SQL"""
         with self.get_connection() as conn:
             result = conn.execute(sql, params_list)
             return result.rowcount
-    
+
     def close(self) -> None:
         """关闭数据库连接池"""
         if self._engine:

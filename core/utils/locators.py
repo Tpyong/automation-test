@@ -99,7 +99,9 @@ class LocatorManager:
             return locator
         raise TypeError(f"定位器类型错误: {type(locator)}")
 
-    def get_by_strategy(self, element_name: str, strategy: str = "default") -> Union[str, Dict[str, Any]]:
+    def get_by_strategy(
+        self, element_name: str, strategy: str = "default"
+    ) -> Union[str, Dict[str, Any]]:
         """
         按策略获取元素定位器
 

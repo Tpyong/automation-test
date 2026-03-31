@@ -9,8 +9,8 @@ from typing import Any, Dict, List, Optional
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from core.utils.logger import get_logger
-from core.utils.reporting.models import TestResult
 from core.utils.reporting.history_manager import HistoryManager
+from core.utils.reporting.models import TestResult
 from core.utils.reporting.worker_merger import WorkerMerger
 
 logger = get_logger(__name__)
@@ -43,8 +43,7 @@ class ReportGenerator:
         # 初始化 Jinja2 环境
         template_dir = Path(__file__).parent / "templates"
         self.env = Environment(
-            loader=FileSystemLoader(template_dir),
-            autoescape=select_autoescape(['html', 'xml'])
+            loader=FileSystemLoader(template_dir), autoescape=select_autoescape(["html", "xml"])
         )
 
         logger.info(f"报告生成器初始化完成，输出目录: {output_dir}, worker_id: {self.worker_id}")
@@ -69,7 +68,9 @@ class ReportGenerator:
 
         logger.info("测试会话结束")
 
-    def add_result(self, nodeid: str, outcome: str, duration: float = 0.0, error_msg: Optional[str] = None) -> None:
+    def add_result(
+        self, nodeid: str, outcome: str, duration: float = 0.0, error_msg: Optional[str] = None
+    ) -> None:
         """
         添加测试结果
 
@@ -252,11 +253,27 @@ class ReportGenerator:
         data = self._prepare_trend_data(history_data)
 
         # 计算统计数据
-        avg_pass_rate = round(sum(data["pass_rates"]) / len(data["pass_rates"]), 2) if data["pass_rates"] else 0
-        avg_total_tests = round(sum(data["total_tests"]) / len(data["total_tests"]), 0) if data["total_tests"] else 0
-        avg_failed_tests = round(sum(data["failed_tests"]) / len(data["failed_tests"]), 0) if data["failed_tests"] else 0
-        avg_skipped_tests = round(sum(data["skipped_tests"]) / len(data["skipped_tests"]), 0) if data["skipped_tests"] else 0
-        avg_duration = round(sum(data["durations"]) / len(data["durations"]), 2) if data["durations"] else 0
+        avg_pass_rate = (
+            round(sum(data["pass_rates"]) / len(data["pass_rates"]), 2) if data["pass_rates"] else 0
+        )
+        avg_total_tests = (
+            round(sum(data["total_tests"]) / len(data["total_tests"]), 0)
+            if data["total_tests"]
+            else 0
+        )
+        avg_failed_tests = (
+            round(sum(data["failed_tests"]) / len(data["failed_tests"]), 0)
+            if data["failed_tests"]
+            else 0
+        )
+        avg_skipped_tests = (
+            round(sum(data["skipped_tests"]) / len(data["skipped_tests"]), 0)
+            if data["skipped_tests"]
+            else 0
+        )
+        avg_duration = (
+            round(sum(data["durations"]) / len(data["durations"]), 2) if data["durations"] else 0
+        )
         max_pass_rate = round(max(data["pass_rates"]), 2) if data["pass_rates"] else 0
 
         # 生成时间
@@ -309,7 +326,7 @@ class ReportGenerator:
         failed_tests = []
         durations = []
         skipped_tests = []
-        module_data = {}
+        module_data: Dict[str, Dict[str, List[float]]] = {}
 
         for data in history_data:
             timestamps.append(data["timestamp"])
@@ -324,7 +341,11 @@ class ReportGenerator:
             for module, module_stats in data["summary"].get("module_stats", {}).items():
                 if module not in module_data:
                     module_data[module] = {"pass_rates": [], "durations": []}
-                module_pass_rate = (module_stats["passed"] / module_stats["total"] * 100) if module_stats["total"] > 0 else 0
+                module_pass_rate = (
+                    (module_stats["passed"] / module_stats["total"] * 100)
+                    if module_stats["total"] > 0
+                    else 0
+                )
                 module_data[module]["pass_rates"].append(module_pass_rate)
                 module_data[module]["durations"].append(summary["duration"])
 

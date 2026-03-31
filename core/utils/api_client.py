@@ -44,7 +44,9 @@ class APIClient:
         self.session.mount("https://", adapter)
 
         # 默认请求头
-        self.session.headers.update({"Content-Type": "application/json", "Accept": "application/json"})
+        self.session.headers.update(
+            {"Content-Type": "application/json", "Accept": "application/json"}
+        )
 
         logger.info(f"API 客户端初始化完成，base_url: {base_url}")
 
@@ -67,7 +69,12 @@ class APIClient:
             logger.debug(f"响应体: {response.text}")
 
     @allure.step("发送 GET 请求: {endpoint}")
-    def get(self, endpoint: str, params: Optional[Dict[Any, Any]] = None, headers: Optional[Dict[Any, Any]] = None) -> requests.Response:
+    def get(
+        self,
+        endpoint: str,
+        params: Optional[Dict[Any, Any]] = None,
+        headers: Optional[Dict[Any, Any]] = None,
+    ) -> requests.Response:
         """发送 GET 请求"""
         url = self._make_url(endpoint)
         self._log_request("GET", url, params=params)
@@ -78,23 +85,39 @@ class APIClient:
         return response
 
     @allure.step("发送 POST 请求: {endpoint}")
-    def post(self, endpoint: str, data: Optional[Dict[Any, Any]] = None, json_data: Optional[Dict[Any, Any]] = None, headers: Optional[Dict[Any, Any]] = None) -> requests.Response:
+    def post(
+        self,
+        endpoint: str,
+        data: Optional[Dict[Any, Any]] = None,
+        json_data: Optional[Dict[Any, Any]] = None,
+        headers: Optional[Dict[Any, Any]] = None,
+    ) -> requests.Response:
         """发送 POST 请求"""
         url = self._make_url(endpoint)
         self._log_request("POST", url, json=json_data, data=data)
 
-        response = self.session.post(url, data=data, json=json_data, headers=headers, timeout=self.timeout)
+        response = self.session.post(
+            url, data=data, json=json_data, headers=headers, timeout=self.timeout
+        )
 
         self._log_response(response)
         return response
 
     @allure.step("发送 PUT 请求: {endpoint}")
-    def put(self, endpoint: str, data: Optional[Dict[Any, Any]] = None, json_data: Optional[Dict[Any, Any]] = None, headers: Optional[Dict[Any, Any]] = None) -> requests.Response:
+    def put(
+        self,
+        endpoint: str,
+        data: Optional[Dict[Any, Any]] = None,
+        json_data: Optional[Dict[Any, Any]] = None,
+        headers: Optional[Dict[Any, Any]] = None,
+    ) -> requests.Response:
         """发送 PUT 请求"""
         url = self._make_url(endpoint)
         self._log_request("PUT", url, json=json_data, data=data)
 
-        response = self.session.put(url, data=data, json=json_data, headers=headers, timeout=self.timeout)
+        response = self.session.put(
+            url, data=data, json=json_data, headers=headers, timeout=self.timeout
+        )
 
         self._log_response(response)
         return response
@@ -153,12 +176,16 @@ class APIAssertions:
 
     @staticmethod
     @allure.step("验证响应字段值: {field} = {expected}")
-    def assert_response_field_equals(response: requests.Response, field: str, expected: Any) -> None:
+    def assert_response_field_equals(
+        response: requests.Response, field: str, expected: Any
+    ) -> None:
         """验证响应 JSON 字段值"""
         try:
             data = response.json()
             actual = data.get(field)
-            Assertions.assert_equal(actual, expected, f"字段 {field} 期望值: {expected}, 实际值: {actual}")
+            Assertions.assert_equal(
+                actual, expected, f"字段 {field} 期望值: {expected}, 实际值: {actual}"
+            )
         except json.JSONDecodeError:
             Assertions.assert_true(False, "响应不是有效的 JSON 格式")
 
@@ -167,4 +194,6 @@ class APIAssertions:
     def assert_response_time(response: requests.Response, max_time: int = 2000) -> None:
         """验证响应时间"""
         elapsed_ms = response.elapsed.total_seconds() * 1000
-        Assertions.assert_true(elapsed_ms < max_time, f"响应时间 {elapsed_ms}ms 超过阈值 {max_time}ms")
+        Assertions.assert_true(
+            elapsed_ms < max_time, f"响应时间 {elapsed_ms}ms 超过阈值 {max_time}ms"
+        )
