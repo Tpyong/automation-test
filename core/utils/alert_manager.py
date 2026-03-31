@@ -259,7 +259,7 @@ class AlertManager:
 - 总测试数: {session_metrics.get('total_tests', 0) if session_metrics else 0}
 - 通过: {session_metrics.get('passed_tests', 0) if session_metrics else 0}
 - 失败: {session_metrics.get('failed_tests', 0) if session_metrics else 0}
-- 通过率: {session_metrics.get('pass_rate', 0):.1f}% if session_metrics else 0}%
+- 通过率: {session_metrics.get('pass_rate', 0):.1f}% if session_metrics else 0%
 
 ### 失败的测试
 """
@@ -308,7 +308,7 @@ class AlertManager:
 总测试数: {session_metrics.get('total_tests', 0) if session_metrics else 0}
 通过: {session_metrics.get('passed_tests', 0) if session_metrics else 0}
 失败: {session_metrics.get('failed_tests', 0) if session_metrics else 0}
-通过率: {session_metrics.get('pass_rate', 0):.1f}% if session_metrics else 0}%
+通过率: {session_metrics.get('pass_rate', 0):.1f}% if session_metrics else 0%
 
 失败的测试:
 """

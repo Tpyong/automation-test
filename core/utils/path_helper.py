@@ -29,9 +29,11 @@ class PathHelper:
         Returns:
             完整的文件路径
         """
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        path = Path("screenshots") / f"{name}_{timestamp}.png"
-        path.parent.mkdir(exist_ok=True)
+        date_str = date_str or datetime.now().strftime("%Y%m%d")
+        timestamp = datetime.now().strftime("%H%M%S")
+        # 使用统一的命名格式：{name}_{timestamp}.png（目录已经按日期分类）
+        path = Path("reports") / "screenshots" / date_str / f"{name}_{timestamp}.png"
+        path.parent.mkdir(exist_ok=True, parents=True)
         return str(path)
 
     @staticmethod
@@ -47,8 +49,9 @@ class PathHelper:
             完整的文件路径
         """
         date_str = date_str or datetime.now().strftime("%Y%m%d")
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        path = Path("videos") / date_str / f"{name}_{timestamp}.webm"
+        timestamp = datetime.now().strftime("%H%M%S")
+        # 使用统一的命名格式：{name}_{timestamp}.webm（目录已经按日期分类）
+        path = Path("reports") / "videos" / date_str / f"{name}_{timestamp}.webm"
         path.parent.mkdir(exist_ok=True, parents=True)
         return str(path)
 

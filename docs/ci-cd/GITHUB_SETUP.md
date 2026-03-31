@@ -199,11 +199,11 @@ flake8 core/ tests/
 2. **保留失败截图**：
    ```yaml
    - name: Upload screenshots
-     if: failure()
-     uses: actions/upload-artifact@v4
-     with:
-       name: screenshots
-       path: screenshots/
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: reports/screenshots/
    ```
 
 3. **SSH 调试**（高级）：

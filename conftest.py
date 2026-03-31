@@ -19,6 +19,7 @@ _report_generator: Any = None
 _browser_pool: Any = None
 _db_manager: Any = None
 _test_data_manager: Any = None
+_test_advisor: Any = None
 
 def _get_allure_helper() -> Any:
     """延迟加载 AllureHelper"""
@@ -60,14 +61,29 @@ def _get_test_data_manager() -> Any:
         _test_data_manager = TestDataManager(_get_db_manager())
     return _test_data_manager
 
+def _get_test_advisor() -> Any:
+    """延迟加载 TestAdvisor"""
+    global _test_advisor
+    if _test_advisor is None:
+        from core.utils.test_advisor import get_test_advisor
+        _test_advisor = get_test_advisor()
+    return _test_advisor
+
 logger = get_logger(__name__)
 
 
 def pytest_configure(config: Any) -> None:
-    # config.option.allure_report_dir = "reports/allure-report"
-    # 不设置allure_report_dir，避免pytest自动生成Allure报告
-    # 报告生成由专门的allure-report作业处理
-    pass
+    # 设置Allure报告结果目录为reports/allure-results
+    config.option.allure_report_dir = "reports/allure-results"
+    # 清理Allure报告目录，避免报告累积
+    import shutil
+    allure_results_dir = "reports/allure-results"
+    if os.path.exists(allure_results_dir):
+        shutil.rmtree(allure_results_dir)
+        logger.info(f"已清理Allure报告目录: {allure_results_dir}")
+    # 重新创建目录
+    os.makedirs(allure_results_dir, exist_ok=True)
+    logger.info(f"已创建Allure报告目录: {allure_results_dir}")
 
 
 def pytest_sessionstart(session: Any) -> None:
@@ -75,13 +91,11 @@ def pytest_sessionstart(session: Any) -> None:
     logger.info("测试会话开始")
     logger.info("=" * 50)
     
-    # 记录配置摘要
     from config.settings import Settings
     settings = Settings()
     config_summary = settings.get_config_summary()
     logger.info(f"配置摘要: {config_summary}")
     
-    # 开始收集测试结果
     report_gen = _get_report_generator()
     report_gen.start_session()
     logger.info("报告生成器会话已开始")
@@ -92,27 +106,110 @@ def pytest_sessionfinish(session: Any, exitstatus: int) -> None:
     logger.info(f"测试会话结束，退出码: {exitstatus}")
     logger.info("=" * 50)
     
-    # 生成测试结果汇总报告
     report_gen = _get_report_generator()
     report_gen.end_session()
     logger.info("报告生成器会话已结束")
     
-    # 生成 HTML 和 JSON 报告
     html_report = report_gen.generate_html_report()
     json_report = report_gen.generate_json_report()
-    
-    # 保存测试结果到历史记录
     history_file = report_gen.save_history()
-    
-    # 生成测试趋势报告
     trend_report = report_gen.generate_trend_report()
     
-    # 清理浏览器实例池
+    try:
+        test_advisor = _get_test_advisor()
+        advisor_report = test_advisor.generate_advisor_report()
+        logger.info(f"  - 智能测试建议报告: {advisor_report}")
+    except Exception as e:
+        logger.warning(f"生成智能测试建议报告时出错: {e}")
+    
+    try:
+        settings = Settings()
+        if settings.video_enabled:
+            video_root_dir = os.path.join("reports", "videos", datetime.now().strftime("%Y%m%d"))
+            if os.path.exists(video_root_dir):
+                for suite_dir in os.listdir(video_root_dir):
+                    suite_path = os.path.join(video_root_dir, suite_dir)
+                    if os.path.isdir(suite_path):
+                        for test_dir in os.listdir(suite_path):
+                            test_path = os.path.join(suite_path, test_dir)
+                            if os.path.isdir(test_path):
+                                video_files = [f for f in os.listdir(test_path) if f.endswith('.webm')]
+                                if video_files:
+                                    non_empty_videos = []
+                                    for video_file in video_files:
+                                        video_path = os.path.join(test_path, video_file)
+                                        if os.path.exists(video_path) and os.path.getsize(video_path) > 0:
+                                            non_empty_videos.append(video_file)
+                                        else:
+                                            try:
+                                                os.remove(video_path)
+                                                logger.info(f"已删除空视频文件: {video_file}")
+                                            except Exception as e:
+                                                logger.warning(f"删除空视频文件时出错: {e}")
+                                    
+                                    if non_empty_videos:
+                                        test_name_parts = test_dir.split("_")
+                                        timestamp_start_index = -1
+                                        for i, part in enumerate(reversed(test_name_parts)):
+                                            if len(part) == 6 and part.isdigit():
+                                                timestamp_start_index = len(test_name_parts) - i - 2
+                                                break
+                                        
+                                        if timestamp_start_index > 0:
+                                            test_name_part = "_".join(test_name_parts[:timestamp_start_index])
+                                        else:
+                                            last_underscore = test_dir.rfind("_")
+                                            if last_underscore > 0:
+                                                test_name_part = test_dir[:last_underscore]
+                                            else:
+                                                test_name_part = test_dir
+                                        
+                                        for video_file in non_empty_videos:
+                                            try:
+                                                original_video_path = os.path.join(test_path, video_file)
+                                                mtime = os.path.getmtime(original_video_path)
+                                                timestamp = datetime.fromtimestamp(mtime).strftime("%H%M%S")
+                                                new_video_name = f"{test_name_part}_{timestamp}.webm"
+                                                new_video_path = os.path.join(suite_path, new_video_name)
+                                                
+                                                if os.path.exists(new_video_path):
+                                                    try:
+                                                        os.remove(new_video_path)
+                                                        logger.info(f"已删除已存在的视频文件: {new_video_name}")
+                                                    except Exception as e:
+                                                        logger.warning(f"删除已存在的视频文件时出错: {e}")
+                                                
+                                                os.rename(original_video_path, new_video_path)
+                                                logger.info(f"视频文件已移动并重命名: {new_video_name}")
+                                            except Exception as e:
+                                                logger.error(f"移动并重命名视频文件时出错: {e}")
+        
+        video_root_dir = os.path.join("reports", "videos", datetime.now().strftime("%Y%m%d"))
+        if os.path.exists(video_root_dir):
+            for suite_dir in os.listdir(video_root_dir):
+                suite_path = os.path.join(video_root_dir, suite_dir)
+                if os.path.isdir(suite_path):
+                    for test_dir in os.listdir(suite_path):
+                        test_path = os.path.join(suite_path, test_dir)
+                        if os.path.isdir(test_path) and not os.listdir(test_path):
+                            try:
+                                os.rmdir(test_path)
+                                logger.info(f"已删除空测试目录: {test_dir}")
+                            except Exception as e:
+                                logger.warning(f"删除空测试目录时出错: {e}")
+                    if not os.listdir(suite_path):
+                        try:
+                            os.rmdir(suite_path)
+                            logger.info(f"已删除空套件目录: {suite_dir}")
+                        except Exception as e:
+                            logger.warning(f"删除空套件目录时出错: {e}")
+    except Exception as e:
+        logger.error(f"处理视频文件时出错: {e}")
+    
     pool = _get_browser_pool()
     pool.cleanup()
     logger.info("浏览器实例池已清理")
     
-    # 关闭数据库连接池
     try:
         db_manager = _get_db_manager()
         db_manager.close()
@@ -149,11 +246,9 @@ def browser(playwright: Playwright, settings: Settings) -> Generator[Browser, No
 
     logger.info(f"初始化浏览器池: {browser_type}, headless: {headless}, viewport: {viewport}")
 
-    # 初始化浏览器池
     pool = _get_browser_pool()
     pool.initialize(playwright, browser_type, headless, slow_mo)
 
-    # 获取浏览器实例
     browser_obj = pool.acquire_browser()
     if not browser_obj:
         raise RuntimeError("无法获取浏览器实例")
@@ -162,33 +257,45 @@ def browser(playwright: Playwright, settings: Settings) -> Generator[Browser, No
     
     yield browser_obj
 
-    # 释放浏览器实例回池中
     pool.release_browser(browser_obj)
     logger.info(f"浏览器实例已释放: {id(browser_obj)}")
 
 
 @pytest.fixture(scope="function")
-def context(browser: Browser, settings: Settings) -> Generator[BrowserContext, None, None]:
-    context_options: Dict[str, Any] = {
+def browser_context_args(request: Any, settings: Settings) -> Dict[str, Any]:
+    """扩展 pytest-playwright 的 browser_context_args fixture，添加自定义配置"""
+    args: Dict[str, Any] = {
         "viewport": settings.viewport,
         "ignore_https_errors": True,
         "locale": "zh-CN",
         "timezone_id": "Asia/Shanghai"
     }
     
-    # 如果启用了录屏，添加录屏配置
-    if settings.video_enabled:
-        video_dir = os.path.join("videos", datetime.now().strftime("%Y%m%d"))
-        os.makedirs(video_dir, exist_ok=True)
-        context_options["record_video_dir"] = video_dir
-        context_options["record_video_size"] = settings.video_size
-        logger.info(f"启用录屏功能，视频保存目录: {video_dir}")
+    test_node = request.node
+    test_fixtures = getattr(test_node, "fixturenames", [])
+    uses_browser = any(fixture in test_fixtures for fixture in ["page", "browser", "browser_context"])
     
-    context = browser.new_context(**context_options)
-
-    yield context
-
-    context.close()
+    if settings.video_enabled and uses_browser:
+        test_file = test_node.fspath.basename if hasattr(test_node, 'fspath') else 'unknown'
+        if hasattr(test_node, 'fspath'):
+            test_suite = os.path.splitext(test_file)[0]
+        else:
+            test_suite = 'unknown'
+        
+        test_name = test_node.name.replace("/", "_").replace("\\", "_")
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+        
+        video_dir = os.path.join("reports", "videos", datetime.now().strftime("%Y%m%d"), test_suite, f"{test_name}_{timestamp}")
+        os.makedirs(video_dir, exist_ok=True)
+        
+        setattr(test_node, "video_dir", video_dir)
+        setattr(test_node, "test_name", test_name)
+        
+        args["record_video_dir"] = video_dir
+        args["record_video_size"] = settings.video_size
+        logger.info(f"为测试 {test_node.name} 启用录屏功能，视频保存目录: {video_dir}")
+    
+    return args
 
 
 @pytest.fixture(scope="function")
@@ -198,91 +305,151 @@ def page(context: BrowserContext, request: Any, settings: Settings) -> Generator
 
     yield page_obj
 
-    # 测试失败时截图
-    if hasattr(request.node, 'rep_call') and request.node.rep_call.failed:
-        try:
-            screenshot_path = PathHelper.get_screenshot_path(request.node.name)
-            page_obj.screenshot(path=screenshot_path, full_page=True)
-            _get_allure_helper().attach_screenshot(screenshot_path, name="失败截图")
-            logger.info(f"失败截图已保存: {screenshot_path}")
-        except Exception as e:
-            logger.error(f"保存失败截图时出错: {e}")
+    try:
+        screenshot_path = PathHelper.get_screenshot_path(request.node.name)
+        page_obj.screenshot(path=screenshot_path, full_page=True)
+        setattr(request.node, "screenshot_path", screenshot_path)
+        print(f"[DEBUG] 测试截图已保存: {screenshot_path}")
+    except Exception as e:
+        print(f"[DEBUG] 保存测试截图时出错: {e}")
 
     page_obj.close()
+
+
+@allure.step("附加测试附件")
+def _attach_test_artifacts(item: Any) -> None:
+    """
+    附加测试附件到 Allure 报告
+    """
+    try:
+        test_name = getattr(item, "test_name", item.nodeid.split("::")[-1].replace("/", "_").replace("\\", "_"))
+        print(f"[DEBUG] 开始附加附件到 Allure 报告，测试名称: {test_name}")
+    except Exception as e:
+        test_name = "unknown_test"
+        print(f"[DEBUG] 获取测试名称时出错: {e}")
     
-    # 如果启用了录屏，重命名视频文件并附加到 Allure 报告
-    if settings.video_enabled and hasattr(page_obj, 'video') and page_obj.video:
-        try:
-            original_video_path = page_obj.video.path()
-            if original_video_path and os.path.exists(original_video_path):
-                # 重命名视频文件为更友好的名称
-                video_dir = os.path.dirname(original_video_path)
-                new_video_name = f"{request.node.name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.webm"
-                new_video_path = os.path.join(video_dir, new_video_name)
+    # 1. 附加截图
+    try:
+        screenshot_path = getattr(item, "screenshot_path", None)
+        print(f"[DEBUG] 截图路径: {screenshot_path}")
+        if screenshot_path and os.path.exists(screenshot_path):
+            print(f"[DEBUG] 截图文件存在，大小: {os.path.getsize(screenshot_path)} bytes")
+            allure.attach.file(
+                screenshot_path,
+                name=f"{test_name}_screenshot",
+                attachment_type=allure.attachment_type.PNG
+            )
+            print(f"[DEBUG] 截图已附加到 Allure 报告: {screenshot_path}")
+        else:
+            print(f"[DEBUG] 截图路径不存在或为空: {screenshot_path}")
+    except Exception as e:
+        print(f"[DEBUG] 附加截图到 Allure 报告时出错: {e}")
+    
+    # 2. 附加视频
+    try:
+        from config.settings import Settings
+        settings = Settings()
+        print(f"[DEBUG] 视频功能是否启用: {settings.video_enabled}")
+        if settings.video_enabled:
+            video_dir = getattr(item, "video_dir", None)
+            print(f"[DEBUG] 视频目录: {video_dir}")
+            if video_dir and os.path.exists(video_dir):
+                print(f"[DEBUG] 视频目录存在")
+                import time
+                time.sleep(1)
                 
-                # 使用安全重命名（带重试）
-                if PathHelper.safe_rename(str(original_video_path), new_video_path):
-                    # 附加到 Allure 报告
-                    _get_allure_helper().attach_video(new_video_path, name=f"测试视频-{request.node.name}")
-                    logger.info(f"测试视频已保存: {new_video_path}")
-        except Exception as e:
-            logger.error(f"保存测试视频时出错: {e}")
+                video_files = [f for f in os.listdir(video_dir) if f.endswith('.webm')]
+                print(f"[DEBUG] 视频文件数量: {len(video_files)}")
+                if video_files:
+                    for video_file in video_files:
+                        video_path = os.path.join(video_dir, video_file)
+                        print(f"[DEBUG] 视频文件路径: {video_path}")
+                        if os.path.exists(video_path) and os.path.getsize(video_path) > 0:
+                            print(f"[DEBUG] 视频文件存在，大小: {os.path.getsize(video_path)} bytes")
+                            allure.attach.file(
+                                video_path,
+                                name=f"{test_name}_video",
+                                attachment_type=allure.attachment_type.WEBM
+                            )
+                            print(f"[DEBUG] 视频文件已附加到 Allure 报告: {video_path}")
+                            break
+                        else:
+                            print(f"[DEBUG] 视频文件不存在或为空: {video_path}")
+                else:
+                    print(f"[DEBUG] 视频目录中没有视频文件: {video_dir}")
+            else:
+                print(f"[DEBUG] 视频目录不存在: {video_dir}")
+        else:
+            print("[DEBUG] 视频功能未启用")
+    except Exception as e:
+        print(f"[DEBUG] 附加视频文件到 Allure 报告时出错: {e}")
+    
+    print("[DEBUG] 附件附加完成")
+
+
+@pytest.hookimpl(tryfirst=True, hookwrapper=True)
+def pytest_runtest_teardown(item: Any, nextitem: Any) -> None:
+    """
+    Allure官方推荐的最佳实践：在teardown的yield之后附加视频
+    确保所有fixture清理完成后再附加视频
+    """
+    yield
+    
+    # 附加测试附件
+    _attach_test_artifacts(item)
 
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
 def pytest_runtest_makereport(item: Any, call: Any) -> Any:
+    """
+    Allure官方推荐的最佳实践：在call阶段之后统一附加截图和视频
+    确保所有附件都在同一阶段，不会分散在不同位置
+    """
     outcome = yield
     rep = outcome.get_result()
     setattr(item, f"rep_{rep.when}", rep)
     
-    # 记录测试结果到报告生成器
     if rep.when == "call":
-        logger.info(f"收集测试结果: {item.nodeid} - {rep.outcome}")
-        report_gen = _get_report_generator()
-        error_msg = str(rep.longrepr) if rep.failed else None
-        duration = rep.duration if rep.duration else 0.0
-        report_gen.add_result(
-            nodeid=item.nodeid,
-            outcome=rep.outcome,
-            duration=duration,
-            error_msg=error_msg
-        )
-        logger.info(f"测试结果已添加到报告生成器")
+        print(f"[DEBUG] 收集测试结果: {item.nodeid} - {rep.outcome}")
+        
+        # 记录测试结果到报告生成器
+        try:
+            report_gen = _get_report_generator()
+            error_msg = str(rep.longrepr) if rep.failed else None
+            duration = rep.duration if rep.duration else 0.0
+            report_gen.add_result(
+                nodeid=item.nodeid,
+                outcome=rep.outcome,
+                duration=duration,
+                error_msg=error_msg
+            )
+            print(f"[DEBUG] 测试结果已添加到报告生成器")
+        except Exception as e:
+            print(f"[DEBUG] 添加测试结果到报告生成器时出错: {e}")
 
 
 @pytest.fixture(autouse=True)
 def allure_step(request: Any) -> Generator[None, None, None]:
+    start_time = datetime.now()
+    setattr(request.node, "start_time", start_time)
+    
     with allure.step(f"开始执行测试: {request.node.name}"):
         yield
     with allure.step(f"结束执行测试: {request.node.name}"):
         pass
 
 
-# ==================== 测试数据清理机制 ====================
-
 @pytest.fixture(scope="function")
 def test_data_cleanup(request: Any) -> Generator[Dict[str, Any], None, None]:
-    """
-    测试数据清理 fixture
-    
-    使用示例:
-        def test_example(page, test_data_cleanup):
-            # 在 test_data_cleanup 字典中存储需要清理的数据
-            test_data_cleanup['user_id'] = created_user_id
-            test_data_cleanup['cleanup_func'] = delete_user
-            # 测试代码...
-    """
     cleanup_data: Dict[str, Any] = {
-        'items': [],  # 存储需要清理的数据项
-        'cleanup_funcs': []  # 存储清理函数
+        'items': [],
+        'cleanup_funcs': []
     }
     
     yield cleanup_data
     
-    # 测试结束后执行清理
     logger.info(f"开始清理测试数据: {request.node.name}")
     
-    # 执行注册的清理函数
     for cleanup_func in cleanup_data.get('cleanup_funcs', []):
         try:
             cleanup_func()
@@ -295,19 +462,9 @@ def test_data_cleanup(request: Any) -> Generator[Dict[str, Any], None, None]:
 
 @pytest.fixture(scope="function")
 def setup_teardown(request: Any) -> Generator[Callable[..., None], None, None]:
-    """
-    通用 setup/teardown fixture
-    
-    使用示例:
-        def test_example(page, setup_teardown):
-            # 注册 setup 和 teardown
-            setup_teardown(lambda: print("setup"), lambda: print("teardown"))
-            # 测试代码...
-    """
     teardown_funcs: List[Callable[..., None]] = []
     
     def register_setup_teardown(setup_func: Optional[Callable[..., None]] = None, teardown_func: Optional[Callable[..., None]] = None) -> None:
-        """注册 setup 和 teardown 函数"""
         if setup_func:
             try:
                 setup_func()
@@ -321,7 +478,6 @@ def setup_teardown(request: Any) -> Generator[Callable[..., None], None, None]:
     
     yield register_setup_teardown
     
-    # 执行 teardown
     for teardown_func in reversed(teardown_funcs):
         try:
             teardown_func()
@@ -330,88 +486,28 @@ def setup_teardown(request: Any) -> Generator[Callable[..., None], None, None]:
             logger.error(f"Teardown 执行失败: {e}")
 
 
-# ==================== 数据库测试 Fixtures ====================
-
 @pytest.fixture(scope="session")
 def db_manager() -> Generator[Any, None, None]:
-    """
-    数据库管理器 fixture
-    
-    使用示例:
-        def test_with_db(db_manager):
-            # 执行 SQL
-            result = db_manager.execute("SELECT * FROM users WHERE id = :id", {"id": 1})
-            # 使用结果...
-    """
     manager = _get_db_manager()
     yield manager
 
 
 @pytest.fixture(scope="function")
 def db_session(db_manager: Any) -> Generator[Any, None, None]:
-    """
-    数据库会话 fixture（自动事务回滚）
-    
-    使用示例:
-        def test_with_transaction(db_session):
-            # 插入数据
-            db_session.execute("INSERT INTO users (name) VALUES (:name)", {"name": "test"})
-            # 查询数据
-            result = db_session.execute("SELECT * FROM users WHERE name = :name", {"name": "test"})
-            # 测试结束后自动回滚
-    """
     with db_manager.get_session() as session:
         yield session
-        # 测试结束后自动回滚
         session.rollback()
 
 
 @pytest.fixture(scope="function")
 def test_data_manager(db_manager: Any) -> Generator[Any, None, None]:
-    """
-    测试数据管理器 fixture
-    
-    使用示例:
-        def test_with_data(test_data_manager):
-            # 创建测试数据
-            builder = test_data_manager.get_builder()
-            user_id = builder.with_defaults("users").with_field("email", "test@example.com").insert("users")
-            
-            # 跟踪记录用于清理
-            test_data_manager.track_record("users", user_id)
-            
-            # 测试代码...
-            
-        # 测试结束后自动清理
-    """
     manager = _get_test_data_manager()
     yield manager
-    # 测试结束后自动清理
     manager.cleanup()
 
 
-# ==================== Mock 服务器 Fixture ====================
-
 @pytest.fixture(scope="function")
 def mock_server() -> Generator[Any, None, None]:
-    """
-    Mock 服务器 fixture
-    
-    使用示例:
-        def test_with_mock(mock_server):
-            # 添加端点
-            mock_server.add_endpoint(
-                method='GET',
-                path='/api/users',
-                status_code=200,
-                body={'users': [{'id': 1, 'name': 'test'}]}
-            )
-            
-            # 获取服务器 URL
-            base_url = mock_server.get_base_url()
-            
-            # 测试代码...
-    """
     from core.utils.mock_server import MockServer
     server = MockServer()
     server.start()

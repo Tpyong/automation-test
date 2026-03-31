@@ -109,7 +109,7 @@ pipeline {
                 always {
                     junit 'reports/pytest-report.html'
                     archiveArtifacts(
-                        artifacts: 'reports/allure-results/, reports/test-summary.html, reports/test-summary.json, screenshots/',
+                        artifacts: 'reports/allure-results/, reports/test-summary.html, reports/test-summary.json, reports/screenshots/, reports/videos/',
                         allowEmptyArchive: true,
                         fingerprint: true
                     )

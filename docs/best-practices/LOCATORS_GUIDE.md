@@ -462,5 +462,5 @@ A:
 
 - `locators/login_page_semantic.yaml` - 语义化定位器示例
 - `core/pages/login_page_semantic.py` - 使用语义化定位的页面对象
-- `tests/sample_tests/test_login_example.py` - 测试用例示例
+- `tests/e2e/test_todomvc.py` - 测试用例示例
 

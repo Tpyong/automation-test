@@ -64,13 +64,13 @@ pytest -v
 **Allure报告**：
 ```bash
 # 运行测试并收集Allure结果数据
-pytest --alluredir=allure-results
+pytest --alluredir=reports/allure-results
 
 # 生成Allure报告
-allure generate allure-results -o allure-report
+allure generate reports/allure-results -o reports/allure-report --clean
 
 # 在浏览器中查看报告
-allure serve allure-report
+allure open reports/allure-report
 ```
 
 **自定义HTML报告**：
@@ -97,7 +97,7 @@ allure serve allure-report
 - ✅ **Allure 报告** - 美观的测试报告
 - ✅ **测试覆盖率** - 代码覆盖率统计
 - ✅ **CI/CD 模板** - GitHub/GitLab/Jenkins
-- ✅ **录屏功能** - 测试过程录屏
+- ✅ **录屏功能** - 企业级测试录制策略，采用Allure官方推荐的最佳实践，在测试teardown阶段统一附加截图和视频，确保附件一致性和文件完整性
 - ✅ **并行测试** - 支持 pytest-xdist 并行执行
 - ✅ **测试结果历史** - 自动存储测试历史数据
 - ✅ **测试趋势分析** - 生成测试趋势报告

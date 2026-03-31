@@ -52,7 +52,7 @@
 1. **安装依赖**：`pip install -r requirements.lock`
 2. **安装浏览器**：`playwright install`
 3. **运行测试**：`pytest tests/sample_tests/test_sample.py -v`
-4. **查看报告**：`allure serve allure-results`
+4. **查看报告**：`allure open reports/allure-report`
 
 ## 联系与支持
 

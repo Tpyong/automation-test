@@ -531,8 +531,13 @@ def test_with_cleanup(page, test_data_cleanup):
 ## 录屏功能
 
 1. 修改 `.env` 文件，设置 `VIDEO_ENABLED=true`
-2. 运行测试，录屏自动保存到 `videos/YYYYMMDD/` 目录
-3. 视频文件格式：`{测试名称}_{日期}_{时间}.webm`
+2. 运行测试，录屏自动保存到 `reports/videos/YYYYMMDD/` 目录
+3. 视频文件格式：`{测试名称}_{时间戳}.webm`（目录已按日期分类）
+4. 智能录屏控制：仅为使用浏览器 fixture 的测试启用录屏
+5. 空视频文件过滤：自动检测并删除 0B 的视频文件
+6. 视频文件与测试用例关联：确保视频正确附加到对应的测试用例
+7. 集成测试优化：使用 mock_server 的集成测试不会生成视频文件
+8. 自动附加到 Allure 报告：视频文件会自动附加到 Allure 测试报告中
 
 ## 并行测试
 

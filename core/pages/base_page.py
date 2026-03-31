@@ -1,12 +1,10 @@
-import os
-from datetime import datetime
-
 import allure
 from playwright.sync_api import Locator, Page
 from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 
 from core.utils.allure_helper import AllureHelper
 from core.utils.logger import get_logger
+from core.utils.path_helper import PathHelper
 
 logger = get_logger(__name__)
 
@@ -76,8 +74,8 @@ class BasePage:
 
     @allure.step("截图: {name}")
     def screenshot(self, name: str = "screenshot") -> None:
-        screenshot_path = os.path.join("screenshots", f"{name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.png")
-        os.makedirs(os.path.dirname(screenshot_path), exist_ok=True)
+        # 使用统一的命名格式：{name}_{timestamp}.png（目录已经按日期分类）
+        screenshot_path = PathHelper.get_screenshot_path(name)
         self.page.screenshot(path=screenshot_path, full_page=True)
         logger.info(f"截图已保存: {screenshot_path}")
         AllureHelper.attach_screenshot(screenshot_path, name=name)

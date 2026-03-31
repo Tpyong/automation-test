@@ -76,6 +76,9 @@ Thumbs.db
 # Log files
 *.log
 logs/
+test_full_log.txt
+test_log.txt
+test_video_log.txt
 
 # Build files
 build/
@@ -96,3 +99,10 @@ env/
 
 # Twine
 .pypirc
+
+# Secrets
+.secrets.key
+.secrets.salt
+
+# Temporary test files
+test_*.py

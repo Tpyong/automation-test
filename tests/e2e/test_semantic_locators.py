@@ -65,8 +65,8 @@ class TestSemanticLocators:
         # 创建使用语义化定位的页面对象
         login_page = LoginPageSemantic(page)
 
-        with allure.step("导航到登录页面"):
-            login_page.navigate("https://demo.playwright.dev/todomvc")
+        with allure.step("验证页面对象初始化成功"):
+            Assertions.assert_not_none(login_page.locators, "定位器应该成功加载")
 
         with allure.step("查看定位器配置信息"):
             # 查看各个元素的定位器配置
@@ -76,8 +76,9 @@ class TestSemanticLocators:
             button_config = login_page.get_locator_info("login_button")
             allure.attach(str(button_config), "登录按钮定位器配置")
 
-        with allure.step("验证页面对象初始化成功"):
-            Assertions.assert_not_none(login_page.locators, "定位器应该成功加载")
+        with allure.step("验证定位器配置正确"):
+            Assertions.assert_not_none(username_config, "用户名输入框定位器配置应该存在")
+            Assertions.assert_not_none(button_config, "登录按钮定位器配置应该存在")
 
     @pytest.mark.ui
     @allure.story("定位器优先级")

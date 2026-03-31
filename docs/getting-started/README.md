@@ -78,13 +78,13 @@ pytest tests/sample_tests/test_sample.py -v
 **Allure报告**：
 ```bash
 # 运行测试并收集Allure结果数据
-pytest --alluredir=allure-results
+pytest --alluredir=reports/allure-results
 
 # 生成Allure报告
-allure generate allure-results -o allure-report
+allure generate reports/allure-results -o reports/allure-report --clean
 
 # 在浏览器中查看报告
-allure serve allure-report
+allure open reports/allure-report
 ```
 
 **自定义HTML报告**：

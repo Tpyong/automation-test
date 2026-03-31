@@ -156,7 +156,11 @@ class BrowserPool:
                     if browser.is_connected():
                         browser.close()
                 except Exception as e:
-                    logger.error(f"关闭浏览器实例失败: {e}")
+                    # 忽略事件循环已关闭的错误
+                    if "Event loop is closed" not in str(e):
+                        logger.error(f"关闭浏览器实例失败: {e}")
+                    else:
+                        logger.debug("浏览器实例已关闭，跳过清理")
 
             self._pool.clear()
             self._in_use.clear()
