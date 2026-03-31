@@ -47,7 +47,7 @@ class DataCache:
         """
         try:
             with open(file_path, "rb") as f:
-                file_hash = hashlib.md5(f.read()).hexdigest()
+                file_hash = hashlib.md5(f.read(), usedforsecurity=False).hexdigest()
             return file_hash
         except Exception as e:
             logger.error(f"计算文件哈希失败: {e}")
@@ -63,7 +63,7 @@ class DataCache:
         Returns:
             缓存键
         """
-        return hashlib.md5(file_path.encode()).hexdigest()
+        return hashlib.md5(file_path.encode(), usedforsecurity=False).hexdigest()
 
     def _get_cache_file_path(self, cache_key: str) -> Path:
         """

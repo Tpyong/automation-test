@@ -61,7 +61,11 @@ class TestDataManager:
 
     def delete_record(self, table: str, record_id: Any, id_column: str = "id") -> None:
         """删除记录"""
-        sql = f"DELETE FROM {table} WHERE {id_column} = :id"
+        # 验证表名和列名，防止SQL注入
+        if not table.isalnum() or not id_column.isalnum():
+            raise ValueError("表名和列名只能包含字母和数字")
+        # 使用方括号包围表名和列名，增强安全性
+        sql = f"DELETE FROM [{table}] WHERE [{id_column}] = :id"  # nosec B608
         self.db_manager.execute(sql, {"id": record_id})
 
     def load_data_from_file(self, filename: str) -> Dict[str, Any]:
@@ -103,7 +107,11 @@ class TestDataManager:
         snapshot_data = {}
 
         for table in tables:
-            sql = f"SELECT * FROM {table}"
+            # 验证表名，防止SQL注入
+            if not table.isalnum():
+                raise ValueError("表名只能包含字母和数字")
+            # 使用方括号包围表名，增强安全性
+            sql = f"SELECT * FROM [{table}]"  # nosec B608
             records = self.db_manager.execute(sql)
             snapshot_data[table] = records
 
@@ -125,15 +133,23 @@ class TestDataManager:
             snapshot_data = json.load(f)
 
         for table, records in snapshot_data.items():
-            # 清空表
-            self.db_manager.execute(f"TRUNCATE TABLE {table}")
+            # 验证表名，防止SQL注入
+            if not table.isalnum():
+                raise ValueError("表名只能包含字母和数字")
+            # 清空表，使用方括号包围表名
+            self.db_manager.execute(f"TRUNCATE TABLE [{table}]")
 
             # 恢复数据
             if records:
                 columns = list(records[0].keys())
-                column_str = ", ".join(columns)
+                # 验证列名，防止SQL注入
+                for col in columns:
+                    if not col.isalnum():
+                        raise ValueError("列名只能包含字母和数字")
+                column_str = ", ".join([f"[{col}]" for col in columns])
                 placeholders = ", ".join([f":{col}" for col in columns])
-                sql = f"INSERT INTO {table} ({column_str}) VALUES ({placeholders})"
+                # 使用方括号包围表名和列名
+                sql = f"INSERT INTO [{table}] ({column_str}) VALUES ({placeholders})"  # nosec B608
 
                 self.db_manager.execute_many(sql, records)
 
@@ -167,11 +183,20 @@ class TestDataBuilder:
         if not self.data:
             raise ValueError("没有数据可插入")
 
+        # 验证表名，防止SQL注入
+        if not table.isalnum():
+            raise ValueError("表名只能包含字母和数字")
+
         columns = list(self.data.keys())
-        column_str = ", ".join(columns)
+        # 验证列名，防止SQL注入
+        for col in columns:
+            if not col.isalnum():
+                raise ValueError("列名只能包含字母和数字")
+        column_str = ", ".join([f"[{col}]" for col in columns])
         placeholders = ", ".join([f":{col}" for col in columns])
 
-        sql = f"INSERT INTO {table} ({column_str}) VALUES ({placeholders})"
+        # 使用方括号包围表名和列名，增强安全性
+        sql = f"INSERT INTO [{table}] ({column_str}) VALUES ({placeholders})"  # nosec B608
 
         with self.db_manager.get_connection() as conn:
             result = conn.execute(sql, self.data)
