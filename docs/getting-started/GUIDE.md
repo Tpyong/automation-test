@@ -513,7 +513,7 @@ python scripts/secrets_tool.py decrypt .env
 
 配置加载时会自动解密加密值，无需手动处理。
 
-**注意：** 请妥善保管 `.secrets.key` 和 `.secrets.salt` 文件！
+**注意：** 请妥善保管 `config/secrets/.secrets.key` 和 `config/secrets/.secrets.salt` 文件！
 
 ## 测试数据清理
 

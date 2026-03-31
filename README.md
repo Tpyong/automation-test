@@ -166,7 +166,9 @@ allure open reports/allure-report
 ├── Makefile                   # 常用命令快捷方式
 ├── .pre-commit-config.yaml    # 预提交钩子配置
 ├── requirements.in            # 依赖定义文件
-└── requirements.lock          # 锁定版本依赖
+├── requirements.lock          # 锁定版本依赖
+├── logs/                      # 日志文件
+└── scripts/                   # 脚本文件
 ```
 
 ## 常用命令

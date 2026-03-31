@@ -76,9 +76,6 @@ Thumbs.db
 # Log files
 *.log
 logs/
-test_full_log.txt
-test_log.txt
-test_video_log.txt
 
 # Build files
 build/
@@ -101,8 +98,8 @@ env/
 .pypirc
 
 # Secrets
-.secrets.key
-.secrets.salt
+config/secrets/.secrets.key
+config/secrets/.secrets.salt
 
 # Temporary test files
 test_*.py
