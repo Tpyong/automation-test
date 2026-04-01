@@ -17,7 +17,7 @@ class TestSample:
     @allure.story("页面访问测试")
     @allure.severity(allure.severity_level.BLOCKER)
     @allure.title("验证 Playwright 演示页面可以正常访问")
-    def test_playwright_demo_page(self, page, settings):
+    def test_playwright_demo_page(self, page):
         logger.info("开始执行测试: test_playwright_demo_page")
 
         base_page = BasePage(page)
@@ -44,7 +44,7 @@ class TestSample:
     @allure.story("待办事项功能测试")
     @allure.severity(allure.severity_level.CRITICAL)
     @allure.title("验证添加待办事项功能")
-    def test_add_todo_item(self, page, settings):
+    def test_add_todo_item(self, page):
         logger.info("开始执行测试: test_add_todo_item")
 
         base_page = BasePage(page)

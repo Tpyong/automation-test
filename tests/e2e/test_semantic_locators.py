@@ -19,7 +19,7 @@ class TestSemanticLocators:
     @pytest.mark.ui
     @allure.story("SmartLocator 功能")
     @allure.title("测试 SmartLocator 解析定位器配置")
-    def test_smart_locator_parsing(self, page, settings):
+    def test_smart_locator_parsing(self, page):
         """测试 SmartLocator 能否正确解析各种定位器配置"""
 
         # 测试 role 定位
@@ -59,7 +59,7 @@ class TestSemanticLocators:
     @pytest.mark.ui
     @allure.story("SmartPage 功能")
     @allure.title("测试 SmartPage 使用语义化定位器")
-    def test_smart_page_with_semantic_locators(self, page, settings):
+    def test_smart_page_with_semantic_locators(self, page):
         """测试 SmartPage 能否正确使用语义化定位器"""
 
         # 创建使用语义化定位的页面对象
@@ -83,7 +83,7 @@ class TestSemanticLocators:
     @pytest.mark.ui
     @allure.story("定位器优先级")
     @allure.title("测试定位器优先级顺序")
-    def test_locator_priority(self, page, settings):
+    def test_locator_priority(self, page):
         """测试定位器按正确优先级解析"""
 
         # role 应该优先于其他定位方式

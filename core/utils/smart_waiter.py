@@ -52,7 +52,7 @@ class SmartWaiter:
     def calculate_delay(self, attempt: int) -> float:
         """计算延迟时间"""
         delay = self.config.initial_delay  # 默认值
-        
+
         if self.config.strategy == WaitStrategy.FIXED:
             delay = self.config.initial_delay
         elif self.config.strategy == WaitStrategy.LINEAR:
@@ -88,6 +88,9 @@ class SmartWaiter:
         """计算自适应延迟"""
         if not self._attempt_history:
             return self.config.initial_delay
+        
+        # 使用 attempt 参数调整延迟
+        base_delay = self.config.initial_delay * min(attempt, 5) / 5
 
         # 分析历史成功率
         recent_attempts = self._attempt_history[-10:]
@@ -98,13 +101,13 @@ class SmartWaiter:
         # 根据成功率调整延迟
         if success_rate > 0.8:
             # 成功率高，减少等待时间
-            return self.config.initial_delay * 0.5
+            return base_delay * 0.5
         elif success_rate > 0.5:
             # 成功率中等，使用标准延迟
-            return self.config.initial_delay
+            return base_delay
         else:
             # 成功率低，增加等待时间
-            return self.config.initial_delay * 2.0
+            return base_delay * 2.0
 
     def wait(
         self,

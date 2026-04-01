@@ -391,7 +391,9 @@ class APIPerformanceTester:
                 "successful_requests": 0,
                 "failed_requests": results["failed_requests"],
                 "success_rate": 0.0,
-                "errors": results["errors"][:10] if results.get("errors") else [],  # 只保留前 10 个错误
+                "errors": (
+                    results["errors"][:10] if results.get("errors") else []
+                ),  # 只保留前 10 个错误
             }
 
         logger.info(

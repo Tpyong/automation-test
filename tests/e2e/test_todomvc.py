@@ -19,7 +19,7 @@ class TestTodoMVC:
     @allure.story("页面加载")
     @allure.severity(allure.severity_level.BLOCKER)
     @allure.title("TodoMVC 页面加载成功")
-    def test_page_load(self, page, settings):
+    def test_page_load(self, page):
         """测试 TodoMVC 页面加载场景"""
         # 导航到 Playwright 演示页面
         with allure.step("导航到 TodoMVC 演示页面"):
@@ -38,7 +38,7 @@ class TestTodoMVC:
     @allure.story("添加待办事项")
     @allure.severity(allure.severity_level.CRITICAL)
     @allure.title("添加新的待办事项")
-    def test_add_todo(self, page, settings):
+    def test_add_todo(self, page):
         """测试添加待办事项场景"""
         # 导航到 TodoMVC 演示页面
         with allure.step("导航到 TodoMVC 演示页面"):
@@ -59,7 +59,7 @@ class TestTodoMVC:
     @allure.story("标记完成")
     @allure.severity(allure.severity_level.NORMAL)
     @allure.title("标记待办事项为已完成")
-    def test_mark_todo_completed(self, page, settings):
+    def test_mark_todo_completed(self, page):
         """测试标记待办事项为已完成"""
         # 导航到 TodoMVC 演示页面
         with allure.step("导航到 TodoMVC 演示页面"):
@@ -80,7 +80,7 @@ class TestTodoMVC:
     @allure.story("删除待办事项")
     @allure.severity(allure.severity_level.MINOR)
     @allure.title("删除待办事项")
-    def test_delete_todo(self, page, settings):
+    def test_delete_todo(self, page):
         """测试删除待办事项"""
         # 导航到 TodoMVC 演示页面
         with allure.step("导航到 TodoMVC 演示页面"):
@@ -103,7 +103,7 @@ class TestTodoMVC:
     @allure.story("页面元素检查")
     @allure.severity(allure.severity_level.MINOR)
     @allure.title("检查 TodoMVC 页面元素")
-    def test_todo_page_elements(self, page, settings):
+    def test_todo_page_elements(self, page):
         """测试 TodoMVC 页面元素显示"""
         # 导航到 TodoMVC 演示页面
         with allure.step("导航到 TodoMVC 演示页面"):
