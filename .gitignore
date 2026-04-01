@@ -102,4 +102,4 @@ config/secrets/.secrets.key
 config/secrets/.secrets.salt
 
 # Temporary test files
-test_*.py
+# test_*.py
