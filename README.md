@@ -45,6 +45,7 @@ cp config/envs/.env.full .env
 ```
 
 **环境配置文件说明：**
+
 - `config/envs/.env.minimal` - 最小配置（推荐新手使用）
 - `config/envs/.env.standard` - 标准配置
 - `config/envs/.env.full` - 完整配置（包含所有选项）
@@ -62,6 +63,7 @@ pytest -v
 ### 4. 查看报告
 
 **Allure报告**：
+
 ```bash
 # 运行测试并收集Allure结果数据
 pytest --alluredir=reports/allure-results

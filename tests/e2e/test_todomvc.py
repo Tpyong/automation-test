@@ -51,7 +51,9 @@ class TestTodoMVC:
         with allure.step("验证待办事项已添加"):
             todo_item = page.locator(".todo-list li")
             Assertions.assert_true(todo_item.is_visible(), "待办事项应该显示")
-            Assertions.assert_contains(todo_item.text_content(), "测试待办事项", "待办事项文本应该匹配")
+            Assertions.assert_contains(
+                todo_item.text_content(), "测试待办事项", "待办事项文本应该匹配"
+            )
 
     @pytest.mark.ui
     @allure.story("标记完成")

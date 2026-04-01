@@ -73,6 +73,7 @@ class SmartWaiter:
             delay = self._calculate_adaptive_delay(attempt)
 
         else:
+            # 默认为固定延迟
             delay = self.config.initial_delay
 
         # 应用最大延迟限制
@@ -330,7 +331,12 @@ def smart_retry(
                         time.sleep(delay)
 
             logger.error(f"函数 {func.__name__} 达到最大重试次数 {max_attempts}")
-            raise last_exception
+            if last_exception:
+                raise last_exception
+            else:
+                raise Exception(
+                    f"函数 {func.__name__} 达到最大重试次数 {max_attempts}，但没有捕获到异常"
+                )
 
         return wrapper
 

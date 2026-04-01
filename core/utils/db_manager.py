@@ -146,7 +146,7 @@ class DatabaseManager:
         """批量执行 SQL"""
         with self.get_connection() as conn:
             result = conn.execute(sql, params_list)
-            return result.rowcount
+            return int(result.rowcount)
 
     def close(self) -> None:
         """关闭数据库连接池"""

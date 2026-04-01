@@ -84,7 +84,7 @@ class DataMasker:
         if not data:
             return data
 
-        result = {}
+        result: Dict[str, Any] = {}
         sensitive_fields = sensitive_fields or []
 
         for key, value in data.items():
@@ -107,7 +107,7 @@ class DataMasker:
         if not data:
             return data
 
-        result = []
+        result: List[Any] = []
         for item in data:
             if isinstance(item, str):
                 result.append(self.mask_string(item))

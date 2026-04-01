@@ -277,7 +277,7 @@ class AuditLogger:
 
     def generate_audit_report(self) -> Dict[str, Any]:
         """生成审计报告"""
-        report = {
+        report: Dict[str, Any] = {
             "session_id": self._current_session,
             "generated_at": datetime.now().isoformat(),
             "summary": {

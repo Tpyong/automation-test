@@ -30,7 +30,7 @@ class AlertConfig:
     smtp_user: str = ""
     smtp_password: str = ""
     email_from: str = ""
-    email_to: List[str] = None
+    email_to: List[str] = []
 
     # 钉钉配置
     dingtalk_webhook: str = ""
@@ -42,10 +42,6 @@ class AlertConfig:
     # 告警阈值
     failure_threshold: int = 1  # 失败测试数阈值
     consecutive_failures: int = 1  # 连续失败次数阈值
-
-    def __post_init__(self):
-        if self.email_to is None:
-            self.email_to = []
 
 
 class AlertManager:
@@ -268,7 +264,10 @@ class AlertManager:
 """
 
         for test in failed_tests[:5]:  # 只显示前5个
-            content += f"- {test.get('name', 'Unknown')}\n"
+            if test:
+                content += f"- {test.get('name', 'Unknown')}\n"
+            else:
+                content += "- Unknown test\n"
 
         if len(failed_tests) > 5:
             content += f"- ... 还有 {len(failed_tests) - 5} 个失败的测试\n"
@@ -310,7 +309,10 @@ class AlertManager:
 """
 
         for test in failed_tests[:5]:
-            content += f"- {test.get('name', 'Unknown')}\n"
+            if test:
+                content += f"- {test.get('name', 'Unknown')}\n"
+            else:
+                content += "- Unknown test\n"
 
         # 发送请求
         payload = {"msgtype": "text", "text": {"content": content}}

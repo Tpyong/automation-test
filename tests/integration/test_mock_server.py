@@ -115,7 +115,9 @@ class TestMockServer:
         """测试 Mock 服务器的延迟响应"""
 
         with allure.step("添加延迟端点"):
-            mock_server.add_endpoint(method="GET", path="/api/slow", status_code=200, body={"status": "ok"}, delay=0.5)
+            mock_server.add_endpoint(
+                method="GET", path="/api/slow", status_code=200, body={"status": "ok"}, delay=0.5
+            )
             base_url = mock_server.get_base_url()
 
         with allure.step("发送请求并验证延迟"):
@@ -135,13 +137,18 @@ class TestMockServer:
         """测试 Mock 服务器记录请求"""
 
         with allure.step("添加端点"):
-            endpoint = mock_server.add_endpoint(method="POST", path="/api/echo", status_code=200, body={"echo": True})
+            endpoint = mock_server.add_endpoint(
+                method="POST", path="/api/echo", status_code=200, body={"echo": True}
+            )
             base_url = mock_server.get_base_url()
 
         with allure.step("发送带参数的请求"):
             test_data = {"message": "Hello, Mock!"}
             response = requests.post(
-                f"{base_url}/api/echo", json=test_data, headers={"X-Custom-Header": "test-value"}, timeout=10
+                f"{base_url}/api/echo",
+                json=test_data,
+                headers={"X-Custom-Header": "test-value"},
+                timeout=10,
             )
             assert response.status_code == 200
 
