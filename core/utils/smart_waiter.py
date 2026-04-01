@@ -51,30 +51,22 @@ class SmartWaiter:
 
     def calculate_delay(self, attempt: int) -> float:
         """计算延迟时间"""
+        delay = self.config.initial_delay  # 默认值
+        
         if self.config.strategy == WaitStrategy.FIXED:
             delay = self.config.initial_delay
-
         elif self.config.strategy == WaitStrategy.LINEAR:
             delay = self.config.initial_delay * attempt
-
         elif self.config.strategy == WaitStrategy.EXPONENTIAL:
             delay = self.config.initial_delay * (self.config.multiplier ** (attempt - 1))
-
         elif self.config.strategy == WaitStrategy.POLYNOMIAL:
             delay = self.config.initial_delay * (attempt**self.config.multiplier)
-
         elif self.config.strategy == WaitStrategy.FIBONACCI:
             delay = self.config.initial_delay * self._get_fibonacci(attempt)
-
         elif self.config.strategy == WaitStrategy.RANDOM:
             delay = random.uniform(self.config.initial_delay, self.config.max_delay)
-
         elif self.config.strategy == WaitStrategy.ADAPTIVE:
             delay = self._calculate_adaptive_delay(attempt)
-
-        else:
-            # 默认为固定延迟
-            delay = self.config.initial_delay
 
         # 应用最大延迟限制
         delay = min(delay, self.config.max_delay)

@@ -252,7 +252,7 @@ class ComplianceChecker:
 
     def generate_compliance_report(self) -> Dict[str, Any]:
         """生成合规报告"""
-        report = {
+        report: Dict[str, Any] = {
             "generated_at": datetime.now().isoformat(),
             "summary": {
                 "total_rules": len(self.rules),
@@ -264,6 +264,11 @@ class ComplianceChecker:
             "violations": [],
             "recommendations": [],
         }
+        # 为嵌套字典添加显式类型注解
+        report["summary"]["by_standard"] = {}
+        report["summary"]["by_severity"] = {}
+        report["violations"] = []
+        report["recommendations"] = []
 
         # 按标准统计
         for standard in ComplianceStandard:

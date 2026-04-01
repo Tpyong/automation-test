@@ -161,7 +161,7 @@ class APIContractTester:
         errors = []
 
         # 验证状态码
-        if str(result.status_code) not in contract.status_codes:
+        if result.status_code not in contract.status_codes:
             errors.append(f"状态码 {result.status_code} 不在预期范围内: {contract.status_codes}")
 
         # 验证响应体结构（简化版）
@@ -271,6 +271,7 @@ class APIPerformanceTester:
                     response_times.append(result)
 
         # 计算统计信息
+        results: Dict[str, Any] = {}
         if response_times:
             response_times.sort()
             total_requests = len(response_times)
@@ -319,7 +320,7 @@ class APIPerformanceTester:
 
         url = f"{self.base_url}{path}"
         stop_event = threading.Event()
-        results = {
+        results: Dict[str, Any] = {
             "total_requests": 0,
             "successful_requests": 0,
             "failed_requests": 0,
@@ -336,16 +337,16 @@ class APIPerformanceTester:
                     response_time = time.time() - start_time
 
                     with lock:
-                        results["total_requests"] += 1
+                        results["total_requests"] = int(results["total_requests"]) + 1
                         if response.status_code == 200:
-                            results["successful_requests"] += 1
+                            results["successful_requests"] = int(results["successful_requests"]) + 1
                             results["response_times"].append(response_time)
                         else:
-                            results["failed_requests"] += 1
+                            results["failed_requests"] = int(results["failed_requests"]) + 1
                 except Exception as e:
                     with lock:
-                        results["total_requests"] += 1
-                        results["failed_requests"] += 1
+                        results["total_requests"] = int(results["total_requests"]) + 1
+                        results["failed_requests"] = int(results["failed_requests"]) + 1
                         results["errors"].append(str(e))
 
         logger.info(f"开始压力测试: {method} {path}, 持续时间: {duration}s, 目标 RPS: {target_rps}")
@@ -390,7 +391,7 @@ class APIPerformanceTester:
                 "successful_requests": 0,
                 "failed_requests": results["failed_requests"],
                 "success_rate": 0.0,
-                "errors": results["errors"][:10],  # 只保留前 10 个错误
+                "errors": results["errors"][:10] if results.get("errors") else [],  # 只保留前 10 个错误
             }
 
         logger.info(

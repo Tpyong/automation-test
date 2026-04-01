@@ -268,13 +268,13 @@ def settings() -> Settings:
 
 
 @pytest.fixture(scope="session")
-def playwright() -> Generator[Playwright, None, None]:
+def playwright() -> Generator[Playwright, Any, None]:
     with sync_playwright() as p:
         yield p
 
 
 @pytest.fixture(scope="session")
-def browser(playwright: Playwright, settings: Settings) -> Generator[Browser, None, None]:
+def browser(playwright: Playwright, settings: Settings) -> Generator[Browser, Any, None]:
     """使用浏览器实例池的浏览器fixture"""
     browser_type = settings.browser_type
     headless = settings.headless
@@ -344,7 +344,7 @@ def browser_context_args(request: Any, settings: Settings) -> Dict[str, Any]:
 
 
 @pytest.fixture(scope="function")
-def page(context: BrowserContext, request: Any, settings: Settings) -> Generator[Page, None, None]:
+def page(context: BrowserContext, request: Any, settings: Settings) -> Generator[Page, Any, None]:
     page_obj = context.new_page()
     page_obj.set_default_timeout(30000)
 
@@ -439,7 +439,7 @@ def _attach_test_artifacts(item: Any) -> None:
 
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
-def pytest_runtest_teardown(item: Any, nextitem: Any) -> None:
+def pytest_runtest_teardown(item: Any, nextitem: Any) -> Generator[None, Any, None]:
     """
     Allure官方推荐的最佳实践：在teardown的yield之后附加视频
     确保所有fixture清理完成后再附加视频
@@ -451,7 +451,7 @@ def pytest_runtest_teardown(item: Any, nextitem: Any) -> None:
 
 
 @pytest.hookimpl(tryfirst=True, hookwrapper=True)
-def pytest_runtest_makereport(item: Any, call: Any) -> Any:
+def pytest_runtest_makereport(item: Any, call: Any) -> Generator[None, Any, Any]:
     """
     Allure官方推荐的最佳实践：在call阶段之后统一附加截图和视频
     确保所有附件都在同一阶段，不会分散在不同位置
@@ -477,7 +477,7 @@ def pytest_runtest_makereport(item: Any, call: Any) -> Any:
 
 
 @pytest.fixture(autouse=True)
-def allure_step(request: Any) -> Generator[None, None, None]:
+def allure_step(request: Any) -> Generator[None, Any, None]:
     start_time = datetime.now()
     setattr(request.node, "start_time", start_time)
 
@@ -488,7 +488,7 @@ def allure_step(request: Any) -> Generator[None, None, None]:
 
 
 @pytest.fixture(scope="function")
-def test_data_cleanup(request: Any) -> Generator[Dict[str, Any], None, None]:
+def test_data_cleanup(request: Any) -> Generator[Dict[str, Any], Any, None]:
     cleanup_data: Dict[str, Any] = {"items": [], "cleanup_funcs": []}
 
     yield cleanup_data
@@ -506,7 +506,7 @@ def test_data_cleanup(request: Any) -> Generator[Dict[str, Any], None, None]:
 
 
 @pytest.fixture(scope="function")
-def setup_teardown(request: Any) -> Generator[Callable[..., None], None, None]:
+def setup_teardown(request: Any) -> Generator[Callable[..., None], Any, None]:
     teardown_funcs: List[Callable[..., None]] = []
 
     def register_setup_teardown(
@@ -535,27 +535,27 @@ def setup_teardown(request: Any) -> Generator[Callable[..., None], None, None]:
 
 
 @pytest.fixture(scope="session")
-def db_manager() -> Generator[Any, None, None]:
+def db_manager() -> Generator[Any, Any, None]:
     manager = _get_db_manager()
     yield manager
 
 
 @pytest.fixture(scope="function")
-def db_session(db_manager: Any) -> Generator[Any, None, None]:
+def db_session(db_manager: Any) -> Generator[Any, Any, None]:
     with db_manager.get_session() as session:
         yield session
         session.rollback()
 
 
 @pytest.fixture(scope="function")
-def test_data_manager(db_manager: Any) -> Generator[Any, None, None]:
+def test_data_manager(db_manager: Any) -> Generator[Any, Any, None]:
     manager = _get_test_data_manager()
     yield manager
     manager.cleanup()
 
 
 @pytest.fixture(scope="function")
-def mock_server() -> Generator[Any, None, None]:
+def mock_server() -> Generator[Any, Any, None]:
     from core.utils.mock_server import MockServer
 
     server = MockServer()
