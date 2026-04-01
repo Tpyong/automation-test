@@ -95,10 +95,10 @@ def pytest_configure(config: Any) -> None:
     allure_results_dir = "reports/allure-results"
     if os.path.exists(allure_results_dir):
         shutil.rmtree(allure_results_dir)
-        logger.info(f"已清理Allure报告目录: {allure_results_dir}")
+        logger.info("已清理Allure报告目录: %s", allure_results_dir)
     # 重新创建目录
     os.makedirs(allure_results_dir, exist_ok=True)
-    logger.info(f"已创建Allure报告目录: {allure_results_dir}")
+    logger.info("已创建Allure报告目录: %s", allure_results_dir)
 
 
 def pytest_sessionstart(session: Any) -> None:
@@ -110,7 +110,7 @@ def pytest_sessionstart(session: Any) -> None:
 
     settings = Settings()
     config_summary = settings.get_config_summary()
-    logger.info(f"配置摘要: {config_summary}")
+    logger.info("配置摘要: %s", config_summary)
 
     report_gen = _get_report_generator()
     report_gen.start_session()

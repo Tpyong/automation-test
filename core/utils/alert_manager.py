@@ -93,7 +93,7 @@ class AlertManager:
             try:
                 self._send_email_alert(title, message, failed_tests, session_metrics)
             except Exception as e:
-                logger.error(f"发送邮件告警失败: {e}")
+                logger.error("发送邮件告警失败: %s", e)
                 success = False
 
         # 发送钉钉告警
@@ -101,7 +101,7 @@ class AlertManager:
             try:
                 self._send_dingtalk_alert(title, message, failed_tests, session_metrics)
             except Exception as e:
-                logger.error(f"发送钉钉告警失败: {e}")
+                logger.error("发送钉钉告警失败: %s", e)
                 success = False
 
         # 发送企业微信告警
@@ -109,7 +109,7 @@ class AlertManager:
             try:
                 self._send_wechat_alert(title, message, failed_tests, session_metrics)
             except Exception as e:
-                logger.error(f"发送企业微信告警失败: {e}")
+                logger.error("发送企业微信告警失败: %s", e)
                 success = False
 
         # 记录告警历史
@@ -155,7 +155,7 @@ class AlertManager:
             server.login(self.config.smtp_user, self.config.smtp_password)
             server.send_message(msg)
 
-        logger.info(f"邮件告警已发送: {self.config.email_to}")
+        logger.info("邮件告警已发送: %s", self.config.email_to)
 
     def _build_email_content(
         self,
@@ -353,7 +353,7 @@ class AlertManager:
         with open(output_path, "w", encoding="utf-8") as f:
             json.dump(self.alert_history, f, ensure_ascii=False, indent=2)
 
-        logger.info(f"告警历史已保存: {output_path}")
+        logger.info("告警历史已保存: %s", output_path)
         return str(output_path)
 
 

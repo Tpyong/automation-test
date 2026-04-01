@@ -132,23 +132,24 @@ class SmartWaiter:
         while attempt < self.config.max_attempts:
             # 检查超时
             if timeout and (time.time() - start_time) > timeout:
-                logger.warning(f"等待超时: {error_message or '条件未满足'}")
+                logger.warning("等待超时: %s", error_message or '条件未满足')
                 return False
 
             # 检查条件
             try:
                 if condition():
                     self._record_attempt(attempt, True)
-                    logger.debug(f"条件在第 {attempt + 1} 次尝试后满足")
+                    logger.debug("条件在第 %d 次尝试后满足", attempt + 1)
                     return True
             except Exception as e:
-                logger.debug(f"条件检查失败: {e}")
+                logger.debug("条件检查失败: %s", e)
 
             # 计算延迟
             delay = self.calculate_delay(attempt + 1)
 
             logger.debug(
-                f"等待 {delay:.2f} 秒后重试（尝试 {attempt + 1}/{self.config.max_attempts}）"
+                "等待 %.2f 秒后重试（尝试 %d/%d）", 
+                delay, attempt + 1, self.config.max_attempts
             )
 
             # 等待
@@ -156,7 +157,7 @@ class SmartWaiter:
             attempt += 1
 
         self._record_attempt(attempt, False)
-        logger.warning(f"达到最大尝试次数 {self.config.max_attempts}，条件仍未满足")
+        logger.warning("达到最大尝试次数 %d，条件仍未满足", self.config.max_attempts)
         return False
 
     def wait_for_element(self, page: Any, selector: str, timeout: Optional[float] = None) -> bool:
@@ -320,12 +321,12 @@ def smart_retry(
                     if attempt < max_attempts:
                         delay = waiter.calculate_delay(attempt)
                         logger.warning(
-                            f"函数 {func.__name__} 执行失败（尝试 {attempt}/{max_attempts}），"
-                            f"{delay:.2f}秒后重试: {e}"
+                            "函数 %s 执行失败（尝试 %d/%d），%.2f秒后重试: %s",
+                            func.__name__, attempt, max_attempts, delay, e
                         )
                         time.sleep(delay)
 
-            logger.error(f"函数 {func.__name__} 达到最大重试次数 {max_attempts}")
+            logger.error("函数 %s 达到最大重试次数 %d", func.__name__, max_attempts)
             if last_exception:
                 raise last_exception
             else:

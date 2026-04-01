@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Union
 
 import requests
+from requests.exceptions import RequestException
 
 from core.utils.logger import get_logger
 
@@ -68,7 +69,7 @@ class APIContractTester:
                 spec = yaml.safe_load(f)
 
         self._parse_openapi_spec(spec)
-        logger.info(f"已加载 OpenAPI 规范: {len(self.contracts)} 个 API")
+        logger.info("已加载 OpenAPI 规范: %d 个 API", len(self.contracts))
 
     def _parse_openapi_spec(self, spec: Dict[str, Any]) -> None:
         """解析 OpenAPI 规范"""
@@ -191,7 +192,7 @@ class APIContractTester:
         results: Dict[str, List[APITestResult]] = {"passed": [], "failed": []}
 
         for key, contract in self.contracts.items():
-            logger.info(f"测试 API: {key}")
+            logger.info("测试 API: %s", key)
 
             result = self.test_api(path=contract.path, method=contract.method)
 
@@ -202,10 +203,10 @@ class APIContractTester:
 
             if result.passed:
                 results["passed"].append(result)
-                logger.info(f"✅ API 测试通过: {key}")
+                logger.info("✅ API 测试通过: %s", key)
             else:
                 results["failed"].append(result)
-                logger.error(f"❌ API 测试失败: {key}, 错误: {result.validation_errors}")
+                logger.error("❌ API 测试失败: %s, 错误: %s", key, result.validation_errors)
 
         return results
 
@@ -256,11 +257,11 @@ class APIPerformanceTester:
                 )
                 response.raise_for_status()
                 return time.time() - start_time
-            except Exception as e:
+            except RequestException as e:
                 errors.append(str(e))
                 return -1
 
-        logger.info(f"开始负载测试: {method} {path}, 迭代次数: {iterations}, 并发: {concurrency}")
+        logger.info("开始负载测试: %s %s, 迭代次数: %d, 并发: %d", method, path, iterations, concurrency)
 
         with ThreadPoolExecutor(max_workers=concurrency) as executor:
             futures = [executor.submit(make_request) for _ in range(iterations)]
@@ -271,7 +272,6 @@ class APIPerformanceTester:
                     response_times.append(result)
 
         # 计算统计信息
-        results: Dict[str, Any] = {}
         if response_times:
             response_times.sort()
             total_requests = len(response_times)
@@ -298,7 +298,7 @@ class APIPerformanceTester:
                 "errors": errors,
             }
 
-        logger.info(f"负载测试完成: 平均响应时间 {results.get('avg_response_time', 0):.3f}s")
+        logger.info("负载测试完成: 平均响应时间 %.3fs", results.get('avg_response_time', 0))
         return results
 
     def stress_test(
@@ -343,13 +343,13 @@ class APIPerformanceTester:
                             results["response_times"].append(response_time)
                         else:
                             results["failed_requests"] = int(results["failed_requests"]) + 1
-                except Exception as e:
+                except RequestException as e:
                     with lock:
                         results["total_requests"] = int(results["total_requests"]) + 1
                         results["failed_requests"] = int(results["failed_requests"]) + 1
                         results["errors"].append(str(e))
 
-        logger.info(f"开始压力测试: {method} {path}, 持续时间: {duration}s, 目标 RPS: {target_rps}")
+        logger.info("开始压力测试: %s %s, 持续时间: %ds, 目标 RPS: %d", method, path, duration, target_rps)
 
         # 启动工作线程
         threads = []
