@@ -8,7 +8,7 @@ import json
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 import requests
 from requests.exceptions import RequestException
@@ -27,6 +27,7 @@ class APIContract:
     request_schema: Optional[Dict[str, Any]] = None
     response_schema: Optional[Dict[str, Any]] = None
     status_codes: List[int] = field(default_factory=lambda: [200])
+
     headers: Optional[Dict[str, str]] = None
     query_params: Optional[Dict[str, Any]] = None
 
@@ -181,9 +182,9 @@ class APIContractTester:
 
         # 简化验证：检查必需字段是否存在
         if "required" in schema:
-            for field in schema["required"]:
-                if field not in response:
-                    errors.append(f"缺少必需字段: {field}")
+            for required_field in schema["required"]:
+                if required_field not in response:
+                    errors.append(f"缺少必需字段: {required_field}")
 
         return errors
 
@@ -261,7 +262,9 @@ class APIPerformanceTester:
                 errors.append(str(e))
                 return -1
 
-        logger.info("开始负载测试: %s %s, 迭代次数: %d, 并发: %d", method, path, iterations, concurrency)
+        logger.info(
+            "开始负载测试: %s %s, 迭代次数: %d, 并发: %d", method, path, iterations, concurrency
+        )
 
         with ThreadPoolExecutor(max_workers=concurrency) as executor:
             futures = [executor.submit(make_request) for _ in range(iterations)]
@@ -298,7 +301,7 @@ class APIPerformanceTester:
                 "errors": errors,
             }
 
-        logger.info("负载测试完成: 平均响应时间 %.3fs", results.get('avg_response_time', 0))
+        logger.info("负载测试完成: 平均响应时间 %.3fs", results.get("avg_response_time", 0))
         return results
 
     def stress_test(
@@ -349,7 +352,9 @@ class APIPerformanceTester:
                         results["failed_requests"] = int(results["failed_requests"]) + 1
                         results["errors"].append(str(e))
 
-        logger.info("开始压力测试: %s %s, 持续时间: %ds, 目标 RPS: %d", method, path, duration, target_rps)
+        logger.info(
+            "开始压力测试: %s %s, 持续时间: %ds, 目标 RPS: %d", method, path, duration, target_rps
+        )
 
         # 启动工作线程
         threads = []
@@ -397,6 +402,8 @@ class APIPerformanceTester:
             }
 
         logger.info(
-            f"压力测试完成: 成功率 {summary.get('success_rate', 0):.1f}%, 实际 RPS: {summary.get('actual_rps', 0):.1f}"
+            "压力测试完成: 成功率 %.1f%%, 实际 RPS: %.1f",
+            summary.get("success_rate", 0),
+            summary.get("actual_rps", 0),
         )
         return summary

@@ -1,6 +1,6 @@
 """测试结果汇总报告生成器"""
 
-from core.utils.reporting import ReportGenerator, TestResult
+from core.utils.reporting import ReportGenerator
 
 # 全局报告生成器实例
 _REPORT_GENERATOR = None

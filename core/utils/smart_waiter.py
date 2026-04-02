@@ -88,7 +88,7 @@ class SmartWaiter:
         """计算自适应延迟"""
         if not self._attempt_history:
             return self.config.initial_delay
-        
+
         # 使用 attempt 参数调整延迟
         base_delay = self.config.initial_delay * min(attempt, 5) / 5
 
@@ -132,7 +132,7 @@ class SmartWaiter:
         while attempt < self.config.max_attempts:
             # 检查超时
             if timeout and (time.time() - start_time) > timeout:
-                logger.warning("等待超时: %s", error_message or '条件未满足')
+                logger.warning("等待超时: %s", error_message or "条件未满足")
                 return False
 
             # 检查条件
@@ -148,8 +148,7 @@ class SmartWaiter:
             delay = self.calculate_delay(attempt + 1)
 
             logger.debug(
-                "等待 %.2f 秒后重试（尝试 %d/%d）", 
-                delay, attempt + 1, self.config.max_attempts
+                "等待 %.2f 秒后重试（尝试 %d/%d）", delay, attempt + 1, self.config.max_attempts
             )
 
             # 等待
@@ -322,7 +321,11 @@ def smart_retry(
                         delay = waiter.calculate_delay(attempt)
                         logger.warning(
                             "函数 %s 执行失败（尝试 %d/%d），%.2f秒后重试: %s",
-                            func.__name__, attempt, max_attempts, delay, e
+                            func.__name__,
+                            attempt,
+                            max_attempts,
+                            delay,
+                            e,
                         )
                         time.sleep(delay)
 

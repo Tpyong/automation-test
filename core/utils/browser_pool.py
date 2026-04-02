@@ -4,7 +4,7 @@
 """
 
 import threading
-from typing import Any, Dict, List, Optional, Set
+from typing import Dict, List, Optional, Set
 
 from playwright.sync_api import Browser, Playwright
 

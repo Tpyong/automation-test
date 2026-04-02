@@ -173,7 +173,12 @@ class AlertManager:
         body {{ font-family: Arial, sans-serif; margin: 20px; }}
         .header {{ background-color: #f44336; color: white; padding: 20px; text-align: center; }}
         .content {{ padding: 20px; }}
-        .summary {{ background-color: #f9f9f9; padding: 15px; margin: 20px 0; border-left: 4px solid #f44336; }}
+        .summary {{
+            background-color: #f9f9f9;
+            padding: 15px;
+            margin: 20px 0;
+            border-left: 4px solid #f44336;
+        }}
         table {{ border-collapse: collapse; width: 100%; margin: 20px 0; }}
         th, td {{ border: 1px solid #ddd; padding: 12px; text-align: left; }}
         th {{ background-color: #f44336; color: white; }}
@@ -186,7 +191,7 @@ class AlertManager:
         <h1>⚠️ 测试执行失败告警</h1>
         <p>{title}</p>
     </div>
-    
+
     <div class="content">
         <div class="summary">
             <h2>告警信息</h2>

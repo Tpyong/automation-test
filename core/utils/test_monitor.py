@@ -270,7 +270,7 @@ class TestMonitor:
             <div class="metric-value">{session.avg_test_duration:.3f}s</div>
         </div>
     </div>
-    
+
     <h2>最慢的测试 (Top 20)</h2>
     <table>
         <tr>

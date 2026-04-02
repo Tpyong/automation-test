@@ -6,7 +6,7 @@
 
 import os
 from contextlib import contextmanager
-from typing import Any, Dict, Generator, List, Optional, Union
+from typing import Any, Dict, Generator, List, Optional
 
 from core.utils.logger import get_logger
 

@@ -189,7 +189,12 @@ class TestAdvisor:
                 {
                     "type": "performance",
                     "title": "优化执行时间较长的测试",
-                    "description": f"以下测试执行时间较长: {', '.join([f'{test} ({duration:.2f}s)' for test, duration in top_slow_tests])}",
+                    "description": (
+                        "以下测试执行时间较长: "
+                        + ", ".join(
+                            [f"{test} ({duration:.2f}s)" for test, duration in top_slow_tests]
+                        )
+                    ),
                     "priority": "medium",
                     "action": "考虑优化这些测试的执行逻辑，或使用并行执行",
                 }
@@ -210,7 +215,10 @@ class TestAdvisor:
                 {
                     "type": "reliability",
                     "title": "修复频繁失败的测试",
-                    "description": f"以下测试频繁失败: {', '.join([f'{test} ({count}次)' for test, count in top_failures])}",
+                    "description": (
+                        "以下测试频繁失败: "
+                        + ", ".join([f"{test} ({count}次)" for test, count in top_failures])
+                    ),
                     "priority": "high",
                     "action": "检查这些测试的稳定性，修复根本原因",
                 }
@@ -231,7 +239,15 @@ class TestAdvisor:
                 {
                     "type": "module",
                     "title": "改善表现不佳的模块",
-                    "description": f"以下模块通过率较低: {', '.join([f'{module} ({stats.get("pass_rate", 0):.1f}%)' for module, stats in top_poor_modules])}",
+                    "description": (
+                        "以下模块通过率较低: "
+                        + ", ".join(
+                            [
+                                f'{module} ({stats.get("pass_rate", 0):.1f}%)'
+                                for module, stats in top_poor_modules
+                            ]
+                        )
+                    ),
                     "priority": "high",
                     "action": "重点关注这些模块的测试质量",
                 }
@@ -358,7 +374,14 @@ class TestAdvisor:
             padding: 0;
         }}
         body {{
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-family:
+                -apple-system,
+                BlinkMacSystemFont,
+                'Segoe UI',
+                Roboto,
+                'Helvetica Neue',
+                Arial,
+                sans-serif;
             background: #f5f7fa;
             padding: 20px;
         }}
