@@ -40,7 +40,11 @@ jobs:
 
     - name: Install Playwright browsers
       run: |
-        playwright install --with-deps
+        echo "Installing Playwright browsers for ${{ matrix.browser }}..."
+        playwright install --with-deps ${{ matrix.browser }}
+        echo "Verifying browser installation..."
+        playwright install-deps ${{ matrix.browser }} || echo "Note: install-deps failed, continuing..."
+        echo "Browser installation completed"
 
     - name: Run tests
       run: |

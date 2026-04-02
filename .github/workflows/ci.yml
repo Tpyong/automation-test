@@ -87,7 +87,11 @@ jobs:
 
     - name: Install Playwright browsers
       run: |
+        echo "Installing Playwright browser: ${{ matrix.browser }}..."
         playwright install --with-deps ${{ matrix.browser }}
+        echo "Verifying browser installation..."
+        playwright install-deps ${{ matrix.browser }} || echo "Note: install-deps failed, continuing..."
+        echo "Browser installation completed"
 
     - name: Create environment file
       run: |
@@ -190,7 +194,11 @@ jobs:
 
     - name: Install Playwright browsers
       run: |
+        echo "Installing Playwright browser: chromium..."
         playwright install --with-deps chromium
+        echo "Verifying browser installation..."
+        playwright install-deps chromium || echo "Note: install-deps failed, continuing..."
+        echo "Browser installation completed"
 
     - name: Create environment file
       run: |
