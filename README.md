@@ -2,14 +2,6 @@
 
 基于 Python + Pytest + Playwright + Allure 的企业级自动化测试可复用标准框架。
 
-## 最新修复
-
-### 2026-04-02: 修复 Playwright Locator 类型检查错误
-
-- ✅ 移除 `core/utils/locators.py` 中多余的 `iter_parents` 类型检查
-- ✅ CI 配置添加 Python 缓存清理步骤，防止使用旧字节码
-- ✅ 修复后所有测试通过，无 `iter_parents` 错误
-
 ---
 
 ## 技术栈
