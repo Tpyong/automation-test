@@ -268,6 +268,9 @@ def settings() -> Settings:
     import os
     browser_env = os.getenv("BROWSER", "not set")
     logger.info(f"Settings fixture: BROWSER 环境变量 = {browser_env}")
+    
+    # 如果 BROWSER 环境变量没有设置，使用默认值 chromium
+    # 注意：pytest-playwright 可能会覆盖这个环境变量
     return Settings()
 
 
@@ -278,28 +281,40 @@ def playwright() -> Generator[Playwright, Any, None]:
 
 
 @pytest.fixture(scope="session")
-def browser(playwright: Playwright, settings: Settings) -> Generator[Browser, Any, None]:
-    """使用浏览器实例池的浏览器fixture"""
-    browser_type = settings.browser_type
-    headless = settings.headless
-    slow_mo = settings.slow_mo
-    viewport = settings.viewport
+def browser(playwright: Playwright, request: Any) -> Generator[Browser, Any, None]:
+    """使用浏览器实例池的浏览器 fixture，基于 pytest-playwright 的 browser 类型"""
+    import os
+    
+    # 从 pytest-playwright 获取浏览器类型
+    # pytest-playwright 会自动处理 --browser 参数或 BROWSER 环境变量
+    browser_name = request.config.getoption("--browser", default="chromium")
+    
+    # 如果没有指定，尝试从环境变量读取
+    if not browser_name or browser_name == "not set":
+        browser_name = os.getenv("BROWSER", "chromium")
+    
+    headless = os.getenv("HEADLESS", "true").lower() == "true"
+    slow_mo = int(os.getenv("SLOW_MO", "0"))
+    
+    viewport_width = int(os.getenv("VIEWPORT_WIDTH", "1920"))
+    viewport_height = int(os.getenv("VIEWPORT_HEIGHT", "1080"))
+    viewport = {"width": viewport_width, "height": viewport_height}
 
-    logger.info(f"初始化浏览器池: {browser_type}, headless: {headless}, viewport: {viewport}")
+    logger.info(f"初始化浏览器池：{browser_name}, headless: {headless}, viewport: {viewport}")
 
     pool = _get_browser_pool()
-    pool.initialize(playwright, browser_type, headless, slow_mo)
+    pool.initialize(playwright, browser_name, headless, slow_mo)
 
     browser_obj = pool.acquire_browser()
     if not browser_obj:
         raise RuntimeError("无法获取浏览器实例")
 
-    logger.info(f"成功获取浏览器实例: {id(browser_obj)}")
+    logger.info(f"成功获取浏览器实例：{id(browser_obj)}")
 
     yield browser_obj
 
     pool.release_browser(browser_obj)
-    logger.info(f"浏览器实例已释放: {id(browser_obj)}")
+    logger.info(f"浏览器实例已释放：{id(browser_obj)}")
 
 
 @pytest.fixture(scope="function")
