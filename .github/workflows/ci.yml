@@ -35,8 +35,8 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install --no-cache-dir -r requirements.lock
-        pip install --no-cache-dir -r requirements-dev.txt
+        pip install --index-url https://pypi.org/simple --no-cache-dir -r requirements.lock
+        pip install --index-url https://pypi.org/simple --no-cache-dir -r requirements-dev.txt
 
     - name: Run security scan
       run: |
@@ -83,7 +83,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install --no-cache-dir -r requirements.lock
+        pip install --index-url https://pypi.org/simple --no-cache-dir -r requirements.lock
 
     - name: Install Playwright browsers
       run: |
@@ -186,7 +186,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.lock
+        pip install --index-url https://pypi.org/simple -r requirements.lock
 
     - name: Install Playwright browsers
       run: |
