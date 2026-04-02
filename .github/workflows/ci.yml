@@ -97,7 +97,7 @@ jobs:
       run: |
         cat > .env << EOF
         BASE_URL=https://demo.playwright.dev/todomvc
-        BROWSER=${{ matrix.browser }}
+        TEST_BROWSER=${{ matrix.browser }}
         HEADLESS=true
         SLOW_MO=0
         TIMEOUT=30000
@@ -115,7 +115,8 @@ jobs:
         # 创建 Allure 结果目录
         mkdir -p reports/allure-results
         # 运行测试并生成 Allure 结果
-        BROWSER=${{ matrix.browser }} pytest -v -m "smoke or ui" --alluredir=reports/allure-results
+        export TEST_BROWSER=${{ matrix.browser }}
+        pytest -v -m "smoke or ui" --alluredir=reports/allure-results
 
     - name: Generate Allure report
       if: always()
@@ -204,7 +205,7 @@ jobs:
       run: |
         cat > .env << EOF
         BASE_URL=https://demo.playwright.dev/todomvc
-        BROWSER=chromium
+        TEST_BROWSER=chromium
         HEADLESS=true
         EOF
 
