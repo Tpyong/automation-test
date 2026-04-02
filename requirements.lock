@@ -4,8 +4,6 @@
 #
 #    pip-compile --output-file=requirements.lock requirements.in
 #
---index-url https://pypi.tuna.tsinghua.edu.cn/simple
---trusted-host pypi.tuna.tsinghua.edu.cn
 
 allure-pytest==2.15.3
     # via -r requirements.in
