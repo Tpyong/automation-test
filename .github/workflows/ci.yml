@@ -207,6 +207,11 @@ jobs:
         BASE_URL=https://demo.playwright.dev/todomvc
         TEST_BROWSER=chromium
         HEADLESS=true
+        SLOW_MO=0
+        TIMEOUT=30000
+        VIEWPORT_WIDTH=1920
+        VIEWPORT_HEIGHT=1080
+        VIDEO_ENABLED=false
         EOF
 
     - name: Run tests with coverage
@@ -271,19 +276,29 @@ jobs:
 
     - name: Find latest Allure report
       run: |
+        # 切换到 artifacts 目录查找
+        cd artifacts
+        
         # 查找所有 Allure 报告目录
-        REPORT_DIRS=$(find artifacts -name "allure-report-*" -type d)
+        REPORT_DIRS=$(find . -name "allure-report-*" -type d | sed 's|^\./||')
         if [ -z "$REPORT_DIRS" ]; then
           echo "No Allure reports found"
           exit 1
         fi
         
         # 选择最新的报告目录
-        LATEST_REPORT=$(ls -t $REPORT_DIRS | head -1)
+        LATEST_REPORT=$(echo "$REPORT_DIRS" | sort | tail -1)
         echo "Using latest report: $LATEST_REPORT"
         
-        # 复制报告内容到当前目录（修复路径）
-        cp -r "$LATEST_REPORT"/* .
+        # 复制报告内容到上级目录
+        cp -r "$LATEST_REPORT"/* ..
+        
+        # 返回上级目录
+        cd ..
+        
+        # 验证复制结果
+        echo "Report contents:"
+        ls -la
 
     - name: Setup Pages
       uses: actions/configure-pages@v4

@@ -298,6 +298,10 @@ def browser(playwright: Playwright, request: Any) -> Generator[Browser, Any, Non
     headless = os.getenv("HEADLESS", "true").lower() == "true"
     slow_mo = int(os.getenv("SLOW_MO", "0"))
     
+    # 添加调试日志，确认环境变量读取正确
+    logger.info(f"HEADLESS 环境变量：{os.getenv('HEADLESS', 'not set')}")
+    logger.info(f"解析后的 headless 值：{headless}")
+    
     viewport_width = int(os.getenv("VIEWPORT_WIDTH", "1920"))
     viewport_height = int(os.getenv("VIEWPORT_HEIGHT", "1080"))
     viewport = {"width": viewport_width, "height": viewport_height}

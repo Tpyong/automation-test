@@ -60,9 +60,8 @@ jobs:
         echo "matrix.browser: ${{ matrix.browser }}"
         echo "================"
         export TEST_BROWSER=${{ matrix.browser }}
-        # 禁用 pytest-playwright 的默认 browser fixture
-        export PYTEST_DISABLE_PLUGIN_AUTOLOAD=0
-        pytest tests/ -v --alluredir=allure-results -p no:warnings
+        # 运行测试（移除 -p no:warnings，避免禁用必要插件）
+        pytest tests/ -v --alluredir=allure-results
       env:
         TEST_ENV: testing
         HEADLESS: true
