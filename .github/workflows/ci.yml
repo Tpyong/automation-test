@@ -17,6 +17,12 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Clean Python cache
+      run: |
+        find . -type d -name __pycache__ -exec rm -rf {} + || true
+        find . -type f -name "*.pyc" -delete || true
+        find . -type f -name "*.pyo" -delete || true
+
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
@@ -55,6 +61,12 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+
+    - name: Clean Python cache
+      run: |
+        find . -type d -name __pycache__ -exec rm -rf {} + || true
+        find . -type f -name "*.pyc" -delete || true
+        find . -type f -name "*.pyo" -delete || true
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
@@ -152,6 +164,12 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+
+    - name: Clean Python cache
+      run: |
+        find . -type d -name __pycache__ -exec rm -rf {} + || true
+        find . -type f -name "*.pyc" -delete || true
+        find . -type f -name "*.pyo" -delete || true
 
     - name: Set up Python
       uses: actions/setup-python@v5

@@ -44,6 +44,17 @@ pipeline {
             }
         }
         
+        stage('Clean Python Cache') {
+            steps {
+                sh '''
+                    find . -type d -name __pycache__ -exec rm -rf {} + || true
+                    find . -type f -name "*.pyc" -delete || true
+                    find . -type f -name "*.pyo" -delete || true
+                    find . -type f -name "*.pyo" -delete || true
+                '''
+            }
+        }
+        
         stage('Setup Python Environment') {
             steps {
                 sh '''
