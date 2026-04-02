@@ -166,19 +166,25 @@ class SmartLocator:
         """
         if isinstance(self.config, str):
             # 传统 CSS/XPath 选择器
-            locator = self.page.locator(self.config)
-            # 检查是否有 iter_parents 方法，而不是直接检查类型
-            if not hasattr(locator, 'iter_parents'):
-                raise TypeError(f"Expected Locator object with iter_parents method, got {type(locator)}")
-            return locator
+            try:
+                locator = self.page.locator(self.config)
+                # 检查是否有 iter_parents 方法，而不是直接检查类型
+                if not hasattr(locator, 'iter_parents'):
+                    raise TypeError(f"Expected Locator object with iter_parents method, got {type(locator)}")
+                return locator
+            except Exception as e:
+                raise TypeError(f"Failed to create Locator from string config: {self.config}, error: {e}")
 
         if isinstance(self.config, dict):
             # 语义化定位方式
-            locator = self._get_semantic_locator(self.config)
-            # 检查是否有 iter_parents 方法，而不是直接检查类型
-            if not hasattr(locator, 'iter_parents'):
-                raise TypeError(f"Expected Locator object with iter_parents method, got {type(locator)}")
-            return locator
+            try:
+                locator = self._get_semantic_locator(self.config)
+                # 检查是否有 iter_parents 方法，而不是直接检查类型
+                if not hasattr(locator, 'iter_parents'):
+                    raise TypeError(f"Expected Locator object with iter_parents method, got {type(locator)}")
+                return locator
+            except Exception as e:
+                raise TypeError(f"Failed to create Locator from dict config: {self.config}, error: {e}")
 
         else:
             raise ValueError(f"不支持的定位器配置: {self.config}")
@@ -198,107 +204,110 @@ class SmartLocator:
         8. css - CSS 选择器
         9. xpath - XPath 选择器
         """
-        # 1. get_by_role - 最推荐的方式
-        if "role" in config:
-            role = config["role"]
-            name = config.get("name")  # 可选的 accessible name
-            if name:
-                locator = self.page.get_by_role(role, name=name)
+        try:
+            # 1. get_by_role - 最推荐的方式
+            if "role" in config:
+                role = config["role"]
+                name = config.get("name")  # 可选的 accessible name
+                if name:
+                    locator = self.page.get_by_role(role, name=name)
+                    # 检查是否有 iter_parents 方法，而不是直接检查类型
+                    if not hasattr(locator, 'iter_parents'):
+                        raise TypeError(f"Expected Locator object with iter_parents method, got {type(locator)}")
+                    return locator
+                locator = self.page.get_by_role(role)
                 # 检查是否有 iter_parents 方法，而不是直接检查类型
                 if not hasattr(locator, 'iter_parents'):
                     raise TypeError(f"Expected Locator object with iter_parents method, got {type(locator)}")
                 return locator
-            locator = self.page.get_by_role(role)
-            # 检查是否有 iter_parents 方法，而不是直接检查类型
-            if not hasattr(locator, 'iter_parents'):
-                raise TypeError(f"Expected Locator object with iter_parents method, got {type(locator)}")
-            return locator
 
-        # 2. get_by_label - 表单元素推荐
-        if "label" in config:
-            label = config["label"]
-            exact = config.get("exact", False)
-            locator = self.page.get_by_label(label, exact=exact)
-            # 检查是否有 iter_parents 方法，而不是直接检查类型
-            if not hasattr(locator, 'iter_parents'):
-                raise TypeError(f"Expected Locator object with iter_parents method, got {type(locator)}")
-            return locator
+            # 2. get_by_label - 表单元素推荐
+            if "label" in config:
+                label = config["label"]
+                exact = config.get("exact", False)
+                locator = self.page.get_by_label(label, exact=exact)
+                # 检查是否有 iter_parents 方法，而不是直接检查类型
+                if not hasattr(locator, 'iter_parents'):
+                    raise TypeError(f"Expected Locator object with iter_parents method, got {type(locator)}")
+                return locator
 
-        # 3. get_by_placeholder
-        if "placeholder" in config:
-            placeholder = config["placeholder"]
-            exact = config.get("exact", False)
-            locator = self.page.get_by_placeholder(placeholder, exact=exact)
-            # 检查是否有 iter_parents 方法，而不是直接检查类型
-            if not hasattr(locator, 'iter_parents'):
-                raise TypeError(f"Expected Locator object with iter_parents method, got {type(locator)}")
-            return locator
+            # 3. get_by_placeholder
+            if "placeholder" in config:
+                placeholder = config["placeholder"]
+                exact = config.get("exact", False)
+                locator = self.page.get_by_placeholder(placeholder, exact=exact)
+                # 检查是否有 iter_parents 方法，而不是直接检查类型
+                if not hasattr(locator, 'iter_parents'):
+                    raise TypeError(f"Expected Locator object with iter_parents method, got {type(locator)}")
+                return locator
 
-        # 4. get_by_text
-        if "text" in config:
-            text = config["text"]
-            exact = config.get("exact", False)
-            locator = self.page.get_by_text(text, exact=exact)
-            # 检查是否有 iter_parents 方法，而不是直接检查类型
-            if not hasattr(locator, 'iter_parents'):
-                raise TypeError(f"Expected Locator object with iter_parents method, got {type(locator)}")
-            return locator
+            # 4. get_by_text
+            if "text" in config:
+                text = config["text"]
+                exact = config.get("exact", False)
+                locator = self.page.get_by_text(text, exact=exact)
+                # 检查是否有 iter_parents 方法，而不是直接检查类型
+                if not hasattr(locator, 'iter_parents'):
+                    raise TypeError(f"Expected Locator object with iter_parents method, got {type(locator)}")
+                return locator
 
-        # 5. get_by_title
-        if "title" in config:
-            title = config["title"]
-            exact = config.get("exact", False)
-            locator = self.page.get_by_title(title, exact=exact)
-            # 检查是否有 iter_parents 方法，而不是直接检查类型
-            if not hasattr(locator, 'iter_parents'):
-                raise TypeError(f"Expected Locator object with iter_parents method, got {type(locator)}")
-            return locator
+            # 5. get_by_title
+            if "title" in config:
+                title = config["title"]
+                exact = config.get("exact", False)
+                locator = self.page.get_by_title(title, exact=exact)
+                # 检查是否有 iter_parents 方法，而不是直接检查类型
+                if not hasattr(locator, 'iter_parents'):
+                    raise TypeError(f"Expected Locator object with iter_parents method, got {type(locator)}")
+                return locator
 
-        # 6. get_by_alt_text
-        if "alt" in config:
-            alt = config["alt"]
-            exact = config.get("exact", False)
-            locator = self.page.get_by_alt_text(alt, exact=exact)
-            # 检查是否有 iter_parents 方法，而不是直接检查类型
-            if not hasattr(locator, 'iter_parents'):
-                raise TypeError(f"Expected Locator object with iter_parents method, got {type(locator)}")
-            return locator
+            # 6. get_by_alt_text
+            if "alt" in config:
+                alt = config["alt"]
+                exact = config.get("exact", False)
+                locator = self.page.get_by_alt_text(alt, exact=exact)
+                # 检查是否有 iter_parents 方法，而不是直接检查类型
+                if not hasattr(locator, 'iter_parents'):
+                    raise TypeError(f"Expected Locator object with iter_parents method, got {type(locator)}")
+                return locator
 
-        # 7. get_by_test_id
-        if "test_id" in config:
-            test_id = config["test_id"]
-            locator = self.page.get_by_test_id(test_id)
-            # 检查是否有 iter_parents 方法，而不是直接检查类型
-            if not hasattr(locator, 'iter_parents'):
-                raise TypeError(f"Expected Locator object with iter_parents method, got {type(locator)}")
-            return locator
+            # 7. get_by_test_id
+            if "test_id" in config:
+                test_id = config["test_id"]
+                locator = self.page.get_by_test_id(test_id)
+                # 检查是否有 iter_parents 方法，而不是直接检查类型
+                if not hasattr(locator, 'iter_parents'):
+                    raise TypeError(f"Expected Locator object with iter_parents method, got {type(locator)}")
+                return locator
 
-        # 8. CSS 选择器
-        if "css" in config:
-            locator = self.page.locator(config["css"])
-            # 检查是否有 iter_parents 方法，而不是直接检查类型
-            if not hasattr(locator, 'iter_parents'):
-                raise TypeError(f"Expected Locator object with iter_parents method, got {type(locator)}")
-            return locator
+            # 8. CSS 选择器
+            if "css" in config:
+                locator = self.page.locator(config["css"])
+                # 检查是否有 iter_parents 方法，而不是直接检查类型
+                if not hasattr(locator, 'iter_parents'):
+                    raise TypeError(f"Expected Locator object with iter_parents method, got {type(locator)}")
+                return locator
 
-        # 9. XPath 选择器
-        if "xpath" in config:
-            locator = self.page.locator(config["xpath"])
-            # 检查是否有 iter_parents 方法，而不是直接检查类型
-            if not hasattr(locator, 'iter_parents'):
-                raise TypeError(f"Expected Locator object with iter_parents method, got {type(locator)}")
-            return locator
+            # 9. XPath 选择器
+            if "xpath" in config:
+                locator = self.page.locator(config["xpath"])
+                # 检查是否有 iter_parents 方法，而不是直接检查类型
+                if not hasattr(locator, 'iter_parents'):
+                    raise TypeError(f"Expected Locator object with iter_parents method, got {type(locator)}")
+                return locator
 
-        # 默认使用第一个值作为 CSS 选择器
-        first_value = list(config.values())[0]
-        if isinstance(first_value, str):
-            locator = self.page.locator(first_value)
-            # 检查是否有 iter_parents 方法，而不是直接检查类型
-            if not hasattr(locator, 'iter_parents'):
-                raise TypeError(f"Expected Locator object with iter_parents method, got {type(locator)}")
-            return locator
+            # 默认使用第一个值作为 CSS 选择器
+            first_value = list(config.values())[0]
+            if isinstance(first_value, str):
+                locator = self.page.locator(first_value)
+                # 检查是否有 iter_parents 方法，而不是直接检查类型
+                if not hasattr(locator, 'iter_parents'):
+                    raise TypeError(f"Expected Locator object with iter_parents method, got {type(locator)}")
+                return locator
 
-        raise ValueError(f"无法识别的定位器配置: {config}")
+            raise ValueError(f"无法识别的定位器配置: {config}")
+        except Exception as e:
+            raise TypeError(f"Failed to create semantic Locator from config: {config}, error: {e}")
 
 
 class SmartPage:
@@ -331,11 +340,14 @@ class SmartPage:
 
     def get_playwright_locator(self, element_name: str) -> Locator:
         """获取 Playwright Locator 对象"""
-        locator = self.get_smart_locator(element_name).get_locator()
-        # 检查是否有 iter_parents 方法，而不是直接检查类型
-        if not hasattr(locator, 'iter_parents'):
-            raise TypeError(f"Expected Locator object with iter_parents method, got {type(locator)}")
-        return locator
+        try:
+            locator = self.get_smart_locator(element_name).get_locator()
+            # 检查是否有 iter_parents 方法，而不是直接检查类型
+            if not hasattr(locator, 'iter_parents'):
+                raise TypeError(f"Expected Locator object with iter_parents method, got {type(locator)}")
+            return locator
+        except Exception as e:
+            raise TypeError(f"Failed to get Playwright Locator for element '{element_name}', error: {e}")
 
     def click(self, element_name: str, **kwargs: Any) -> None:
         """点击元素"""
