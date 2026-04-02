@@ -282,6 +282,11 @@ def browser(playwright: Playwright, request: Any) -> Generator[Browser, Any, Non
     # 从 pytest-playwright 获取浏览器类型
     browser_name = request.config.getoption("--browser", default=None)
     
+    logger.info(f"=== Browser Fixture 调试 ===")
+    logger.info(f"request.config.getoption('--browser') = {browser_name}")
+    logger.info(f"TEST_BROWSER 环境变量 = {os.getenv('TEST_BROWSER', 'not set')}")
+    logger.info(f"===========================")
+    
     # 如果命令行参数为空，从 TEST_BROWSER 环境变量读取（避免与 pytest-playwright 冲突）
     if not browser_name:
         browser_name = os.getenv("TEST_BROWSER", "chromium")
@@ -297,6 +302,7 @@ def browser(playwright: Playwright, request: Any) -> Generator[Browser, Any, Non
     viewport_height = int(os.getenv("VIEWPORT_HEIGHT", "1080"))
     viewport = {"width": viewport_width, "height": viewport_height}
 
+    logger.info(f"最终选择的浏览器类型：{browser_name}")
     logger.info(f"初始化浏览器池：{browser_name}, headless: {headless}, viewport: {viewport}")
 
     pool = _get_browser_pool()
