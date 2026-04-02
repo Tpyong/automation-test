@@ -88,11 +88,13 @@ logger = get_logger(__name__)
 
 def pytest_addoption(parser: Any) -> None:
     """添加自定义命令行参数"""
+    # 注意：不使用 --browser，因为 pytest-playwright 已经定义了
+    # 改用 --test-browser 避免冲突
     parser.addoption(
-        "--browser",
+        "--test-browser",
         action="store",
         default=None,
-        help="浏览器类型：chromium, firefox, webkit"
+        help="测试使用的浏览器类型：chromium, firefox, webkit"
     )
 
 
@@ -276,7 +278,7 @@ def pytest_sessionfinish(session: Any, exitstatus: int) -> None:
 def settings(request: Any) -> Settings:
     """获取配置，支持命令行参数覆盖"""
     # 获取命令行传入的浏览器类型
-    browser = request.config.getoption("--browser")
+    browser = request.config.getoption("--test-browser")
     
     # 如果命令行指定了浏览器，覆盖环境变量
     if browser:

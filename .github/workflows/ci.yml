@@ -115,7 +115,7 @@ jobs:
         # 创建 Allure 结果目录
         mkdir -p reports/allure-results
         # 运行测试并生成 Allure 结果
-        pytest -v -m "smoke or ui" --browser=${{ matrix.browser }} --alluredir=reports/allure-results
+        pytest -v -m "smoke or ui" --test-browser=${{ matrix.browser }} --alluredir=reports/allure-results
 
     - name: Generate Allure report
       if: always()

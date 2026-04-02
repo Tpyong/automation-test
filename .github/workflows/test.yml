@@ -50,7 +50,7 @@ jobs:
 
     - name: Run tests
       run: |
-        pytest tests/ -v --browser=${{ matrix.browser }} --alluredir=allure-results
+        pytest tests/ -v --test-browser=${{ matrix.browser }} --alluredir=allure-results
       env:
         TEST_ENV: testing
         HEADLESS: true
