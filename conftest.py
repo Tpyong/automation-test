@@ -265,12 +265,6 @@ def pytest_sessionfinish(session: Any, exitstatus: int) -> None:
 @pytest.fixture(scope="session")
 def settings() -> Settings:
     """获取配置"""
-    import os
-    browser_env = os.getenv("BROWSER", "not set")
-    logger.info(f"Settings fixture: BROWSER 环境变量 = {browser_env}")
-    
-    # 如果 BROWSER 环境变量没有设置，使用默认值 chromium
-    # 注意：pytest-playwright 可能会覆盖这个环境变量
     return Settings()
 
 
@@ -286,14 +280,7 @@ def browser(playwright: Playwright, request: Any) -> Generator[Browser, Any, Non
     import os
     
     # 从 pytest-playwright 获取浏览器类型
-    # pytest-playwright 会自动处理 --browser 参数或 BROWSER 环境变量
     browser_name = request.config.getoption("--browser", default=None)
-    
-    logger.info(f"=== Browser Fixture 调试信息 ===")
-    logger.info(f"request.config.getoption('--browser') = {browser_name}")
-    logger.info(f"BROWSER 环境变量 = {os.getenv('BROWSER', 'not set')}")
-    logger.info(f"TEST_BROWSER 环境变量 = {os.getenv('TEST_BROWSER', 'not set')}")
-    logger.info(f"===========================")
     
     # 如果命令行参数为空，从 TEST_BROWSER 环境变量读取（避免与 pytest-playwright 冲突）
     if not browser_name:
@@ -310,7 +297,6 @@ def browser(playwright: Playwright, request: Any) -> Generator[Browser, Any, Non
     viewport_height = int(os.getenv("VIEWPORT_HEIGHT", "1080"))
     viewport = {"width": viewport_width, "height": viewport_height}
 
-    logger.info(f"最终选择的浏览器类型：{browser_name}")
     logger.info(f"初始化浏览器池：{browser_name}, headless: {headless}, viewport: {viewport}")
 
     pool = _get_browser_pool()
