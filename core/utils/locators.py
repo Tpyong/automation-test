@@ -160,24 +160,31 @@ class SmartLocator:
     def get_locator(self) -> Locator:
         """
         根据配置获取 Playwright Locator 对象
-    
+        
         Returns:
             Playwright Locator 对象
         """
+        # 调试日志：检查 page 对象的类型
+        logger.debug(f"SmartLocator.get_locator - page type: {type(self.page)}, config: {self.config}")
+            
         if isinstance(self.config, str):
             # 传统 CSS/XPath 选择器
             try:
-                return self.page.locator(self.config)
+                locator = self.page.locator(self.config)
+                logger.debug(f"String config - locator type: {type(locator)}")
+                return locator
             except Exception as e:
                 raise TypeError(f"Failed to create Locator from string config: {self.config}, error: {e}")
-    
+            
         if isinstance(self.config, dict):
             # 语义化定位方式
             try:
-                return self._get_semantic_locator(self.config)
+                locator = self._get_semantic_locator(self.config)
+                logger.debug(f"Dict config - locator type: {type(locator)}")
+                return locator
             except Exception as e:
                 raise TypeError(f"Failed to create Locator from dict config: {self.config}, error: {e}")
-    
+            
         else:
             raise ValueError(f"不支持的定位器配置：{self.config}")
 
@@ -197,13 +204,19 @@ class SmartLocator:
         9. xpath - XPath 选择器
         """
         try:
+            logger.debug(f"_get_semantic_locator - page type: {type(self.page)}, config: {config}")
+            
             # 1. get_by_role - 最推荐的方式
             if "role" in config:
                 role = config["role"]
                 name = config.get("name")  # 可选的 accessible name
                 if name:
-                    return self.page.get_by_role(role, name=name)
-                return self.page.get_by_role(role)
+                    locator = self.page.get_by_role(role, name=name)
+                    logger.debug(f"get_by_role({role}, name={name}) -> type: {type(locator)}")
+                    return locator
+                locator = self.page.get_by_role(role)
+                logger.debug(f"get_by_role({role}) -> type: {type(locator)}")
+                return locator
             
             # 2. get_by_label - 表单元素推荐
             if "label" in config:
