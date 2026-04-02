@@ -90,12 +90,33 @@ jobs:
       env:
         TEST_ENV: testing
       run: |
-        pytest -v -m "smoke or ui" --browser=${{ matrix.browser }}
+        # 创建 Allure 结果目录
+        mkdir -p reports/allure-results
+        # 运行测试并生成 Allure 结果
+        pytest -v -m "smoke or ui" --browser=${{ matrix.browser }} --alluredir=reports/allure-results
 
     - name: Generate Allure report
       if: always()
       run: |
-        allure generate reports/allure-results -o reports/allure-report --clean
+        # 安装allure命令行工具
+        echo "Downloading Allure..."
+        wget -qO- https://github.com/allure-framework/allure2/releases/download/2.24.1/allure-2.24.1.tgz | tar -xz -C /tmp/
+        
+        # 检查解压结果
+        echo "Checking Allure installation..."
+        ls -la /tmp/
+        ls -la /tmp/allure-2.24.1/
+        ls -la /tmp/allure-2.24.1/bin/
+        
+        # 确保使用绝对路径运行allure
+        ALLURE_BIN=/tmp/allure-2.24.1/bin/allure
+        if [ -f "$ALLURE_BIN" ]; then
+            echo "Allure found at: $ALLURE_BIN"
+            $ALLURE_BIN generate reports/allure-results -o reports/allure-report --clean
+        else
+            echo "Error: Allure binary not found"
+            exit 1
+        fi
 
     - name: Upload Allure report
       if: always()
