@@ -118,6 +118,11 @@ git push origin main
 |--------|-----|------|
 | `TEST_ENV` | `testing` | 测试环境标识 |
 | `HEADLESS` | `true` | 无头模式运行浏览器 |
+| `TEST_BROWSER` | `${{ matrix.browser }}` | 浏览器类型（chromium/firefox/webkit） |
+
+**重要提示**：
+- ✅ **使用 `TEST_BROWSER`**：避免与 pytest-playwright 插件的默认值冲突
+- ❌ **不要使用 `BROWSER`**：pytest-playwright 会覆盖这个环境变量
 
 ## 报告查看
 

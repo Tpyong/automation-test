@@ -78,8 +78,10 @@
 | 参数 | 说明 | 选项 |
 |------|------|------|
 | TEST_ENV | 测试环境 | testing, staging |
-| BROWSER | 浏览器 | chromium, firefox, webkit |
+| TEST_BROWSER | 浏览器 | chromium, firefox, webkit |
 | RUN_SMOKE_ONLY | 仅运行冒烟测试 | true, false |
+
+**注意**：Jenkins 中使用 `TEST_BROWSER` 而不是 `BROWSER`，以避免与 pytest-playwright 冲突。
 
 ## 最佳实践
 
@@ -90,13 +92,18 @@
 ```bash
 # 基础配置
 BASE_URL=https://your-test-site.com
-BROWSER=chromium
+TEST_BROWSER=chromium  # 使用 TEST_BROWSER 而不是 BROWSER，避免与 pytest-playwright 冲突
 HEADLESS=true
 
 # 敏感信息（建议使用加密或 Secrets）
 DB_PASSWORD=ENC:xxx
 API_KEY=ENC:xxx
 ```
+
+**重要提示**：
+- ✅ **使用 `TEST_BROWSER` 环境变量**：避免被 pytest-playwright 的默认值覆盖
+- ❌ **不要使用 `BROWSER`**：pytest-playwright 会设置其默认值（chromium），导致配置失效
+- 🔧 **本地开发**：可以使用 `--browser` 命令行参数指定浏览器类型
 
 ### 2. 密钥管理
 

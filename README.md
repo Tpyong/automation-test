@@ -59,8 +59,22 @@ cp config/envs/.env.full .env
 ### 3. 运行测试
 
 ```bash
+# 默认使用 Chromium 浏览器
 pytest -v
+
+# 指定浏览器（Chromium/Firefox/WebKit）
+pytest -v --browser=firefox
+
+# 并行运行测试
+pytest -v -n auto
 ```
+
+**浏览器配置说明：**
+
+- **本地开发**：使用 `--browser` 命令行参数指定浏览器类型
+- **CI/CD**：使用 `TEST_BROWSER` 环境变量指定浏览器类型（避免与 pytest-playwright 冲突）
+- **支持的浏览器**：chromium、firefox、webkit
+- **默认浏览器**：chromium
 
 ### 4. 查看报告
 
@@ -131,6 +145,13 @@ allure open reports/allure-report
 - ✅ **智能测试建议** - 基于历史测试结果提供优化建议
 
 ## 最近变更
+
+### 浏览器配置优化
+
+- ✅ **浏览器配置修复** - 解决了 Firefox 和 WebKit 测试失败的问题
+- ✅ **环境变量优化** - 使用 `TEST_BROWSER` 环境变量代替 `BROWSER`，避免与 pytest-playwright 插件冲突
+- ✅ **CI/CD 配置更新** - GitHub Actions 和 GitLab CI 已更新为使用正确的浏览器配置
+- ✅ **调试代码清理** - 移除了调试日志，保持代码简洁
 
 ### 代码质量修复
 
