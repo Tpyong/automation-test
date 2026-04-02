@@ -302,6 +302,12 @@ def browser(playwright: Playwright, request: Any) -> Generator[Browser, Any, Non
     logger.info(f"HEADLESS 环境变量：{os.getenv('HEADLESS', 'not set')}")
     logger.info(f"解析后的 headless 值：{headless}")
     
+    # 强制确保在 CI 环境中使用 headless 模式
+    if os.getenv("CI", "false").lower() == "true" and not headless:
+        logger.warning("CI 环境中检测到 HEADLESS=false，强制设置为 true")
+        headless = True
+        logger.info(f"修正后的 headless 值：{headless}")
+    
     viewport_width = int(os.getenv("VIEWPORT_WIDTH", "1920"))
     viewport_height = int(os.getenv("VIEWPORT_HEIGHT", "1080"))
     viewport = {"width": viewport_width, "height": viewport_height}

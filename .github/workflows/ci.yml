@@ -302,6 +302,8 @@ jobs:
 
     - name: Setup Pages
       uses: actions/configure-pages@v4
+      with:
+        enablement: false  # 跳过 Pages 启用检查
 
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
