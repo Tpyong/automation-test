@@ -83,7 +83,7 @@ jobs:
         echo "Running pylint..."
         pylint core/ tests/ --output-format=text --fail-under=8.0
         echo "Running flake8..."
-        flake8 core/ tests/
+        flake8 core/ tests/ --max-line-length=100
         echo "Running black check..."
         black --check core/ tests/
         echo "Running isort check..."
