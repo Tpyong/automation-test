@@ -50,10 +50,11 @@ jobs:
 
     - name: Run tests
       run: |
-        pytest tests/ -v --test-browser=${{ matrix.browser }} --alluredir=allure-results
+        pytest tests/ -v --alluredir=allure-results
       env:
         TEST_ENV: testing
         HEADLESS: true
+        BROWSER: ${{ matrix.browser }}
 
     - name: Upload test results
       if: always()
