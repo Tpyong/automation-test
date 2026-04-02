@@ -80,7 +80,7 @@ exclude = ["tests", "reports", "venv", ".venv", "dist", "build"]
 # Black 代码格式化（统一代码风格）
 # ==============================
 [tool.black]
-line-length = 100                  # 单行最大长度
+line-length = 120                  # 单行最大长度
 target-version = ['py311']         # 适配Python3.11语法
 include = '\.pyi?$'                # 只格式化py/pyi文件
 # 格式化时跳过的目录
@@ -101,8 +101,8 @@ extend-exclude = '''
 # isort 导入包排序（规整导包顺序）
 # ==============================
 [tool.isort]
-profile = "black"                  # 兼容black格式
-line_length = 100
+profile = "black"                  # 兼容 black 格式
+line_length = 120
 multi_line_output = 3
 include_trailing_comma = true
 force_grid_wrap = 0
@@ -114,7 +114,7 @@ skip = [".git", "__pycache__", "venv", ".venv", "reports"]
 # flake8 代码语法巡检
 # ==============================
 [tool.flake8]
-max-line-length = 100
+max-line-length = 120
 extend-ignore = ["E203", "W503"]  # 忽略和black冲突的规则
 exclude = [".git", "__pycache__", "venv", ".venv", "build", "dist", "reports"]
 per-file-ignores = [

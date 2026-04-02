@@ -99,9 +99,7 @@ class LocatorManager:
             return locator
         raise TypeError(f"定位器类型错误: {type(locator)}")
 
-    def get_by_strategy(
-        self, element_name: str, strategy: str = "default"
-    ) -> Union[str, Dict[str, Any]]:
+    def get_by_strategy(self, element_name: str, strategy: str = "default") -> Union[str, Dict[str, Any]]:
         """
         按策略获取元素定位器
 
@@ -160,7 +158,7 @@ class SmartLocator:
     def get_locator(self) -> Locator:
         """
         根据配置获取 Playwright Locator 对象
-        
+
         Returns:
             Playwright Locator 对象
         """
@@ -170,14 +168,14 @@ class SmartLocator:
                 return self.page.locator(self.config)
             except Exception as e:
                 raise TypeError(f"Failed to create Locator from string config: {self.config}, error: {e}")
-            
+
         if isinstance(self.config, dict):
             # 语义化定位方式
             try:
                 return self._get_semantic_locator(self.config)
             except Exception as e:
                 raise TypeError(f"Failed to create Locator from dict config: {self.config}, error: {e}")
-            
+
         else:
             raise ValueError(f"不支持的定位器配置：{self.config}")
 
@@ -204,55 +202,55 @@ class SmartLocator:
                 if name:
                     return self.page.get_by_role(role, name=name)
                 return self.page.get_by_role(role)
-            
+
             # 2. get_by_label - 表单元素推荐
             if "label" in config:
                 label = config["label"]
                 exact = config.get("exact", False)
                 return self.page.get_by_label(label, exact=exact)
-            
+
             # 3. get_by_placeholder
             if "placeholder" in config:
                 placeholder = config["placeholder"]
                 exact = config.get("exact", False)
                 return self.page.get_by_placeholder(placeholder, exact=exact)
-            
+
             # 4. get_by_text
             if "text" in config:
                 text = config["text"]
                 exact = config.get("exact", False)
                 return self.page.get_by_text(text, exact=exact)
-            
+
             # 5. get_by_title
             if "title" in config:
                 title = config["title"]
                 exact = config.get("exact", False)
                 return self.page.get_by_title(title, exact=exact)
-            
+
             # 6. get_by_alt_text
             if "alt" in config:
                 alt = config["alt"]
                 exact = config.get("exact", False)
                 return self.page.get_by_alt_text(alt, exact=exact)
-            
+
             # 7. get_by_test_id
             if "test_id" in config:
                 test_id = config["test_id"]
                 return self.page.get_by_test_id(test_id)
-            
+
             # 8. CSS 选择器
             if "css" in config:
                 return self.page.locator(config["css"])
-            
+
             # 9. XPath 选择器
             if "xpath" in config:
                 return self.page.locator(config["xpath"])
-            
+
             # 默认使用第一个值作为 CSS 选择器
             first_value = list(config.values())[0]
             if isinstance(first_value, str):
                 return self.page.locator(first_value)
-            
+
             raise ValueError(f"无法识别的定位器配置：{config}")
         except Exception as e:
             raise TypeError(f"Failed to create semantic Locator from config: {config}, error: {e}")
