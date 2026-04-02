@@ -287,19 +287,20 @@ def browser(playwright: Playwright, request: Any) -> Generator[Browser, Any, Non
     
     # 从 pytest-playwright 获取浏览器类型
     # pytest-playwright 会自动处理 --browser 参数或 BROWSER 环境变量
-    browser_name = request.config.getoption("--browser", default="chromium")
+    browser_name = request.config.getoption("--browser", default=None)
     
     logger.info(f"=== Browser Fixture 调试信息 ===")
     logger.info(f"request.config.getoption('--browser') = {browser_name}")
     logger.info(f"BROWSER 环境变量 = {os.getenv('BROWSER', 'not set')}")
     logger.info(f"===========================")
     
-    # 如果没有指定，尝试从环境变量读取
-    if not browser_name or browser_name == "chromium":
-        env_browser = os.getenv("BROWSER")
-        if env_browser and env_browser != "chromium":
-            browser_name = env_browser
-            logger.info(f"从环境变量读取浏览器类型：{browser_name}")
+    # 如果命令行参数为空，从环境变量读取
+    if not browser_name:
+        browser_name = os.getenv("BROWSER", "chromium")
+    
+    # 如果是列表，取第一个元素（pytest-playwright 的行为）
+    if isinstance(browser_name, list):
+        browser_name = browser_name[0] if browser_name else "chromium"
     
     headless = os.getenv("HEADLESS", "true").lower() == "true"
     slow_mo = int(os.getenv("SLOW_MO", "0"))
@@ -308,6 +309,7 @@ def browser(playwright: Playwright, request: Any) -> Generator[Browser, Any, Non
     viewport_height = int(os.getenv("VIEWPORT_HEIGHT", "1080"))
     viewport = {"width": viewport_width, "height": viewport_height}
 
+    logger.info(f"最终选择的浏览器类型：{browser_name}")
     logger.info(f"初始化浏览器池：{browser_name}, headless: {headless}, viewport: {viewport}")
 
     pool = _get_browser_pool()
