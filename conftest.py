@@ -265,6 +265,9 @@ def pytest_sessionfinish(session: Any, exitstatus: int) -> None:
 @pytest.fixture(scope="session")
 def settings() -> Settings:
     """获取配置"""
+    import os
+    browser_env = os.getenv("BROWSER", "not set")
+    logger.info(f"Settings fixture: BROWSER 环境变量 = {browser_env}")
     return Settings()
 
 
