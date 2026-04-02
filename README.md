@@ -78,20 +78,26 @@ pytest -v -n auto
 
 ### 4. 查看报告
 
-**Allure报告**：
+**Allure 报告**：
 
 ```bash
-# 运行测试并收集Allure结果数据
+# 运行测试并收集 Allure 结果数据
 pytest --alluredir=reports/allure-results
 
-# 生成Allure报告
+# 生成 Allure 报告
 allure generate reports/allure-results -o reports/allure-report --clean
 
 # 在浏览器中查看报告
 allure open reports/allure-report
 ```
 
-**自定义HTML报告**：
+**CI/CD 报告查看**：
+- 访问 GitHub Actions 页面
+- 选择成功的 workflow 运行
+- 在页面底部 "Artifacts" 区域下载 `allure-report-html.zip`
+- 解压后打开 `index.html` 查看报告
+
+**自定义 HTML 报告**：
 直接在浏览器中打开 `reports/test-summary.html` 文件
 
 ## 文档
@@ -145,6 +151,15 @@ allure open reports/allure-report
 - ✅ **智能测试建议** - 基于历史测试结果提供优化建议
 
 ## 最近变更
+
+### 2026-04-02: CI/CD Pipeline 完整修复
+
+- ✅ **pytest 插件识别修复** - 移除 `-p no:warnings` 导致 pytest-html、pytest-cov 插件无法识别
+- ✅ **浏览器 headless 模式强制** - CI 环境自动检测并强制使用 headless=true，解决 XServer 缺失问题
+- ✅ **Allure 报告部署优化** - 改用普通 artifact 上传，无需 GitHub Pages 权限
+- ✅ **PyPI 源配置修复** - 移除 requirements.lock 中的清华源，使用官方源避免 403 错误
+- ✅ **Dockerfile 修复** - 使用正确的 requirements.in 文件
+- ✅ **Allure 路径修复** - 修复 artifacts 路径查找和复制逻辑
 
 ### 浏览器配置优化
 

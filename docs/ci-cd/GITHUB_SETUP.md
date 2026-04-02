@@ -30,15 +30,17 @@ GitHub Actions 工作流配置位于 `.github/workflows/test.yml`，包含以下
 2. 在左侧菜单选择 **Actions** > **General**
 3. 确保 **Allow all actions and reusable workflows** 已选中
 
-### 2. 配置 GitHub Pages
+### 2. ~~配置 GitHub Pages~~（已废弃）
 
-用于托管 Allure 测试报告：
+**注意**：从 2026-04-02 起，Allure 报告改用 artifact 上传，不再需要配置 GitHub Pages。
 
-1. 在 GitHub 仓库页面，点击 **Settings** 标签
-2. 在左侧菜单选择 **Pages**
-3. **Source** 选择 **Deploy from a branch**
-4. **Branch** 选择 **gh-pages** 分支的 **/(root)** 目录
-5. 点击 **Save**
+~~用于托管 Allure 测试报告：~~
+
+~~1. 在 GitHub 仓库页面，点击 **Settings** 标签~~
+~~2. 在左侧菜单选择 **Pages**~~
+~~3. **Source** 选择 **Deploy from a branch**~~
+~~4. **Branch** 选择 **gh-pages** 分支的 **/(root)** 目录~~
+~~5. 点击 **Save**~~
 
 ### 3. 设置 Secrets（可选）
 
@@ -103,7 +105,7 @@ git push origin main
   1. 下载所有测试结果
   2. 合并 Allure 结果
   3. 生成 Allure 报告
-  4. 部署到 GitHub Pages
+  4. ~~部署到 GitHub Pages~~（已改为 artifact 上传）
 
 #### 4. Notify 任务
 
@@ -128,11 +130,13 @@ git push origin main
 
 ### Allure 报告
 
-测试完成后，Allure 报告作为 artifact 上传，需要手动下载查看：
+测试完成后，Allure 报告作为 artifact 上传：
 
 1. 在工作流运行页面，滚动到 **Artifacts** 部分
-2. 下载 `allure-report` 压缩包
+2. 下载 `allure-report-html` 压缩包
 3. 解压后在浏览器中打开 `index.html` 文件
+
+**注意**：不再部署到 GitHub Pages，报告保留 30 天
 
 ### 工作流运行记录
 
@@ -160,7 +164,49 @@ git push origin main
     playwright install --with-deps chromium
 ```
 
-#### 2. 测试超时
+#### 2. pytest 插件参数无法识别
+
+**症状**：`pytest: error: unrecognized arguments: --html --cov`
+
+**原因**：使用了 `-p no:warnings` 导致插件被禁用
+
+**解决方案**：
+```yaml
+# 移除 -p no:warnings 参数
+- name: Run tests
+  run: |
+    pytest tests/ -v --alluredir=allure-results
+```
+
+#### 3. CI 环境浏览器启动失败
+
+**症状**：`Looks like you launched a headed browser without having a XServer running`
+
+**原因**：CI 环境没有 XServer，但浏览器以 headed 模式启动
+
+**解决方案**：
+```yaml
+# 确保设置 HEADLESS=true
+env:
+  HEADLESS: true
+```
+
+**自动检测机制**：conftest.py 已添加 CI 环境自动检测和强制 headless 模式
+
+#### 4. PyPI 镜像源 403 错误
+
+**症状**：`HTTP error 403 while getting https://pypi.tuna.tsinghua.edu.cn/...`
+
+**原因**：清华源禁止了某些版本的下载
+
+**解决方案**：
+```bash
+# 移除 requirements.lock 中的镜像源配置
+# 使用官方 PyPI 源
+pip install --index-url https://pypi.org/simple -r requirements.lock
+```
+
+#### 5. 测试超时
 
 **症状**：测试运行时间过长，导致超时
 

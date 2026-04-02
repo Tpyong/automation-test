@@ -20,18 +20,17 @@
 - 定时任务（每天凌晨 2 点）
 - 自动上传 Allure 报告、测试摘要、失败截图
 - 代码覆盖率统计
-- 自动部署 Allure 报告到 GitHub Pages
+- ~~自动部署 Allure 报告到 GitHub Pages~~（已改为 artifact 上传）
 
 ### 使用方法
 
 1. 将代码推送到 GitHub
-2. 在 Settings > Pages 中启用 GitHub Pages
-3. 配置完成后，每次推送都会自动触发测试
+2. 配置完成后，每次推送都会自动触发测试
 
 ### 查看结果
 
 - 测试报告：Actions > 工作流运行记录 > Artifacts
-- Allure 报告：https://your-username.github.io/your-repo/
+- Allure 报告：Actions > 工作流运行记录 > Artifacts > allure-report-html.zip（下载解压查看）
 
 ## GitLab CI
 
@@ -184,4 +183,49 @@ pytest --timeout=300
 
 # 或使用更长的默认超时
 TIMEOUT=60000 pytest
+```
+
+### pytest 插件参数无法识别
+
+**症状**：`pytest: error: unrecognized arguments: --html --cov`
+
+**原因**：使用了 `-p no:warnings` 导致插件被禁用
+
+**解决方案**：
+```yaml
+# 移除 -p no:warnings 参数
+pytest tests/ -v --alluredir=allure-results
+```
+
+### CI 环境浏览器启动失败
+
+**症状**：`Missing X server or $DISPLAY`
+
+**原因**：CI 环境没有 XServer，但浏览器以 headed 模式启动
+
+**解决方案**：
+```yaml
+# 确保设置 HEADLESS=true
+env:
+  HEADLESS: true
+```
+
+**conftest.py 已添加自动检测**：
+```python
+# CI 环境中强制使用 headless 模式
+if os.getenv("CI", "false").lower() == "true" and not headless:
+    headless = True
+```
+
+### PyPI 镜像源 403 错误
+
+**症状**：`HTTP error 403 while getting https://pypi.tuna.tsinghua.edu.cn/...`
+
+**原因**：清华源禁止了某些版本的下载
+
+**解决方案**：
+```bash
+# 移除 requirements.lock 中的镜像源配置
+# 使用官方 PyPI 源
+--index-url https://pypi.org/simple
 ```
