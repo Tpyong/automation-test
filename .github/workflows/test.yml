@@ -54,11 +54,10 @@ jobs:
         echo "BROWSER 环境变量：$BROWSER"
         echo "matrix.browser: ${{ matrix.browser }}"
         echo "================"
-        pytest tests/ -v --alluredir=allure-results
+        pytest tests/ -v --browser=${{ matrix.browser }} --alluredir=allure-results
       env:
         TEST_ENV: testing
         HEADLESS: true
-        BROWSER: ${{ matrix.browser }}
 
     - name: Upload test results
       if: always()
