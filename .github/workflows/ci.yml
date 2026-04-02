@@ -282,8 +282,8 @@ jobs:
         LATEST_REPORT=$(ls -t $REPORT_DIRS | head -1)
         echo "Using latest report: $LATEST_REPORT"
         
-        # 复制报告内容到当前目录
-        cp -r "artifacts/$LATEST_REPORT"/* .
+        # 复制报告内容到当前目录（修复路径）
+        cp -r "$LATEST_REPORT"/* .
 
     - name: Setup Pages
       uses: actions/configure-pages@v4

@@ -308,9 +308,36 @@ def browser(playwright: Playwright, request: Any) -> Generator[Browser, Any, Non
     pool = _get_browser_pool()
     pool.initialize(playwright, browser_name, headless, slow_mo)
 
-    browser_obj = pool.acquire_browser()
+    # 重试机制：尝试获取浏览器实例，最多重试 3 次
+    browser_obj = None
+    max_retries = 3
+    retry_delay = 2  # 秒
+    
+    for attempt in range(max_retries):
+        try:
+            browser_obj = pool.acquire_browser()
+            if browser_obj:
+                logger.info(f"成功获取浏览器实例 (尝试 {attempt + 1}/{max_retries}): {id(browser_obj)}")
+                break
+            else:
+                logger.warning(f"尝试 {attempt + 1}/{max_retries} 获取浏览器失败，等待 {retry_delay}s 后重试...")
+                if attempt < max_retries - 1:
+                    import time
+                    time.sleep(retry_delay)
+        except Exception as e:
+            logger.error(f"尝试 {attempt + 1}/{max_retries} 获取浏览器时出错：{e}")
+            if attempt < max_retries - 1:
+                import time
+                time.sleep(retry_delay)
+    
     if not browser_obj:
-        raise RuntimeError("无法获取浏览器实例")
+        error_msg = (
+            f"无法获取浏览器实例 (已重试 {max_retries} 次). "
+            f"可能原因：1) Playwright 浏览器未安装 2) 系统缺少依赖 3) 资源不足. "
+            f"请检查 CI 日志中的浏览器安装步骤。"
+        )
+        logger.error(error_msg)
+        raise RuntimeError(error_msg)
 
     logger.info(f"成功获取浏览器实例：{id(browser_obj)}")
 
