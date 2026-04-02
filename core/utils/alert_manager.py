@@ -74,8 +74,7 @@ class AlertManager:
     def should_alert(self, failed_count: int, consecutive_failures: int = 1) -> bool:
         """判断是否应该发送告警"""
         return (
-            failed_count >= self.config.failure_threshold
-            and consecutive_failures >= self.config.consecutive_failures
+            failed_count >= self.config.failure_threshold and consecutive_failures >= self.config.consecutive_failures
         )
 
     def send_alert(
@@ -337,9 +336,7 @@ class AlertManager:
         failed_count = len(failed_tests)
 
         if not self.should_alert(failed_count):
-            logger.info(
-                f"失败测试数 {failed_count} 未达到告警阈值 {self.config.failure_threshold}，跳过告警"
-            )
+            logger.info(f"失败测试数 {failed_count} 未达到告警阈值 {self.config.failure_threshold}，跳过告警")
             return True
 
         title = f"测试执行失败 ({failed_count} 个测试失败)"

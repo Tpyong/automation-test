@@ -187,14 +187,9 @@ class TestMonitor:
         if self.current_session is None:
             return []
 
-        sorted_tests = sorted(
-            self.current_session.test_metrics, key=lambda x: x.duration, reverse=True
-        )
+        sorted_tests = sorted(self.current_session.test_metrics, key=lambda x: x.duration, reverse=True)
 
-        return [
-            {"name": t.test_name, "duration": t.duration, "status": t.status}
-            for t in sorted_tests[:top_n]
-        ]
+        return [{"name": t.test_name, "duration": t.duration, "status": t.status} for t in sorted_tests[:top_n]]
 
     def get_failed_tests(self) -> List[Dict[str, Any]]:
         """获取失败的测试"""

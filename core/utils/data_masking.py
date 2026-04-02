@@ -77,9 +77,7 @@ class DataMasker:
 
         return result
 
-    def mask_dict(
-        self, data: Dict[str, Any], sensitive_fields: Optional[List[str]] = None
-    ) -> Dict[str, Any]:
+    def mask_dict(self, data: Dict[str, Any], sensitive_fields: Optional[List[str]] = None) -> Dict[str, Any]:
         """对字典进行脱敏处理"""
         if not data:
             return data

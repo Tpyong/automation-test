@@ -116,9 +116,7 @@ class APIContractTester:
             # 验证状态码
             validation_errors = []
             if expected_status and response.status_code != expected_status:
-                validation_errors.append(
-                    f"状态码不匹配: 期望 {expected_status}, 实际 {response.status_code}"
-                )
+                validation_errors.append(f"状态码不匹配: 期望 {expected_status}, 实际 {response.status_code}")
 
             # 尝试解析响应体
             try:
@@ -168,15 +166,11 @@ class APIContractTester:
 
         # 验证响应体结构（简化版）
         if contract.response_schema and isinstance(result.response_body, dict):
-            errors.extend(
-                self._validate_response_structure(result.response_body, contract.response_schema)
-            )
+            errors.extend(self._validate_response_structure(result.response_body, contract.response_schema))
 
         return errors
 
-    def _validate_response_structure(
-        self, response: Dict[str, Any], schema: Dict[str, Any]
-    ) -> List[str]:
+    def _validate_response_structure(self, response: Dict[str, Any], schema: Dict[str, Any]) -> List[str]:
         """验证响应体结构"""
         errors = []
 
@@ -262,9 +256,7 @@ class APIPerformanceTester:
                 errors.append(str(e))
                 return -1
 
-        logger.info(
-            "开始负载测试: %s %s, 迭代次数: %d, 并发: %d", method, path, iterations, concurrency
-        )
+        logger.info("开始负载测试: %s %s, 迭代次数: %d, 并发: %d", method, path, iterations, concurrency)
 
         with ThreadPoolExecutor(max_workers=concurrency) as executor:
             futures = [executor.submit(make_request) for _ in range(iterations)]
@@ -289,9 +281,7 @@ class APIPerformanceTester:
                 "p50_response_time": response_times[int(total_requests * 0.5)],
                 "p95_response_time": response_times[int(total_requests * 0.95)],
                 "p99_response_time": response_times[int(total_requests * 0.99)],
-                "requests_per_second": (
-                    total_requests / sum(response_times) if sum(response_times) > 0 else 0
-                ),
+                "requests_per_second": (total_requests / sum(response_times) if sum(response_times) > 0 else 0),
             }
         else:
             results = {
@@ -304,9 +294,7 @@ class APIPerformanceTester:
         logger.info("负载测试完成: 平均响应时间 %.3fs", results.get("avg_response_time", 0))
         return results
 
-    def stress_test(
-        self, path: str, method: str = "GET", duration: int = 60, target_rps: int = 100
-    ) -> Dict[str, Any]:
+    def stress_test(self, path: str, method: str = "GET", duration: int = 60, target_rps: int = 100) -> Dict[str, Any]:
         """
         压力测试
 
@@ -352,9 +340,7 @@ class APIPerformanceTester:
                         results["failed_requests"] = int(results["failed_requests"]) + 1
                         results["errors"].append(str(e))
 
-        logger.info(
-            "开始压力测试: %s %s, 持续时间: %ds, 目标 RPS: %d", method, path, duration, target_rps
-        )
+        logger.info("开始压力测试: %s %s, 持续时间: %ds, 目标 RPS: %d", method, path, duration, target_rps)
 
         # 启动工作线程
         threads = []
@@ -396,9 +382,7 @@ class APIPerformanceTester:
                 "successful_requests": 0,
                 "failed_requests": results["failed_requests"],
                 "success_rate": 0.0,
-                "errors": (
-                    results["errors"][:10] if results.get("errors") else []
-                ),  # 只保留前 10 个错误
+                "errors": (results["errors"][:10] if results.get("errors") else []),  # 只保留前 10 个错误
             }
 
         logger.info(

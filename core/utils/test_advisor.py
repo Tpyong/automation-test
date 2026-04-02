@@ -95,9 +95,7 @@ class TestAdvisor:
 
         return {"test_durations": avg_durations, "test_failure_counts": test_failure_counts}
 
-    def analyze_module_performance(
-        self, history_data: List[Dict[str, Any]]
-    ) -> Dict[str, Dict[str, Any]]:
+    def analyze_module_performance(self, history_data: List[Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
         """
         分析模块性能
 
@@ -138,9 +136,7 @@ class TestAdvisor:
             runs = stats["runs"]
             if runs > 0:
                 stats["avg_duration"] = float(stats["duration"] / runs)
-                stats["pass_rate"] = float(
-                    (stats["passed"] / stats["total"] * 100) if stats["total"] > 0 else 0
-                )
+                stats["pass_rate"] = float((stats["passed"] / stats["total"] * 100) if stats["total"] > 0 else 0)
             else:
                 stats["avg_duration"] = 0.0
                 stats["pass_rate"] = 0.0
@@ -191,9 +187,7 @@ class TestAdvisor:
                     "title": "优化执行时间较长的测试",
                     "description": (
                         "以下测试执行时间较长: "
-                        + ", ".join(
-                            [f"{test} ({duration:.2f}s)" for test, duration in top_slow_tests]
-                        )
+                        + ", ".join([f"{test} ({duration:.2f}s)" for test, duration in top_slow_tests])
                     ),
                     "priority": "medium",
                     "action": "考虑优化这些测试的执行逻辑，或使用并行执行",
@@ -202,9 +196,7 @@ class TestAdvisor:
 
         # 2. 识别频繁失败的测试
         frequent_failures = [
-            (test, count)
-            for test, count in performance_analysis.get("test_failure_counts", {}).items()
-            if count >= 3
+            (test, count) for test, count in performance_analysis.get("test_failure_counts", {}).items() if count >= 3
         ]
 
         if frequent_failures:
@@ -216,8 +208,7 @@ class TestAdvisor:
                     "type": "reliability",
                     "title": "修复频繁失败的测试",
                     "description": (
-                        "以下测试频繁失败: "
-                        + ", ".join([f"{test} ({count}次)" for test, count in top_failures])
+                        "以下测试频繁失败: " + ", ".join([f"{test} ({count}次)" for test, count in top_failures])
                     ),
                     "priority": "high",
                     "action": "检查这些测试的稳定性，修复根本原因",
@@ -225,11 +216,7 @@ class TestAdvisor:
             )
 
         # 3. 识别表现不佳的模块
-        poor_modules = [
-            (module, stats)
-            for module, stats in module_analysis.items()
-            if stats.get("pass_rate", 0) < 80
-        ]
+        poor_modules = [(module, stats) for module, stats in module_analysis.items() if stats.get("pass_rate", 0) < 80]
 
         if poor_modules:
             poor_modules.sort(key=lambda x: x[1].get("pass_rate", 0))
@@ -242,10 +229,7 @@ class TestAdvisor:
                     "description": (
                         "以下模块通过率较低: "
                         + ", ".join(
-                            [
-                                f'{module} ({stats.get("pass_rate", 0):.1f}%)'
-                                for module, stats in top_poor_modules
-                            ]
+                            [f'{module} ({stats.get("pass_rate", 0):.1f}%)' for module, stats in top_poor_modules]
                         )
                     ),
                     "priority": "high",
@@ -295,9 +279,7 @@ class TestAdvisor:
             )
 
         # 6. 并行执行建议
-        avg_duration = sum(
-            data["summary"]["summary"].get("duration", 0) for data in history_data
-        ) / len(history_data)
+        avg_duration = sum(data["summary"]["summary"].get("duration", 0) for data in history_data) / len(history_data)
         if avg_duration > 60:
             suggestions.append(
                 {
@@ -323,9 +305,7 @@ class TestAdvisor:
 
         return suggestions
 
-    def generate_advisor_report(
-        self, days: int = 30, filename: str = "test-advisor-report.html"
-    ) -> str:
+    def generate_advisor_report(self, days: int = 30, filename: str = "test-advisor-report.html") -> str:
         """
         生成测试建议报告
 

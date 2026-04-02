@@ -182,9 +182,7 @@ class CircuitBreaker:
         logger.info(f"断路器 [{self.name}] 状态变更: {old_state.value} -> HALF_OPEN (尝试恢复)")
         self._notify_state_change(old_state, CircuitState.HALF_OPEN)
 
-    def add_state_change_listener(
-        self, listener: Callable[[str, CircuitState, CircuitState], None]
-    ) -> None:
+    def add_state_change_listener(self, listener: Callable[[str, CircuitState, CircuitState], None]) -> None:
         """添加状态变更监听器"""
         self._listeners.append(listener)
 
@@ -217,9 +215,7 @@ class CircuitBreaker:
                 "successful_calls": self._stats.successful_calls,
                 "failed_calls": self._stats.failed_calls,
                 "success_rate": (
-                    self._stats.successful_calls / self._stats.total_calls * 100
-                    if self._stats.total_calls > 0
-                    else 0
+                    self._stats.successful_calls / self._stats.total_calls * 100 if self._stats.total_calls > 0 else 0
                 ),
                 "consecutive_failures": self._stats.consecutive_failures,
                 "consecutive_successes": self._stats.consecutive_successes,
@@ -288,9 +284,7 @@ def get_circuit_breaker_manager() -> CircuitBreakerManager:
     return _circuit_breaker_manager
 
 
-def circuit_breaker(
-    name: str, failure_threshold: int = 5, success_threshold: int = 3, timeout: float = 60.0
-):
+def circuit_breaker(name: str, failure_threshold: int = 5, success_threshold: int = 3, timeout: float = 60.0):
     """
     断路器装饰器
 

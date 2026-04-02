@@ -40,11 +40,13 @@ jobs:
 
     - name: Install Playwright browsers
       run: |
-        echo "Installing Playwright browsers for ${{ matrix.browser }}..."
+        echo "Installing Playwright browser: ${{ matrix.browser }}..."
         playwright install --with-deps ${{ matrix.browser }}
-        echo "Verifying browser installation..."
+        echo "Installing system dependencies for ${{ matrix.browser }}..."
         playwright install-deps ${{ matrix.browser }} || echo "Note: install-deps failed, continuing..."
         echo "Browser installation completed for ${{ matrix.browser }}"
+        # 列出已安装的浏览器
+        ls -la ~/.cache/ms-playwright/ || true
 
     - name: Run tests
       run: |

@@ -94,9 +94,7 @@ class SmartWaiter:
 
         # 分析历史成功率
         recent_attempts = self._attempt_history[-10:]
-        success_rate = sum(1 for a in recent_attempts if a.get("success", False)) / len(
-            recent_attempts
-        )
+        success_rate = sum(1 for a in recent_attempts if a.get("success", False)) / len(recent_attempts)
 
         # 根据成功率调整延迟
         if success_rate > 0.8:
@@ -147,9 +145,7 @@ class SmartWaiter:
             # 计算延迟
             delay = self.calculate_delay(attempt + 1)
 
-            logger.debug(
-                "等待 %.2f 秒后重试（尝试 %d/%d）", delay, attempt + 1, self.config.max_attempts
-            )
+            logger.debug("等待 %.2f 秒后重试（尝试 %d/%d）", delay, attempt + 1, self.config.max_attempts)
 
             # 等待
             time.sleep(delay)
@@ -165,13 +161,9 @@ class SmartWaiter:
         def element_exists():
             return page.locator(selector).count() > 0
 
-        return self.wait(
-            condition=element_exists, timeout=timeout, error_message=f"元素未找到: {selector}"
-        )
+        return self.wait(condition=element_exists, timeout=timeout, error_message=f"元素未找到: {selector}")
 
-    def wait_for_text(
-        self, page: Any, selector: str, text: str, timeout: Optional[float] = None
-    ) -> bool:
+    def wait_for_text(self, page: Any, selector: str, text: str, timeout: Optional[float] = None) -> bool:
         """等待文本出现"""
 
         def text_present():
@@ -190,9 +182,7 @@ class SmartWaiter:
         def url_matches():
             return url_pattern in page.url
 
-        return self.wait(
-            condition=url_matches, timeout=timeout, error_message=f"URL未匹配: {url_pattern}"
-        )
+        return self.wait(condition=url_matches, timeout=timeout, error_message=f"URL未匹配: {url_pattern}")
 
     def _record_attempt(self, attempt: int, success: bool) -> None:
         """记录尝试历史"""
@@ -227,9 +217,7 @@ class WaitStrategyFactory:
     @staticmethod
     def create_fixed_waiter(delay: float = 1.0, max_attempts: int = 3) -> SmartWaiter:
         """创建固定等待器"""
-        config = WaitConfig(
-            strategy=WaitStrategy.FIXED, initial_delay=delay, max_attempts=max_attempts
-        )
+        config = WaitConfig(strategy=WaitStrategy.FIXED, initial_delay=delay, max_attempts=max_attempts)
         return SmartWaiter(config)
 
     @staticmethod
@@ -301,9 +289,7 @@ def smart_retry(
     """
 
     def decorator(func: Callable) -> Callable:
-        config = WaitConfig(
-            strategy=strategy, initial_delay=initial_delay, max_attempts=max_attempts
-        )
+        config = WaitConfig(strategy=strategy, initial_delay=initial_delay, max_attempts=max_attempts)
         waiter = SmartWaiter(config)
 
         def wrapper(*args, **kwargs):
@@ -333,9 +319,7 @@ def smart_retry(
             if last_exception:
                 raise last_exception
             else:
-                raise Exception(
-                    f"函数 {func.__name__} 达到最大重试次数 {max_attempts}，但没有捕获到异常"
-                )
+                raise Exception(f"函数 {func.__name__} 达到最大重试次数 {max_attempts}，但没有捕获到异常")
 
         return wrapper
 

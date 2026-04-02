@@ -15,9 +15,7 @@ class AllureHelper:
 
     @staticmethod
     def attach_text(text: str, name: str = "text", attachment_type: Optional[str] = None) -> None:
-        allure.attach(
-            text, name=name, attachment_type=attachment_type or allure.attachment_type.TEXT
-        )
+        allure.attach(text, name=name, attachment_type=attachment_type or allure.attachment_type.TEXT)
 
     @staticmethod
     def attach_json(json_data: Any, name: str = "json") -> None:

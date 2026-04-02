@@ -81,17 +81,11 @@ class BrowserPool:
 
         try:
             if self._browser_type == "chromium":
-                return self._playwright.chromium.launch(
-                    headless=self._headless, slow_mo=self._slow_mo
-                )
+                return self._playwright.chromium.launch(headless=self._headless, slow_mo=self._slow_mo)
             elif self._browser_type == "firefox":
-                return self._playwright.firefox.launch(
-                    headless=self._headless, slow_mo=self._slow_mo
-                )
+                return self._playwright.firefox.launch(headless=self._headless, slow_mo=self._slow_mo)
             elif self._browser_type == "webkit":
-                return self._playwright.webkit.launch(
-                    headless=self._headless, slow_mo=self._slow_mo
-                )
+                return self._playwright.webkit.launch(headless=self._headless, slow_mo=self._slow_mo)
             else:
                 raise ValueError(f"不支持的浏览器类型: {self._browser_type}")
         except Exception as e:

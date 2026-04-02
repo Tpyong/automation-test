@@ -77,9 +77,7 @@ class DatabaseManager:
 
         self.config = config or DatabaseConfig.from_env()
         self._initialized = True
-        logger.info(
-            f"DatabaseManager 初始化完成: {self.config.host}:{self.config.port}/{self.config.database}"
-        )
+        logger.info(f"DatabaseManager 初始化完成: {self.config.host}:{self.config.port}/{self.config.database}")
 
     def initialize(self) -> None:
         """初始化数据库连接池"""

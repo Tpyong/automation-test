@@ -310,9 +310,7 @@ class ComplianceChecker:
     def save_compliance_report(self, output_file: Optional[str] = None) -> str:
         """保存合规报告"""
         if output_file is None:
-            output_file = (
-                f"reports/compliance_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-            )
+            output_file = f"reports/compliance_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
 
         output_path = Path(output_file)
         output_path.parent.mkdir(parents=True, exist_ok=True)

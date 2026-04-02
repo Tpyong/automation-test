@@ -160,9 +160,7 @@ class AuditLogger:
             details=details,
         )
 
-    def log_test_end(
-        self, test_name: str, status: str, details: Optional[Dict[str, Any]] = None
-    ) -> None:
+    def log_test_end(self, test_name: str, status: str, details: Optional[Dict[str, Any]] = None) -> None:
         """记录测试结束"""
         severity = AuditSeverity.LOW if status == "passed" else AuditSeverity.MEDIUM
 
@@ -174,9 +172,7 @@ class AuditLogger:
             details={"status": status, **(details or {})},
         )
 
-    def log_test_failure(
-        self, test_name: str, error: str, details: Optional[Dict[str, Any]] = None
-    ) -> None:
+    def log_test_failure(self, test_name: str, error: str, details: Optional[Dict[str, Any]] = None) -> None:
         """记录测试失败"""
         self.log_event(
             event_type=AuditEventType.TEST_FAILURE,
@@ -214,9 +210,7 @@ class AuditLogger:
             details={"action": action, **(details or {})},
         )
 
-    def log_config_change(
-        self, config_key: str, old_value: Any, new_value: Any, user: Optional[str] = None
-    ) -> None:
+    def log_config_change(self, config_key: str, old_value: Any, new_value: Any, user: Optional[str] = None) -> None:
         """记录配置变更"""
         self.log_event(
             event_type=AuditEventType.CONFIG_CHANGE,
@@ -249,9 +243,7 @@ class AuditLogger:
         """按严重级别获取事件"""
         return [e for e in self.events if e.severity == severity]
 
-    def get_events_by_date_range(
-        self, start_date: datetime, end_date: datetime
-    ) -> List[AuditEvent]:
+    def get_events_by_date_range(self, start_date: datetime, end_date: datetime) -> List[AuditEvent]:
         """按日期范围获取事件"""
         return [e for e in self.events if start_date <= e.timestamp <= end_date]
 
@@ -340,9 +332,7 @@ class DataRetentionPolicy:
         now = datetime.now()
         initial_count = len(self.audit_logger.events)
 
-        self.audit_logger.events = [
-            event for event in self.audit_logger.events if self._should_retain(event, now)
-        ]
+        self.audit_logger.events = [event for event in self.audit_logger.events if self._should_retain(event, now)]
 
         removed_count = initial_count - len(self.audit_logger.events)
         if removed_count > 0:
