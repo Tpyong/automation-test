@@ -292,11 +292,12 @@ def browser(playwright: Playwright, request: Any) -> Generator[Browser, Any, Non
     logger.info(f"=== Browser Fixture 调试信息 ===")
     logger.info(f"request.config.getoption('--browser') = {browser_name}")
     logger.info(f"BROWSER 环境变量 = {os.getenv('BROWSER', 'not set')}")
+    logger.info(f"TEST_BROWSER 环境变量 = {os.getenv('TEST_BROWSER', 'not set')}")
     logger.info(f"===========================")
     
-    # 如果命令行参数为空，从环境变量读取
+    # 如果命令行参数为空，从 TEST_BROWSER 环境变量读取（避免与 pytest-playwright 冲突）
     if not browser_name:
-        browser_name = os.getenv("BROWSER", "chromium")
+        browser_name = os.getenv("TEST_BROWSER", "chromium")
     
     # 如果是列表，取第一个元素（pytest-playwright 的行为）
     if isinstance(browser_name, list):
