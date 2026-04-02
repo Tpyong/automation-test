@@ -86,6 +86,16 @@ def _get_test_advisor() -> Any:
 logger = get_logger(__name__)
 
 
+def pytest_addoption(parser: Any) -> None:
+    """添加自定义命令行参数"""
+    parser.addoption(
+        "--browser",
+        action="store",
+        default=None,
+        help="浏览器类型：chromium, firefox, webkit"
+    )
+
+
 def pytest_configure(config: Any) -> None:
     # 设置Allure报告结果目录为reports/allure-results
     config.option.allure_report_dir = "reports/allure-results"
@@ -263,7 +273,16 @@ def pytest_sessionfinish(session: Any, exitstatus: int) -> None:
 
 
 @pytest.fixture(scope="session")
-def settings() -> Settings:
+def settings(request: Any) -> Settings:
+    """获取配置，支持命令行参数覆盖"""
+    # 获取命令行传入的浏览器类型
+    browser = request.config.getoption("--browser")
+    
+    # 如果命令行指定了浏览器，覆盖环境变量
+    if browser:
+        os.environ["BROWSER"] = browser
+        logger.info(f"使用命令行指定的浏览器：{browser}")
+    
     return Settings()
 
 
