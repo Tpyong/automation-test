@@ -289,9 +289,17 @@ def browser(playwright: Playwright, request: Any) -> Generator[Browser, Any, Non
     # pytest-playwright 会自动处理 --browser 参数或 BROWSER 环境变量
     browser_name = request.config.getoption("--browser", default="chromium")
     
+    logger.info(f"=== Browser Fixture 调试信息 ===")
+    logger.info(f"request.config.getoption('--browser') = {browser_name}")
+    logger.info(f"BROWSER 环境变量 = {os.getenv('BROWSER', 'not set')}")
+    logger.info(f"===========================")
+    
     # 如果没有指定，尝试从环境变量读取
-    if not browser_name or browser_name == "not set":
-        browser_name = os.getenv("BROWSER", "chromium")
+    if not browser_name or browser_name == "chromium":
+        env_browser = os.getenv("BROWSER")
+        if env_browser and env_browser != "chromium":
+            browser_name = env_browser
+            logger.info(f"从环境变量读取浏览器类型：{browser_name}")
     
     headless = os.getenv("HEADLESS", "true").lower() == "true"
     slow_mo = int(os.getenv("SLOW_MO", "0"))
