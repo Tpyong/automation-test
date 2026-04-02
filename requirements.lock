@@ -7,9 +7,9 @@
 --index-url https://pypi.tuna.tsinghua.edu.cn/simple
 --trusted-host pypi.tuna.tsinghua.edu.cn
 
-allure-pytest==2.15.3
+allure-pytest==2.13.2
     # via -r requirements.in
-allure-python-commons==2.15.3
+allure-python-commons==2.13.2
     # via
     #   -r requirements.in
     #   allure-pytest

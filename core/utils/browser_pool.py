@@ -70,7 +70,7 @@ class BrowserPool:
                     browser = self._create_browser()
                     if browser:
                         self._pool.append(browser)
-                        logger.info(f"预创建浏览器实例 {i+1}/{self.max_pool_size}")
+                        logger.info(f"预创建浏览器实例 {i + 1}/{self.max_pool_size}")
                 except Exception as e:
                     logger.error(f"预创建浏览器实例失败: {e}")
 
