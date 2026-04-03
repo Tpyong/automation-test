@@ -1,0 +1,10 @@
+2026-04-03 07:11:17 - config.settings - INFO - 配置验证通过
+2026-04-03 07:11:17 - tests.unit.test_sample - INFO - 开始执行测试: test_add_todo_item
+2026-04-03 07:11:17 - core.pages.base_page - INFO - 导航到: https://demo.playwright.dev/todomvc
+2026-04-03 07:11:17 - core.pages.base_page - INFO - 页面加载完成
+2026-04-03 07:11:17 - core.pages.base_page - INFO - 填充输入框: .new-todo = 学习 Playwright 自动化测试
+2026-04-03 07:11:17 - core.pages.base_page - INFO - 获取元素文本: .todo-list li label = 学习 Playwright 自动化测试
+2026-04-03 07:11:17 - core.utils.assertions - INFO - 断言相等: 期望: 学习 Playwright 自动化测试, 实际: 学习 Playwright 自动化测试
+2026-04-03 07:11:17 - core.pages.base_page - INFO - 截图已保存: reports/screenshots/20260403/todo_item_added_071117.png
+2026-04-03 07:11:17 - tests.unit.test_sample - INFO - 测试执行完成: test_add_todo_item
+2026-04-03 07:11:18 - conftest - INFO - 浏览器实例已释放：139722323875088

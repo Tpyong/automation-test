@@ -1,0 +1,10 @@
+INFO     tests.unit.test_sample:test_sample.py:48 开始执行测试: test_add_todo_item
+INFO     core.pages.base_page:base_page.py:18 导航到: https://demo.playwright.dev/todomvc
+INFO     core.pages.base_page:base_page.py:24 页面加载完成
+INFO     core.pages.base_page:base_page.py:36 填充输入框: .new-todo = 学习 Playwright 自动化测试
+INFO     core.pages.base_page:base_page.py:42 获取元素文本: .todo-list li label = 学习 Playwright 自动化测试
+INFO     core.utils.assertions:assertions.py:16 断言相等: 期望: 学习 Playwright 自动化测试, 实际: 学习 Playwright 自动化测试
+INFO     core.pages.base_page:base_page.py:80 截图已保存: reports/screenshots/20260403/todo_item_added_071113.png
+INFO     tests.unit.test_sample:test_sample.py:67 测试执行完成: test_add_todo_item
+DEBUG    core.utils.browser_pool:browser_pool.py:134 浏览器实例回收到池中: 140012643557984
+INFO     conftest:conftest.py:385 浏览器实例已释放：140012643557984
