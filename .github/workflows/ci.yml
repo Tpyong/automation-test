@@ -105,7 +105,7 @@ jobs:
         VIEWPORT_HEIGHT=1080
         API_BASE_URL=https://api.example.com
         API_TIMEOUT=30000
-        VIDEO_ENABLED=false
+        VIDEO_ENABLED=true
         EOF
 
     - name: Run tests
@@ -216,7 +216,7 @@ jobs:
         TIMEOUT=30000
         VIEWPORT_WIDTH=1920
         VIEWPORT_HEIGHT=1080
-        VIDEO_ENABLED=false
+        VIDEO_ENABLED=true
         EOF
 
     - name: Run tests with coverage
