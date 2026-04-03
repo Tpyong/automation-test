@@ -91,11 +91,14 @@ class Settings:
             self._validate_config()
 
     def _load_env_files(self) -> None:
-        """加载环境配置文件，优先级：.env.{env} > .env"""
-        # 首先加载基础 .env 文件
+        """加载环境配置文件，优先级：.env.{env} > .env > .env.base"""
+        # 首先加载基础配置文件（所有环境的默认值）
+        load_env_file(".env.base")
+        
+        # 然后加载项目根目录的 .env 文件（项目级配置）
         load_env_file(".env")
 
-        # 然后加载特定环境的配置文件（覆盖基础配置）
+        # 最后加载特定环境的配置文件（环境特定配置，覆盖前面的配置）
         env_file = f".env.{self.env}"
         load_env_file(env_file)
 
