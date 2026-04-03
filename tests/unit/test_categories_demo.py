@@ -1,6 +1,7 @@
 """
 测试用例失败示例 - 用于验证 Allure Categories 功能
 """
+
 import allure
 import pytest
 from core.utils.assertions import Assertions
