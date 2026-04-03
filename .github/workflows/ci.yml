@@ -269,56 +269,45 @@ jobs:
       run: |
         docker run --rm automation-test:latest pytest --version
 
+  # 【报告部署任务】仅main分支触发：把Allure测试报告自动部署到GitHub Pages
   deploy-report:
-    name: Deploy Allure Report
-    runs-on: ubuntu-latest
-    needs: test
-    if: github.ref == 'refs/heads/main' && always()
-    
+    name: Deploy Allure Report to GitHub Pages
+    runs-on: ubuntu-latest   # 使用Ubuntu官方运行器
+    needs: test              # 依赖test任务执行完成后再运行
+    if: github.ref == 'refs/heads/main'  # 只在main主干分支执行（避免开发分支乱部署）
+
+    # 部署Pages必需权限（官方要求）
+    permissions:
+      pages: write
+      id-token: write
+
     steps:
-    - name: Download Allure reports
-      uses: actions/download-artifact@v4
-      with:
-        path: artifacts
+      # 1. 下载前面test任务产出的所有Allure报告制品
+      - name: Download all workflow artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts  # 所有报告统一下载到artifacts文件夹
 
-    - name: Find latest Allure report
-      run: |
-        # 切换到 artifacts 目录查找
-        cd artifacts
-        
-        # 查找所有 Allure 报告目录
-        REPORT_DIRS=$(find . -name "allure-report-*" -type d | sed 's|^\./||')
-        if [ -z "$REPORT_DIRS" ]; then
-          echo "No Allure reports found"
-          exit 1
-        fi
-        
-        # 选择最新的报告目录
-        LATEST_REPORT=$(echo "$REPORT_DIRS" | sort | tail -1)
-        echo "Using latest report: $LATEST_REPORT"
-        
-        # 复制报告内容到上级目录
-        cp -r "$LATEST_REPORT"/* ..
-        
-        # 返回上级目录
-        cd ..
-        
-        # 验证复制结果
-        echo "Report contents:"
-        ls -la
+      # 2. 自动找一份最新Allure报告，整理成Pages可识别目录
+      - name: Merge & prepare Allure report
+        run: |
+          # 创建标准报告根目录
+          mkdir -p allure-report
+          # 从所有浏览器/版本报告里，取第一个有效报告复制进去
+          find artifacts -type d -name "allure-report-*" | head -1 | xargs -I {} cp -r {}/* allure-report/
+          # 打印目录结构，方便排错
+          ls -la allure-report
 
-    - name: Upload Allure report as artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: allure-report-html
-        path: .
-        retention-days: 30
+      # 3. 官方固定步骤：配置Pages环境
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v4
 
-    # 部署到 GitHub Pages
-    - name: Deploy to GitHub Pages
-      if: github.ref == 'refs/heads/main' && success()
-      uses: peaceiris/actions-gh-pages@v4
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: allure-report
-        keep_files: false
+      # 4. 把整理好的报告上传为Pages发布制品
+      - name: Upload report for Pages deployment
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: allure-report  # 要发布的静态报告目录
+
+      # 5. 最终执行部署（官方标准动作，稳、不404）
+      - name: Final deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
