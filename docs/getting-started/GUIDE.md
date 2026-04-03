@@ -32,7 +32,15 @@ TEST_ENV=testing pytest
 TEST_ENV=staging pytest
 ```
 
-配置文件优先级：`.env.{env}` > `.env`
+### 配置继承机制
+
+框架实现了三层配置继承机制，优先级从高到低：
+
+1. `.env.{env}` - 环境特定配置（最高优先级）
+2. `.env` - 项目级配置
+3. `.env.base` - 基础配置（所有环境的默认值）
+
+这种机制减少了配置重复，确保所有环境都有统一的默认配置，同时允许在特定环境中覆盖需要修改的配置项。
 
 ### 配置项说明
 
@@ -40,12 +48,27 @@ TEST_ENV=staging pytest
 |--------|------|--------|
 | BASE_URL | 测试网站地址 | https://www.example.com |
 | BROWSER | 浏览器类型 | chromium |
-| HEADLESS | 无头模式 | false |
+| HEADLESS | 无头模式 | true |
 | SLOW_MO | 操作延迟 | 0 |
 | TIMEOUT | 超时时间 | 30000 |
 | VIEWPORT_WIDTH | 浏览器宽度 | 1920 |
 | VIEWPORT_HEIGHT | 浏览器高度 | 1080 |
-| VIDEO_ENABLED | 启用录屏 | false |
+| VIDEO_ENABLED | 启用录屏 | true |
+
+### 配置检查工具
+
+框架提供了配置检查工具，用于验证配置文件的一致性和正确性：
+
+```bash
+# 运行配置检查
+python3 scripts/config_checker.py
+```
+
+配置检查工具会：
+- 验证所有配置文件的一致性
+- 检查配置项的正确性
+- 生成配置摘要
+- 检查 VIDEO_ENABLED 配置的一致性
 
 ## 编写测试
 

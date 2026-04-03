@@ -48,6 +48,7 @@ cp config/envs/.env.full .env
 
 **环境配置文件说明：**
 
+- `config/envs/.env.base` - 基础配置（所有环境的默认值）
 - `config/envs/.env.minimal` - 最小配置（推荐新手使用）
 - `config/envs/.env.standard` - 标准配置
 - `config/envs/.env.full` - 完整配置（包含所有选项）
@@ -55,6 +56,15 @@ cp config/envs/.env.full .env
 - `config/envs/.env.development` - 开发环境配置
 - `config/envs/.env.testing` - 测试环境配置
 - `config/envs/.env.staging` - 预发布环境配置
+
+**配置继承机制：**
+
+框架实现了三层配置继承机制，优先级从高到低：
+1. `.env.{env}` - 环境特定配置（最高优先级）
+2. `.env` - 项目级配置
+3. `.env.base` - 基础配置（所有环境的默认值）
+
+这种机制减少了配置重复，确保所有环境都有统一的默认配置。
 
 ### 3. 运行测试
 
