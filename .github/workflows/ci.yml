@@ -116,9 +116,11 @@ jobs:
         mkdir -p reports/allure-results
         # 运行测试并生成 Allure 结果
         # 排除需要真实 API 的测试（使用示例域名）
+        # 排除演示用的 Categories 测试（仅用于本地验证）
         export TEST_BROWSER=${{ matrix.browser }}
         pytest -v -m "smoke or ui" \
           --ignore=tests/api/test_user_api.py \
+          --ignore=tests/unit/test_categories_demo.py \
           --alluredir=reports/allure-results
 
     - name: Generate Allure report

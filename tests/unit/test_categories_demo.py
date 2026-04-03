@@ -16,7 +16,6 @@ class TestCategoriesDemo:
     @allure.story("断言失败")
     @allure.severity(allure.severity_level.CRITICAL)
     @allure.title("测试断言失败 - 应该归类为自动化缺陷")
-    @pytest.mark.skip(reason="CI 环境中会失败，仅用于本地验证 Categories 功能")
     def test_assertion_failure(self, page):
         """这个测试会失败，用于验证 Categories 功能"""
         # 故意创建一个断言失败
