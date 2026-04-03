@@ -313,3 +313,13 @@ jobs:
         name: allure-report-html
         path: .
         retention-days: 30
+
+    # 部署到 GitHub Pages
+    - name: Deploy to GitHub Pages
+      if: github.ref == 'refs/heads/main' && success()
+      uses: peaceiris/actions-gh-pages@v4
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: .
+        destination_dir: allure-report
+        keep_files: false
