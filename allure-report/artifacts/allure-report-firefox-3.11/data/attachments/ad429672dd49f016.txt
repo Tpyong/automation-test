@@ -1,2 +1,0 @@
-INFO     core.utils.assertions:assertions.py:72 断言字符串包含: 页面标题应包含'TodoMVC'
-INFO     core.utils.assertions:assertions.py:30 断言为真: 待办事项输入框应该可见

@@ -1,9 +1,0 @@
-2026-04-03 07:21:17 - config.settings - INFO - 配置验证通过
-2026-04-03 07:21:17 - tests.unit.test_sample - INFO - 开始执行测试: test_playwright_demo_page
-2026-04-03 07:21:17 - core.pages.base_page - INFO - 导航到: https://demo.playwright.dev/todomvc
-2026-04-03 07:21:18 - core.pages.base_page - INFO - 页面加载完成
-2026-04-03 07:21:18 - core.pages.base_page - INFO - 页面标题: React • TodoMVC
-2026-04-03 07:21:18 - core.utils.assertions - INFO - 断言字符串包含: 页面标题应包含'TodoMVC'
-2026-04-03 07:21:18 - core.utils.assertions - INFO - 断言为真: 待办事项输入框应该可见
-2026-04-03 07:21:18 - core.pages.base_page - INFO - 截图已保存: reports/screenshots/20260403/playwright_demo_page_072118.png
-2026-04-03 07:21:18 - tests.unit.test_sample - INFO - 测试执行完成: test_playwright_demo_page

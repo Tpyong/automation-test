@@ -1,3 +1,0 @@
-2026-04-03 07:21:12 - config.settings - INFO - 配置验证通过
-2026-04-03 07:21:13 - core.utils.assertions - INFO - 断言字符串包含: 页面标题应包含'TodoMVC'
-2026-04-03 07:21:13 - core.utils.assertions - INFO - 断言为真: 待办事项输入框应该可见

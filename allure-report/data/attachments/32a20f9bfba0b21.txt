@@ -1,1 +1,0 @@
-[DEBUG] 测试截图已保存: reports/screenshots/20260403/test_playwright_demo_page_072118.png

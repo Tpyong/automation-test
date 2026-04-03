@@ -1,4 +1,0 @@
-INFO     core.utils.assertions:assertions.py:30 断言为真: 待办事项输入框应该显示
-INFO     core.utils.assertions:assertions.py:72 断言字符串包含: 期望 'React • TodoMVC' 包含 'TodoMVC'
-INFO     core.utils.assertions:assertions.py:30 断言为真: 过滤器应该显示
-INFO     core.utils.assertions:assertions.py:30 断言为真: 清除完成按钮应该显示
