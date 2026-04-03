@@ -149,6 +149,7 @@ allure open reports/allure-report
 - ✅ **测试配置向导** - 帮助用户快速设置测试环境
 - ✅ **增强的测试结果可视化** - 详细的趋势图表和统计分析
 - ✅ **智能测试建议** - 基于历史测试结果提供优化建议
+- ✅ **API 测试完整支持** - RESTful API 测试、Mock 服务器、契约测试、性能测试
 
 ## 最近变更
 
@@ -307,6 +308,8 @@ isort core/ tests/
 
 ## 示例
 
+### UI 测试示例
+
 ```python
 import allure
 import pytest
@@ -322,6 +325,68 @@ class TestExample:
         base_page.navigate(settings.base_url)
         assert "期望标题" in base_page.get_title()
 ```
+
+### API 测试示例
+
+**真实 API 测试**：
+```python
+import allure
+from core.utils.api_client import APIClient, APIAssertions
+
+@allure.epic("API 测试")
+@allure.feature("用户管理")
+def test_get_users(api_client):
+    # 发送 GET 请求
+    response = api_client.get("/api/users", params={"page": 1})
+    
+    # 验证状态码
+    APIAssertions.assert_status_code(response, 200)
+    
+    # 验证响应字段
+    APIAssertions.assert_response_has_field(response, "users")
+    
+    # 验证响应时间
+    APIAssertions.assert_response_time(response, max_time=2000)
+```
+
+**Mock API 测试**（无需真实后端）：
+```python
+import pytest
+import requests
+
+@allure.epic("API 测试")
+@allure.feature("Mock API 测试")
+def test_mock_get_users(mock_server):
+    # 1. 添加 Mock 端点
+    mock_server.add_endpoint(
+        method="GET",
+        path="/api/users",
+        status_code=200,
+        body={"users": [{"id": 1, "name": "张三"}], "total": 1}
+    )
+    
+    # 2. 获取 Mock 服务器地址并发送请求
+    base_url = mock_server.get_base_url()
+    response = requests.get(f"{base_url}/api/users")
+    
+    # 3. 验证响应
+    assert response.status_code == 200
+    assert len(response.json()["users"]) == 1
+```
+
+**运行 API 测试**：
+```bash
+# 运行所有 API 测试
+pytest tests/api/ -v
+
+# 运行 Mock API 测试（推荐先试这个，无需真实 API）
+pytest tests/api/test_mock_api.py -v
+
+# 运行真实 API 测试（需要配置 .env 中的 API_BASE_URL）
+pytest tests/api/test_user_api.py -v
+```
+
+详细文档请查看：[tests/api/README.md](tests/api/README.md)
 
 ## License
 

@@ -95,6 +95,56 @@ allure open reports/allure-report
 
 ---
 
+## 查看 Categories 组件
+
+### 在报告中找到 Categories
+
+生成报告后，在 Allure 报告中查看：
+
+1. **打开报告**
+   ```bash
+   allure open reports/allure-report
+   ```
+
+2. **左侧导航栏** → 点击 **"Categories"**（类别）
+
+3. **查看内容**：
+   - 缺陷分类列表（按匹配数量排序）
+   - 每个分类下的失败测试用例
+   - 每个测试的详细错误信息
+
+### 常见问题排查
+
+#### Q: 找不到 Categories 菜单？
+
+**解决方法**：
+1. ✅ 强制刷新浏览器：`Ctrl + Shift + R`
+2. ✅ 确认报告已重新生成：`allure generate ... --clean`
+3. ✅ 检查 `reports/allure-report/widgets/categories.json` 是否存在
+
+#### Q: Categories 显示为空？
+
+**检查清单**：
+1. ✅ `config/categories.json` 是否存在
+2. ✅ JSON 格式是否正确
+3. ✅ 日志中是否有 "已复制 Allure categories.json" 信息
+4. ✅ 测试失败信息是否匹配正则表达式
+
+**查看日志**：
+```bash
+pytest -v | Select-String "categories.json"
+```
+
+#### Q: 如何优化类别匹配？
+
+**A:** 
+1. 查看实际的错误信息（在测试详情中）
+2. 调整正则表达式使其更精确
+3. 使用在线工具测试正则：[regex101.com](https://regex101.com/)
+4. 添加更多相关类别
+
+---
+
 ## 示例配置
 
 ### 项目默认配置
@@ -231,32 +281,36 @@ pytest -v
 # 查找日志中的 "已复制 Allure categories.json" 信息
 ```
 
-### Q: 如何优化类别匹配？
-
-**A:** 
-1. 查看实际的错误信息
-2. 调整正则表达式使其更精确
-3. 添加更多相关类别
-
-### Q: 类别太多怎么办？
-
-**A:** 
-- 只保留常用的 5-7 个类别
-- 合并相似的类别
-- 移除很少匹配的类别
-
 ---
 
 ## 最佳实践
 
+### 配置管理
+
 1. **保持简洁**：不要创建太多类别，5-7 个为宜
 2. **定期更新**：根据实际失败原因调整类别
 3. **团队共识**：确保团队成员理解每个类别的含义
-4. **自动化分析**：利用类别数据进行质量分析
+4. **版本控制**：将 `config/categories.json` 纳入 Git 管理
+
+### 使用技巧
+
+| 场景 | 推荐操作 |
+|------|----------|
+| 日常开发 | `pytest -v` (自动处理) |
+| 生成报告 | `make allure` (一键完成) |
+| 调试问题 | 查看日志中的复制信息 |
+| 自定义配置 | 编辑 `config/categories.json` |
 
 ---
 
 ## 参考资源
 
+### 相关文档
+- [Allure Categories 查看指南](ALLURE_CATEGORIES_VIEW_GUIDE.md) - 详细的报告查看和排查指南
 - [Allure 官方文档 - Categories](https://docs.qameta.io/allure/#_categories)
 - [Allure GitHub 示例](https://github.com/allure-examples)
+
+### 项目文件
+- [conftest.py](../../conftest.py) - 自动复制逻辑实现
+- [Makefile](../../Makefile) - 便捷命令定义
+- [config/categories.json](../../config/categories.json) - 默认配置示例

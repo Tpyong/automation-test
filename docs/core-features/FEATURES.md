@@ -72,6 +72,18 @@ pytest
 
 内置 API 测试客户端 `APIClient` 和断言工具 `APIAssertions`。
 
+**RESTful API 测试**：
+- 支持 GET/POST/PUT/DELETE 等 HTTP 方法
+- 自动处理请求头、认证、重试逻辑
+- 内置断言工具（状态码、响应字段、响应时间）
+- Allure 报告集成
+
+**Mock 服务器**：
+- 轻量级 Mock 服务器，无需真实后端
+- 自定义端点、响应状态码、响应体、响应头
+- 模拟延迟响应、错误场景
+- 调用次数统计
+
 **API 契约测试**（`core/utils/api_contract_tester.py`）：
 - 支持从 OpenAPI/Swagger 规范加载 API 契约
 - 自动验证 API 响应是否符合契约定义
@@ -85,19 +97,51 @@ pytest
 
 **使用示例：**
 ```python
+# RESTful API 测试
+from core.utils.api_client import APIClient, APIAssertions
+
+@allure.epic("API 测试")
+@allure.feature("用户管理")
+def test_get_users(api_client):
+    response = api_client.get("/api/users", params={"page": 1})
+    APIAssertions.assert_status_code(response, 200)
+    APIAssertions.assert_response_has_field(response, "users")
+    APIAssertions.assert_response_time(response, max_time=2000)
+
+# Mock API 测试（无需真实后端）
+def test_mock_api(mock_server):
+    mock_server.add_endpoint(
+        method="GET",
+        path="/api/users",
+        status_code=200,
+        body={"users": [{"id": 1, "name": "张三"}]}
+    )
+    base_url = mock_server.get_base_url()
+    response = requests.get(f"{base_url}/api/users")
+    assert response.status_code == 200
+
 # API 契约测试
 from core.utils.api_contract_tester import APIContractTester
 
 def test_api_contract():
     tester = APIContractTester("https://api.example.com")
-    # 从 OpenAPI 规范加载契约
     tester.load_openapi_spec("api/openapi.json")
-    # 运行所有契约测试
     results = tester.run_all_contract_tests()
     assert len(results['failed']) == 0
 
 # API 性能测试 - 负载测试
 from core.utils.api_contract_tester import APIPerformanceTester
+
+def test_api_performance():
+    tester = APIPerformanceTester("https://api.example.com")
+    results = tester.load_test(
+        path="/api/users",
+        method="GET",
+        iterations=100,
+        concurrency=10
+    )
+    assert results['avg_response_time'] < 1.0  # 平均响应时间 < 1 秒
+```
 
 def test_api_performance():
     tester = APIPerformanceTester("https://api.example.com")

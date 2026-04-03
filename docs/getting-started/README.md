@@ -70,8 +70,21 @@ HEADLESS=false
 ### 2. 运行第一个测试
 
 ```bash
-pytest tests/sample_tests/test_sample.py -v
+# 运行单元测试示例
+pytest tests/unit/test_sample.py -v
+
+# 运行 Mock API 测试（推荐，无需真实 API）
+pytest tests/api/test_mock_api.py -v
+
+# 运行 UI 测试示例
+pytest tests/e2e/test_todomvc.py -v
 ```
+
+**测试分层说明：**
+- `tests/unit/` - 单元测试（测试独立逻辑）
+- `tests/integration/` - 集成测试（测试组件交互）
+- `tests/api/` - API 测试（测试 RESTful 接口）
+- `tests/e2e/` - E2E 测试（测试完整用户流程）
 
 ### 3. 查看报告
 
