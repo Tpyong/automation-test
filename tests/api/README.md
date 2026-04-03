@@ -2,10 +2,14 @@
 
 ## 📋 概述
 
-本项目提供两种 API 测试方式：
+本项目提供完整的 API 测试解决方案，包含：
 
-1. **真实 API 测试** - 测试真实的后端服务
-2. **Mock API 测试** - 使用 Mock 服务器模拟 API，无需真实后端
+1. **内置 Mock 服务器** - 无需真实后端即可运行测试
+2. **完整的 RESTful API 测试示例** - 包含 CRUD 操作、错误处理、性能测试
+3. **Allure 报告集成** - 美观的测试报告
+4. **缺陷分类** - 自动分类失败原因
+
+所有测试都可以独立运行，无需外部依赖。
 
 ## 🚀 快速开始
 
@@ -15,9 +19,7 @@
 # 安装依赖
 pip install -r requirements-dev.txt
 
-# 配置环境变量（可选）
-cp .env.example .env
-# 编辑 .env 文件，设置 API_BASE_URL 等参数
+# 配置环境变量（API 测试不需要特殊配置）
 ```
 
 ### 运行测试
@@ -28,9 +30,6 @@ pytest tests/api/ -v
 
 # 运行特定测试文件
 pytest tests/api/test_user_api.py -v
-
-# 运行 Mock API 测试
-pytest tests/api/test_mock_api.py -v
 
 # 只运行冒烟测试
 pytest tests/api/ -v -m smoke
@@ -47,187 +46,105 @@ allure open reports/allure-report
 
 ```
 tests/api/
-├── test_user_api.py          # 真实 API 测试示例
-├── test_mock_api.py          # Mock API 测试示例
+├── test_user_api.py          # 用户 API 测试（使用内置 Mock 服务器）
 └── README.md                 # 本文档
 ```
 
 ---
 
-## 🔧 测试真实 API
+## 🎭 内置 Mock 服务器
 
-### 配置方式
+### 特性
 
-在 `.env` 文件中配置：
+- ✅ 完整的 RESTful API 端点
+- ✅ 内存数据存储，支持完整的 CRUD 操作
+- ✅ 自动 ID 生成
+- ✅ 数据验证（如 email 必填）
+- ✅ 支持分页查询
+- ✅ 正确的 HTTP 状态码返回
+- ✅ 无需外部依赖
 
-```bash
-# API 基础 URL
-API_BASE_URL=https://api.example.com
+### 支持的 API 端点
 
-# API 超时时间（毫秒）
-API_TIMEOUT=30000
-```
-
-### 测试示例
-
-查看 [`test_user_api.py`](test_user_api.py)：
-
-```python
-import allure
-import pytest
-from core.utils.api_client import APIClient, APIAssertions
-
-@allure.epic("API 测试")
-@allure.feature("用户管理 API")
-class TestUserAPI:
-    
-    @pytest.fixture(autouse=True)
-    def setup(self, settings):
-        """每个测试前自动执行"""
-        self.api_client = APIClient(
-            base_url=settings.api_base_url,
-            timeout=settings.api_timeout / 1000
-        )
-    
-    @pytest.mark.api
-    @allure.story("获取用户列表")
-    def test_get_users_success(self):
-        """测试获取用户列表"""
-        response = self.api_client.get("/api/users", params={"page": 1})
-        
-        # 验证状态码
-        APIAssertions.assert_status_code(response, 200)
-        
-        # 验证响应字段
-        APIAssertions.assert_response_has_field(response, "users")
-        
-        # 验证响应时间
-        APIAssertions.assert_response_time(response, max_time=2000)
-```
-
-### 可用的断言方法
-
-| 方法 | 说明 | 示例 |
+| 方法 | 路径 | 说明 |
 |------|------|------|
-| `assert_status_code(response, code)` | 验证状态码 | `assert_status_code(response, 200)` |
-| `assert_response_has_field(response, field)` | 验证包含字段 | `assert_response_has_field(response, "data")` |
-| `assert_response_field_equals(response, field, value)` | 验证字段值 | `assert_response_field_equals(response, "id", 1)` |
-| `assert_response_time(response, max_ms)` | 验证响应时间 | `assert_response_time(response, 2000)` |
+| GET | `/api/users` | 获取用户列表（支持分页） |
+| POST | `/api/users` | 创建用户 |
+| GET | `/api/users/{id}` | 获取单个用户 |
+| PUT | `/api/users/{id}` | 更新用户 |
+| DELETE | `/api/users/{id}` | 删除用户 |
 
 ---
 
-## 🎭 Mock API 测试
+## 📝 测试示例
 
-### 使用场景
-
-- ✅ 开发阶段，后端 API 还未完成
-- ✅ 测试第三方 API 集成
-- ✅ 模拟边界情况和错误场景
-- ✅ 性能测试和压力测试
-
-### Mock 服务器功能
-
-| 功能 | 说明 |
-|------|------|
-| 自定义端点 | 添加任意 HTTP 方法的端点 |
-| 自定义响应 | 设置状态码、响应体、响应头 |
-| 延迟模拟 | 模拟网络延迟 |
-| 调用统计 | 记录端点被调用次数 |
-
-### 测试示例
-
-查看 [`test_mock_api.py`](test_mock_api.py)：
+### 查看 [`test_user_api.py`](test_user_api.py)：
 
 ```python
+import allure
 import pytest
 import requests
-import allure
 
-@allure.epic("API 测试")
-@allure.feature("Mock API 测试")
-class TestMockUserAPI:
+from core.utils.logger import get_logger
+
+logger = get_logger(__name__)
+
+
+class UserAPIMockService:
+    """用户 API Mock 服务"""
+    
+    def __init__(self, host: str = 'localhost', port: int = 0):
+        self.host = host
+        self.port = port
+        self.server = None
+        self.thread = None
+    
+    def start(self) -> str:
+        """启动 Mock 服务"""
+        # 实现省略...
+        pass
+
+
+@allure.epic('API 测试')
+@allure.feature('用户管理 API')
+class TestUserAPI:
+    """用户相关 API 测试"""
     
     @pytest.mark.api
-    def test_mock_get_users(self, mock_server):
-        """使用 Mock 服务器测试 GET 请求"""
+    @pytest.mark.smoke
+    @allure.story('获取用户列表')
+    @allure.title('测试获取用户列表 - 成功场景')
+    def test_get_users_success(self, user_api_mock, api_client):
+        """测试成功获取用户列表"""
+        base_url = f'http://{user_api_mock.host}:{user_api_mock.port}'
         
-        # 1. 添加 Mock 端点
-        mock_server.add_endpoint(
-            method="GET",
-            path="/api/users",
-            status_code=200,
-            body={
-                "users": [
-                    {"id": 1, "name": "张三"},
-                    {"id": 2, "name": "李四"}
-                ],
-                "total": 2
-            }
-        )
+        # 先创建一些测试数据
+        with allure.step('准备测试数据'):
+            for i in range(5):
+                user_data = {
+                    'name': f'用户{i+1}',
+                    'email': f'user{i+1}@example.com',
+                    'age': 25 + i,
+                    'role': 'user'
+                }
+                api_client.post(f'{base_url}/api/users', json=user_data)
         
-        # 2. 获取 Mock 服务器地址
-        base_url = mock_server.get_base_url()
+        with allure.step('发送 GET 请求获取用户列表'):
+            response = api_client.get(f'{base_url}/api/users', params={'page': 1, 'limit': 10})
         
-        # 3. 发送请求并验证
-        response = requests.get(f"{base_url}/api/users")
-        assert response.status_code == 200
-        assert len(response.json()["users"]) == 2
-```
-
-### Mock 端点高级用法
-
-#### 1. 模拟错误响应
-
-```python
-mock_server.add_endpoint(
-    method="POST",
-    path="/api/users",
-    status_code=400,
-    body={
-        "error": "Bad Request",
-        "message": "缺少必填字段：email"
-    }
-)
-```
-
-#### 2. 模拟延迟响应
-
-```python
-mock_server.add_endpoint(
-    method="GET",
-    path="/api/slow-endpoint",
-    status_code=200,
-    body={"data": "slow"},
-    delay=2.0  # 延迟 2 秒
-)
-```
-
-#### 3. 自定义响应头
-
-```python
-mock_server.add_endpoint(
-    method="GET",
-    path="/api/protected",
-    status_code=200,
-    body={"secret": "data"},
-    headers={
-        "X-Custom-Header": "CustomValue",
-        "Cache-Control": "no-cache"
-    }
-)
-```
-
-#### 4. 检查调用次数
-
-```python
-# 调用端点 5 次后检查
-endpoint = mock_server.endpoints.get(("GET", "/api/stats"))
-assert endpoint.call_count == 5
+        with allure.step('验证响应状态码'):
+            assert response.status_code == 200
+        
+        with allure.step('验证响应包含用户数据'):
+            data = response.json()
+            assert 'users' in data
+            assert 'total' in data
+            assert data['total'] == 5
 ```
 
 ---
 
-## 📊 测试分类
+## 🎯 测试分类
 
 ### 按测试类型标记
 
@@ -257,6 +174,22 @@ pytest tests/api/ -v -k "CRITICAL"
 # 排除慢速测试
 pytest tests/api/ -v -m "not slow"
 ```
+
+---
+
+## 📊 测试覆盖
+
+### 包含的测试用例：
+
+1. ✅ **获取用户列表** - 测试成功获取用户列表，支持分页
+2. ✅ **创建用户** - 测试成功创建用户
+3. ✅ **更新用户** - 测试成功更新用户信息
+4. ✅ **删除用户** - 测试成功删除用户
+5. ✅ **查询单个用户** - 测试查询用户详情
+6. ✅ **分页参数验证** - 测试分页参数
+7. ✅ **查询不存在用户** - 测试查询不存在的用户应返回 404
+8. ✅ **缺少必填字段** - 测试创建用户时缺少必填字段应返回 400
+9. ✅ **性能测试** - 测试批量获取用户的性能
 
 ---
 
@@ -299,13 +232,21 @@ def test_example(self):
 ### 4. 清理测试数据
 
 ```python
-@pytest.fixture
-def cleanup():
-    created_ids = []
-    yield created_ids
-    # 清理创建的测试数据
-    for id in created_ids:
-        api_client.delete(f"/api/items/{id}")
+@pytest.fixture(scope='function')
+def api_client(user_api_mock):
+    """API 客户端 fixture"""
+    session = requests.Session()
+    session.headers.update({
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+    })
+    
+    # 重置数据
+    UserAPIMockService.reset_data()
+    
+    yield session
+    
+    session.close()
 ```
 
 ---
@@ -377,51 +318,27 @@ def test_conditional():
     pass
 ```
 
-### Q: 如何处理认证？
+### Q: 如何测试真实 API？
 
-```python
-# 方式 1：在客户端中添加认证头
-self.api_client.session.headers.update({
-    "Authorization": f"Bearer {token}"
-})
+虽然本项目的 API 测试默认使用内置 Mock 服务器。如需测试真实 API，可以：
 
-# 方式 2：使用 fixture 登录获取 token
-@pytest.fixture
-def auth_token():
-    response = requests.post("/api/login", json={...})
-    return response.json()["token"]
-```
+1. 修改 `test_user_api.py`，移除 Mock 服务器相关代码
+2. 配置 `API_BASE_URL` 环境变量
+3. 使用真实的 API 客户端
 
-### Q: 如何测试需要数据库的 API？
+### Q: Mock 服务器如何工作？
 
-```python
-@pytest.fixture
-def db_session():
-    session = create_test_session()
-    yield session
-    session.rollback()
-    session.close()
-
-def test_api_with_db(self, db_session):
-    # 使用 db_session 准备测试数据
-    user = User(name="Test", email="test@example.com")
-    db_session.add(user)
-    db_session.commit()
-    
-    # 调用 API 测试
-    response = self.api_client.get(f"/api/users/{user.id}")
-    # ...
-```
+Mock 服务器使用 Python 内置的 `http.server` 模块创建轻量级 HTTP 服务器，在内存中存储数据，支持完整的 CRUD 操作。每次测试运行前会自动重置数据，确保测试隔离。
 
 ---
 
 ## 📚 相关文档
 
 - [Allure Categories 配置](../../docs/core-features/ALLURE_CATEGORIES.md)
-- [Mock Server 使用示例](../integration/test_mock_server.py)
-- [API Client 源码](../../core/utils/api_client.py)
+- [配置管理](../../docs/getting-started/GUIDE.md#配置管理)
+- [功能特性](../../docs/core-features/FEATURES.md)
 
 ---
 
-**最后更新**: 2026-04-03  
+**最后更新**: 2026-04-04  
 **维护者**: 测试团队

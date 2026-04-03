@@ -1,7 +1,7 @@
 import allure
 import pytest
 
-from core.pages.base_page import BasePage
+from core.pages.base.base_page import BasePage
 from core.utils.assertions import Assertions
 from core.utils.logger import get_logger
 

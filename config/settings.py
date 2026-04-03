@@ -4,6 +4,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 from urllib.parse import urlparse
 
 from core.utils.logger import get_logger
+from config.validators import validate_config
 
 logger = get_logger(__name__)
 
@@ -104,56 +105,54 @@ class Settings:
 
     def _validate_config(self) -> None:
         """验证配置的正确性"""
-        errors: List[str] = []
+        # 构建配置字典
+        config = {
+            "BASE_URL": self.base_url,
+            "BROWSER": self.browser_type,
+            "TIMEOUT": self.timeout,
+            "VIEWPORT_WIDTH": self.viewport["width"],
+            "VIEWPORT_HEIGHT": self.viewport["height"]
+        }
 
         # 验证环境名称
         valid_envs = ["development", "testing", "staging", "production"]
         if self.env not in valid_envs:
-            errors.append(f"无效的环境名称: {self.env}，有效值: {valid_envs}")
+            error_msg = f"无效的环境名称: {self.env}，有效值: {valid_envs}"
+            logger.warning(error_msg)
+            if not self.is_development:
+                raise ConfigValidationError(error_msg)
 
-        # 验证浏览器类型
-        valid_browsers = ["chromium", "firefox", "webkit"]
-        if self.browser_type not in valid_browsers:
-            errors.append(f"无效的浏览器类型: {self.browser_type}，有效值: {valid_browsers}")
-
-        # 验证 URL 格式
-        if not self._is_valid_url(self.base_url):
-            errors.append(f"无效的 BASE_URL 格式: {self.base_url}")
-
+        # 验证 API URL 格式
         if not self._is_valid_url(self.api_base_url):
-            errors.append(f"无效的 API_BASE_URL 格式: {self.api_base_url}")
+            error_msg = f"无效的 API_BASE_URL 格式: {self.api_base_url}"
+            logger.warning(error_msg)
+            if not self.is_development:
+                raise ConfigValidationError(error_msg)
 
         # 验证数值范围
-        if self.timeout < 1000 or self.timeout > 300000:
-            errors.append(f"TIMEOUT 应该在 1000-300000 之间，当前: {self.timeout}")
-
         if self.slow_mo < 0 or self.slow_mo > 10000:
-            errors.append(f"SLOW_MO 应该在 0-10000 之间，当前: {self.slow_mo}")
+            error_msg = f"SLOW_MO 应该在 0-10000 之间，当前: {self.slow_mo}"
+            logger.warning(error_msg)
+            if not self.is_development:
+                raise ConfigValidationError(error_msg)
 
         if self.api_timeout < 1000 or self.api_timeout > 300000:
-            errors.append(f"API_TIMEOUT 应该在 1000-300000 之间，当前: {self.api_timeout}")
-
-        # 验证视口大小
-        if self.viewport["width"] < 320 or self.viewport["width"] > 3840:
-            errors.append(f"VIEWPORT_WIDTH 应该在 320-3840 之间，当前: {self.viewport['width']}")
-
-        if self.viewport["height"] < 240 or self.viewport["height"] > 2160:
-            errors.append(f"VIEWPORT_HEIGHT 应该在 240-2160 之间，当前: {self.viewport['height']}")
+            error_msg = f"API_TIMEOUT 应该在 1000-300000 之间，当前: {self.api_timeout}"
+            logger.warning(error_msg)
+            if not self.is_development:
+                raise ConfigValidationError(error_msg)
 
         # 验证数据库端口
         if self.db_port < 1 or self.db_port > 65535:
-            errors.append(f"DB_PORT 应该在 1-65535 之间，当前: {self.db_port}")
-
-        # 如果有错误，抛出异常或记录警告
-        if errors:
-            error_msg = "配置验证失败:\n" + "\n".join([f"  - {e}" for e in errors])
+            error_msg = f"DB_PORT 应该在 1-65535 之间，当前: {self.db_port}"
             logger.warning(error_msg)
-
-            # 如果是开发环境，继续运行；其他环境抛出异常
             if not self.is_development:
                 raise ConfigValidationError(error_msg)
-        else:
-            logger.info("配置验证通过")
+
+        # 使用新的配置验证器验证基本配置
+        if not validate_config(config):
+            if not self.is_development:
+                raise ConfigValidationError("配置验证失败")
 
     @staticmethod
     def _is_valid_url(url: str) -> bool:

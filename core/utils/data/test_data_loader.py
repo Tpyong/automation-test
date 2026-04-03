@@ -6,7 +6,7 @@
 import os
 from typing import Any, Dict, List
 
-from core.utils.data_cache import get_data_cache
+from core.utils.data.data_cache import get_data_cache
 from core.utils.logger import get_logger
 
 logger = get_logger(__name__)

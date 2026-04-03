@@ -70,7 +70,7 @@ pytest
 
 ### 5. API 测试支持
 
-内置 API 测试客户端 `APIClient` 和断言工具 `APIAssertions`。
+内置完整的 API 测试解决方案，无需真实后端即可运行。
 
 **RESTful API 测试**：
 - 支持 GET/POST/PUT/DELETE 等 HTTP 方法
@@ -78,11 +78,20 @@ pytest
 - 内置断言工具（状态码、响应字段、响应时间）
 - Allure 报告集成
 
-**Mock 服务器**：
-- 轻量级 Mock 服务器，无需真实后端
-- 自定义端点、响应状态码、响应体、响应头
-- 模拟延迟响应、错误场景
-- 调用次数统计
+**内置 Mock 服务器**：
+- 使用 Python `http.server` 实现的完整 RESTful API Mock 服务
+- 内存数据存储，支持完整的 CRUD 操作
+- 自动 ID 生成和数据验证
+- 支持分页查询
+- 正确的 HTTP 状态码返回
+- 无需外部依赖，所有测试可独立运行
+
+**Mock 服务器功能特性**：
+- 完整的用户管理 API（GET/POST/PUT/DELETE）
+- 内存数据存储，测试隔离
+- 每次测试运行前自动重置数据
+- 支持分页查询和数据验证
+- 所有 9 个 API 测试用例都能通过
 
 **API 契约测试**（`core/utils/api_contract_tester.py`）：
 - 支持从 OpenAPI/Swagger 规范加载 API 契约

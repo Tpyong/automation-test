@@ -119,7 +119,6 @@ jobs:
         # 排除演示用的 Categories 测试（仅用于本地验证）
         export TEST_BROWSER=${{ matrix.browser }}
         pytest -v -m "smoke or ui" \
-          --ignore=tests/api/test_user_api.py \
           --ignore=tests/unit/test_categories_demo.py \
           --alluredir=reports/allure-results
 
@@ -230,7 +229,6 @@ jobs:
           --cov-report=html:reports/coverage-html \
           --cov-report=xml:reports/coverage.xml \
           --cov-fail-under=20 \
-          --ignore=tests/api/test_user_api.py \
           --ignore=tests/unit/test_categories_demo.py
 
     - name: Upload coverage report

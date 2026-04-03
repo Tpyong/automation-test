@@ -151,6 +151,11 @@ pytest -v | Select-String "categories.json"
 
 项目已提供默认的 `categories.json` 配置：
 
+**重要修复说明：
+- ✅ 修复了路径问题：`Path(__file__).parent` → `Path(__file__).parent.parent`
+- ✅ 确保从项目根目录的 `config/categories.json` 正确复制到 `reports/allure-results/`
+- ✅ 所有测试运行时会自动处理复制工作
+
 ```json
 [
   {

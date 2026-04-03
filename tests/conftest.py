@@ -10,7 +10,19 @@ from playwright.sync_api import Browser, BrowserContext, Page, Playwright, sync_
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from config.settings import Settings
+import sys
+import os
+
+# 添加项目根目录到 Python 路径
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+# 直接导入 settings.py 模块
+import sys
+import os
+
+# 确保导入的是 config/settings.py 而不是 config/settings 包
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from config.settings import Settings, ConfigValidationError
 from core.utils.logger import get_logger
 from core.utils.path_helper import PathHelper
 
@@ -47,7 +59,7 @@ def _get_browser_pool() -> Any:
     """延迟加载 BrowserPool"""
     global _browser_pool
     if _browser_pool is None:
-        from core.utils.browser_pool import get_browser_pool
+        from core.utils.browser.browser_pool import get_browser_pool
 
         _browser_pool = get_browser_pool()
     return _browser_pool
@@ -110,7 +122,8 @@ def _prepare_allure_categories() -> None:
     """
     import shutil
     
-    project_root = Path(__file__).parent
+    # 获取项目根目录（tests 的父目录）
+    project_root = Path(__file__).parent.parent
     source_file = project_root / "config" / "categories.json"
     target_file = project_root / "reports" / "allure-results" / "categories.json"
     
@@ -134,15 +147,27 @@ def pytest_sessionstart(session: Any) -> None:
     # 自动复制 Allure categories.json 配置文件
     _prepare_allure_categories()
 
-    from config.settings import Settings
+    import sys
+import os
 
-    settings = Settings()
-    config_summary = settings.get_config_summary()
-    logger.info("配置摘要：%s", config_summary)
+# 添加项目根目录到 Python 路径
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-    report_gen = _get_report_generator()
-    report_gen.start_session()
-    logger.info("报告生成器会话已开始")
+# 直接导入 settings.py 模块
+import sys
+import os
+
+# 确保导入的是 config/settings.py 而不是 config/settings 包
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from config.settings import Settings, ConfigValidationError
+
+settings = Settings()
+config_summary = settings.get_config_summary()
+logger.info("配置摘要：%s", config_summary)
+
+report_gen = _get_report_generator()
+report_gen.start_session()
+logger.info("报告生成器会话已开始")
 
 
 def pytest_sessionfinish(session: Any, exitstatus: int) -> None:
@@ -481,6 +506,12 @@ def _attach_test_artifacts(item: Any) -> None:
 
     # 2. 附加视频
     try:
+        import sys
+        import os
+
+        # 添加项目根目录到 Python 路径
+        sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
         from config.settings import Settings
 
         settings = Settings()

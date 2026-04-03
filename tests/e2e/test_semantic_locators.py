@@ -6,7 +6,7 @@
 import allure
 import pytest
 
-from core.pages.login_page_semantic import LoginPageSemantic
+from core.pages.specific.login_page_semantic import LoginPageSemantic
 from core.utils.assertions import Assertions
 from core.utils.locators import SmartLocator
 

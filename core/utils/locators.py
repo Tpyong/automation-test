@@ -25,7 +25,7 @@ logger = get_logger(__name__)
 class LocatorManager:
     """元素定位器管理器"""
 
-    def __init__(self, page_name: str, locators_dir: str = "locators"):
+    def __init__(self, page_name: str, locators_dir: str = "resources/locators/web"):
         """
         初始化定位器管理器
 

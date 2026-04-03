@@ -163,6 +163,28 @@ allure open reports/allure-report
 
 ## 最近变更
 
+### 2026-04-04: API 测试重构与文档更新
+
+- ✅ **API 测试重构** - 完全重构了 API 测试，使用内置 Mock 服务器替代真实 API 调用
+- ✅ **Mock 服务实现** - 使用 Python `http.server` 实现了完整的 RESTful API Mock 服务
+- ✅ **测试通过验证** - 所有 9 个 API 测试用例都成功通过，无需真实后端
+- ✅ **Allure 分类配置修复** - 修复了 `categories.json` 路径问题，确保 Allure 报告正确显示缺陷分类
+- ✅ **文档全面更新** - 更新了所有相关文档，反映最新的项目结构和功能
+
+### 2026-04-04: 项目结构优化
+
+- ✅ **测试目录结构** - 按测试类型分类（unit、integration、api、e2e）
+- ✅ **核心模块结构** - 按功能分类，包括 pages、utils、services、exceptions、models
+- ✅ **页面对象结构** - 分为 base（基础页面）、components（组件）、specific（特定页面）
+- ✅ **工具类结构** - 按功能分类（api、browser、data、reporting、security）
+- ✅ **脚本目录结构** - 按功能分类（cli、automation、utils、security）
+- ✅ **资源目录整合** - 统一管理测试数据、定位器和模板文件
+- ✅ **配置验证增强** - 添加了环境、数据库、报告、并行测试和日志配置的验证规则
+- ✅ **配置管理优化** - 实现了三层配置继承（.env.{env} > .env > .env.base），减少配置重复
+- ✅ **基础配置文件** - 创建了 .env.base 基础配置文件，包含所有环境的默认配置
+- ✅ **配置文件清理** - 移除了各环境配置文件中的重复配置项
+- ✅ **VIDEO_ENABLED 默认值** - 将默认值从 false 改为 true，启用视频录制功能
+
 ### 2026-04-02: CI/CD Pipeline 完整修复
 
 - ✅ **pytest 插件识别修复** - 移除 `-p no:warnings` 导致 pytest-html、pytest-cov 插件无法识别
@@ -215,15 +237,92 @@ allure open reports/allure-report
 │   │   ├── .env.testing       # 测试环境
 │   │   └── .env.staging       # 预发布环境
 │   ├── settings.py            # 配置管理类
+│   ├── validators.py          # 配置验证器
+│   ├── settings_dir/          # 配置模块目录
+│   │   ├── __init__.py
+│   │   ├── base.py            # 基础配置
+│   │   ├── development.py     # 开发环境配置
+│   │   ├── production.py      # 生产环境配置
+│   │   └── testing.py         # 测试环境配置
 │   └── __init__.py
 ├── core/                      # 核心模块
 │   ├── pages/                 # 页面对象
-│   └── utils/                 # 工具类
+│   │   ├── base/              # 基础页面对象
+│   │   │   └── base_page.py
+│   │   ├── components/        # 页面组件
+│   │   ├── specific/          # 特定页面对象
+│   │   │   ├── login_page.py
+│   │   │   └── login_page_semantic.py
+│   │   └── __init__.py
+│   ├── utils/                 # 工具类
+│   │   ├── api/               # API 工具
+│   │   │   ├── api_client.py
+│   │   │   └── api_contract_tester.py
+│   │   ├── browser/           # 浏览器工具
+│   │   │   ├── browser_pool.py
+│   │   │   └── smart_waiter.py
+│   │   ├── data/              # 数据工具
+│   │   │   ├── data_cache.py
+│   │   │   ├── data_factory.py
+│   │   │   ├── data_provider.py
+│   │   │   ├── test_data_loader.py
+│   │   │   └── test_data_manager.py
+│   │   ├── reporting/         # 报告工具
+│   │   │   ├── generator.py
+│   │   │   ├── history_manager.py
+│   │   │   ├── models.py
+│   │   │   └── worker_merger.py
+│   │   ├── security/          # 安全工具
+│   │   │   ├── compliance_checker.py
+│   │   │   ├── data_masking.py
+│   │   │   └── secrets_manager.py
+│   │   ├── alert_manager.py   # 告警管理器
+│   │   ├── allure_helper.py   # Allure 辅助工具
+│   │   ├── assertions.py      # 断言工具
+│   │   ├── audit_logger.py    # 审计日志
+│   │   ├── circuit_breaker.py # 断路器
+│   │   ├── db_manager.py      # 数据库管理器
+│   │   ├── exception_handler.py # 异常处理器
+│   │   ├── locators.py        # 定位器管理器
+│   │   ├── logger.py          # 日志工具
+│   │   ├── mock_server.py     # Mock 服务器
+│   │   ├── path_helper.py     # 路径工具
+│   │   ├── report_generator.py # 报告生成器
+│   │   ├── test_advisor.py    # 测试建议
+│   │   ├── test_monitor.py    # 测试监控
+│   │   └── __init__.py
+│   ├── services/              # 服务层
+│   │   ├── api/               # API 服务
+│   │   ├── auth/              # 认证服务
+│   │   └── database/          # 数据库服务
+│   ├── exceptions/            # 异常定义
+│   ├── models/                # 数据模型
+│   └── __init__.py
 ├── tests/                     # 测试用例
 │   ├── unit/                  # 单元测试
 │   ├── integration/           # 集成测试
 │   ├── api/                   # API 测试
-│   └── e2e/                   # 端到端测试
+│   ├── e2e/                   # 端到端测试
+│   ├── conftest.py            # 测试配置
+│   └── README.md              # 测试说明
+├── resources/                 # 资源文件
+│   ├── data/                  # 测试数据
+│   │   ├── fixtures/          # 测试数据夹具
+│   │   └── datasets/          # 测试数据集
+│   ├── locators/              # 元素定位器
+│   │   ├── web/               # Web 定位器
+│   │   └── mobile/            # 移动定位器
+│   ├── templates/             # 模板文件
+│   └── __init__.py
+├── scripts/                   # 脚本文件
+│   ├── cli/                   # 命令行工具
+│   ├── automation/            # 自动化脚本
+│   ├── utils/                 # 脚本工具
+│   ├── security/              # 安全脚本
+│   ├── interactive_runner.py  # 交互式测试运行器
+│   ├── config_wizard.py       # 配置向导
+│   ├── config_checker.py      # 配置检查工具
+│   └── __init__.py
 ├── docs/                      # 文档
 ├── reports/                   # 测试报告
 ├── ci-cd/                     # CI/CD 配置
@@ -242,8 +341,7 @@ allure open reports/allure-report
 ├── .pre-commit-config.yaml    # 预提交钩子配置
 ├── requirements.in            # 依赖定义文件
 ├── requirements.lock          # 锁定版本依赖
-├── logs/                      # 日志文件
-└── scripts/                   # 脚本文件
+└── logs/                      # 日志文件
 ```
 
 ## 常用命令
