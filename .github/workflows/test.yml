@@ -61,7 +61,11 @@ jobs:
         echo "================"
         export TEST_BROWSER=${{ matrix.browser }}
         # 运行测试（移除 -p no:warnings，避免禁用必要插件）
-        pytest tests/ -v --alluredir=allure-results
+        # 排除需要真实 API 的测试（使用示例域名）
+        # 排除演示用的 Categories 测试（仅用于本地验证）
+        pytest tests/ -v --alluredir=allure-results \
+          --ignore=tests/api/test_user_api.py \
+          --ignore=tests/unit/test_categories_demo.py
       env:
         TEST_ENV: testing
         HEADLESS: true
