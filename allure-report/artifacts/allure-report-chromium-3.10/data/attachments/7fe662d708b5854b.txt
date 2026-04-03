@@ -1,0 +1,8 @@
+2026-04-03 07:18:13 - config.settings - INFO - 配置验证通过
+2026-04-03 07:18:13 - core.utils.locators - INFO - 成功加载 YAML 定位器: /home/runner/work/automation-test/automation-test/locators/login_page_semantic.yaml
+2026-04-03 07:18:13 - core.pages.login_page_semantic - INFO - 登录页面对象（语义化定位）初始化完成
+2026-04-03 07:18:13 - core.utils.assertions - INFO - 断言不为空: 定位器应该成功加载
+2026-04-03 07:18:13 - core.pages.login_page_semantic - INFO - 元素 'username_input' 的定位器配置: {'label': '用户名'}
+2026-04-03 07:18:13 - core.pages.login_page_semantic - INFO - 元素 'login_button' 的定位器配置: {'role': 'button', 'name': '登录'}
+2026-04-03 07:18:13 - core.utils.assertions - INFO - 断言不为空: 用户名输入框定位器配置应该存在
+2026-04-03 07:18:13 - core.utils.assertions - INFO - 断言不为空: 登录按钮定位器配置应该存在

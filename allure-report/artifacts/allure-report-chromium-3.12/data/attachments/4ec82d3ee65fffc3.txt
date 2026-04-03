@@ -1,0 +1,7 @@
+2026-04-03 07:18:26 - config.settings - INFO - 配置验证通过
+2026-04-03 07:18:26 - core.utils.mock_server - INFO - Mock 服务器已启动: http://localhost:33823
+2026-04-03 07:18:26 - core.utils.mock_server - INFO - 添加 Mock 端点: GET /api/users
+2026-04-03 07:18:26 - tests.integration.test_mock_server - INFO - Mock 服务器地址: http://localhost:33823
+2026-04-03 07:18:26 - core.utils.mock_server - INFO - Mock 端点被调用: GET /api/users (调用次数: 1)
+2026-04-03 07:18:26 - tests.integration.test_mock_server - INFO - GET 请求成功: {'users': [{'id': 1, 'name': '张三', 'email': 'zhangsan@example.com'}, {'id': 2, 'name': '李四', 'email': 'lisi@example.com'}], 'total': 2}
+2026-04-03 07:18:27 - core.utils.mock_server - INFO - Mock 服务器已停止

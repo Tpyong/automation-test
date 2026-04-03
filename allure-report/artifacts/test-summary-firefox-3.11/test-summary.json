@@ -7,7 +7,7 @@
     "xfailed": 0,
     "xpassed": 0,
     "pass_rate": 100.0,
-    "duration": 14.88
+    "duration": 12.87
   },
   "module_stats": {
     "tests/api/test_mock_api.py": {
@@ -43,7 +43,7 @@
   },
   "failed_tests": [],
   "time": {
-    "start": "2026-04-03 07:14:37",
-    "stop": "2026-04-03 07:14:52"
+    "start": "2026-04-03 07:18:04",
+    "stop": "2026-04-03 07:18:16"
   }
 }

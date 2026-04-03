@@ -1,0 +1,5 @@
+2026-04-03 07:18:15 - config.settings - INFO - 配置验证通过
+2026-04-03 07:18:15 - core.utils.assertions - INFO - 断言为真: 待办事项输入框应该显示
+2026-04-03 07:18:15 - core.utils.assertions - INFO - 断言字符串包含: 期望 'React • TodoMVC' 包含 'TodoMVC'
+2026-04-03 07:18:15 - core.utils.assertions - INFO - 断言为真: 过滤器应该显示
+2026-04-03 07:18:15 - core.utils.assertions - INFO - 断言为真: 清除完成按钮应该显示

@@ -1,6 +1,0 @@
-2026-04-03 07:11:16 - core.utils.mock_server - INFO - Mock 服务器已启动: http://localhost:46727
-2026-04-03 07:11:16 - core.utils.mock_server - INFO - 添加 Mock 端点: GET /api/users
-2026-04-03 07:11:16 - tests.api.test_mock_api - INFO - Mock 服务器地址：http://localhost:46727
-2026-04-03 07:11:16 - core.utils.mock_server - INFO - Mock 端点被调用: GET /api/users (调用次数: 1)
-2026-04-03 07:11:16 - tests.api.test_mock_api - INFO - 响应时间：2.89ms
-2026-04-03 07:11:16 - core.utils.mock_server - INFO - Mock 服务器已停止

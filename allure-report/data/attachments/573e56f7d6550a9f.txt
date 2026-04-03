@@ -1,0 +1,8 @@
+INFO     tests.unit.test_sample:test_sample.py:21 开始执行测试: test_playwright_demo_page
+INFO     core.pages.base_page:base_page.py:18 导航到: https://demo.playwright.dev/todomvc
+INFO     core.pages.base_page:base_page.py:24 页面加载完成
+INFO     core.pages.base_page:base_page.py:66 页面标题: React • TodoMVC
+INFO     core.utils.assertions:assertions.py:72 断言字符串包含: 页面标题应包含'TodoMVC'
+INFO     core.utils.assertions:assertions.py:30 断言为真: 待办事项输入框应该可见
+INFO     core.pages.base_page:base_page.py:80 截图已保存: reports/screenshots/20260403/playwright_demo_page_072118.png
+INFO     tests.unit.test_sample:test_sample.py:40 测试执行完成: test_playwright_demo_page

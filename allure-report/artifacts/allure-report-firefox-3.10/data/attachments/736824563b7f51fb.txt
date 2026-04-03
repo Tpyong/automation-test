@@ -1,0 +1,7 @@
+INFO     core.utils.mock_server:mock_server.py:170 Mock 服务器已启动: http://localhost:36423
+INFO     core.utils.mock_server:mock_server.py:231 添加 Mock 端点: GET /api/users
+INFO     tests.api.test_mock_api:test_mock_api.py:50 Mock 服务器地址：http://localhost:36423
+INFO     core.utils.mock_server:mock_server.py:95 Mock 端点被调用: GET /api/users (调用次数: 1)
+DEBUG    core.utils.mock_server:mock_server.py:128 127.0.0.1 - "GET /api/users HTTP/1.1" 200 -
+INFO     tests.api.test_mock_api:test_mock_api.py:68 响应时间：2.12ms
+INFO     core.utils.mock_server:mock_server.py:193 Mock 服务器已停止

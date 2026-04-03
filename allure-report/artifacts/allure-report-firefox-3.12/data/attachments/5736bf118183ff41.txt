@@ -1,0 +1,1 @@
+[DEBUG] 测试截图已保存: reports/screenshots/20260403/test_smart_locator_parsing_072111.png

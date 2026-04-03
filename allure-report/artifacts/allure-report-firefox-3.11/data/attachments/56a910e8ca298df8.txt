@@ -1,2 +1,0 @@
-2026-04-03 07:14:43 - config.settings - INFO - 配置验证通过
-2026-04-03 07:14:43 - core.utils.assertions - INFO - 断言不为空: 应该成功获取定位器

@@ -1,0 +1,2 @@
+2026-04-03 07:21:15 - config.settings - INFO - 配置验证通过
+2026-04-03 07:21:16 - core.utils.assertions - INFO - 断言为假: 待办事项应该已删除
