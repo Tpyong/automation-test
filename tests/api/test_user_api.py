@@ -15,7 +15,7 @@
 import allure
 import pytest
 
-from core.utils.api_client import APIClient, APIAssertions
+from core.utils.api_client import APIAssertions, APIClient
 from core.utils.logger import get_logger
 
 logger = get_logger(__name__)
