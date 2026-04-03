@@ -286,17 +286,32 @@ jobs:
       - name: Download all workflow artifacts
         uses: actions/download-artifact@v4
         with:
-          path: artifacts  # 所有报告统一下载到artifacts文件夹
+          path: artifacts  # 所有报告统一下载到artifacts文件夹，每个报告一个子目录
 
-      # 2. 自动找一份最新Allure报告，整理成Pages可识别目录
+      # 2. 自动找一份最新Allure报告，整理成Pages可识别目录（修复版命令）
       - name: Merge & prepare Allure report
         run: |
           # 创建标准报告根目录
           mkdir -p allure-report
-          # 从所有浏览器/版本报告里，取第一个有效报告复制进去
-          find artifacts -type d -name "allure-report-*" | head -1 | xargs -I {} cp -r {}/* allure-report/
+          
+          # 【修复核心】遍历所有报告目录，找到第一个有效报告，完整复制
+          for dir in artifacts/allure-report-*; do
+            if [ -d "$dir" ]; then
+              echo "Found report directory: $dir"
+              cp -r "$dir"/* allure-report/
+              break  # 找到第一个就停止，避免多报告冲突
+            fi
+          done
+          
           # 打印目录结构，方便排错
+          echo "Final report directory contents:"
           ls -la allure-report
+          
+          # 检查报告是否成功复制
+          if [ ! -f "allure-report/index.html" ]; then
+            echo "Error: Allure report index.html not found!"
+            exit 1
+          fi
 
       # 3. 官方固定步骤：配置Pages环境
       - name: Configure GitHub Pages
@@ -311,3 +326,4 @@ jobs:
       # 5. 最终执行部署（官方标准动作，稳、不404）
       - name: Final deploy to GitHub Pages
         uses: actions/deploy-pages@v4
+        
