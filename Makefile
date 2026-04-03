@@ -1,4 +1,4 @@
-.PHONY: install test lint format coverage clean docker security
+.PHONY: install test lint format coverage clean docker security allure
 
 install:
 	pip install -r requirements.lock
@@ -74,6 +74,12 @@ docker-clean:
 
 docker-security:
 	docker-compose up security-scan
+
+allure:
+	@echo "生成 Allure 报告..."
+	python scripts/prepare_allure.py
+	allure generate reports/allure-results -o reports/allure-report --clean
+	allure open reports/allure-report
 
 clean:
 	rm -rf .pytest_cache __pycache__ allure-results allure-report reports/* logs/*

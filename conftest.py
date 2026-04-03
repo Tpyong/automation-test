@@ -98,7 +98,32 @@ def pytest_configure(config: Any) -> None:
         logger.info("已清理Allure报告目录: %s", allure_results_dir)
     # 重新创建目录
     os.makedirs(allure_results_dir, exist_ok=True)
-    logger.info("已创建Allure报告目录: %s", allure_results_dir)
+    logger.info("已创建 Allure 报告目录：%s", allure_results_dir)
+
+
+def _prepare_allure_categories() -> None:
+    """
+    准备 Allure categories.json 配置文件
+    
+    从 config/categories.json 复制到 reports/allure-results/
+    确保每次生成报告时都有正确的分类配置
+    """
+    import shutil
+    
+    project_root = Path(__file__).parent
+    source_file = project_root / "config" / "categories.json"
+    target_file = project_root / "reports" / "allure-results" / "categories.json"
+    
+    # 确保目标目录存在
+    target_file.parent.mkdir(parents=True, exist_ok=True)
+    
+    # 复制配置文件
+    if source_file.exists():
+        shutil.copy2(source_file, target_file)
+        logger.info("已复制 Allure categories.json: %s -> %s", source_file, target_file)
+    else:
+        logger.warning("未找到 Allure categories.json 配置文件：%s", source_file)
+        logger.warning("Allure 报告将不会显示缺陷分类")
 
 
 def pytest_sessionstart(session: Any) -> None:
@@ -106,11 +131,14 @@ def pytest_sessionstart(session: Any) -> None:
     logger.info("测试会话开始")
     logger.info("=" * 50)
 
+    # 自动复制 Allure categories.json 配置文件
+    _prepare_allure_categories()
+
     from config.settings import Settings
 
     settings = Settings()
     config_summary = settings.get_config_summary()
-    logger.info("配置摘要: %s", config_summary)
+    logger.info("配置摘要：%s", config_summary)
 
     report_gen = _get_report_generator()
     report_gen.start_session()

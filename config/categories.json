@@ -1,0 +1,37 @@
+[
+  {
+    "name": "自动化缺陷",
+    "messageRegex": ".*AssertionError.*|.*assert.*|.*应该.*",
+    "matchedStatuses": ["failed"]
+  },
+  {
+    "name": "元素未找到",
+    "messageRegex": ".*TimeoutError.*|.*ElementHandle.*|.*locator.*not found.*",
+    "matchedStatuses": ["failed"]
+  },
+  {
+    "name": "网络错误",
+    "messageRegex": ".*NetworkError.*|.*ERR_.*|.*connection.*|.*timeout.*",
+    "matchedStatuses": ["failed", "broken"]
+  },
+  {
+    "name": "浏览器问题",
+    "messageRegex": ".*browser.*|.*playwright.*|.*chromium.*|.*firefox.*|.*webkit.*",
+    "matchedStatuses": ["failed", "broken"]
+  },
+  {
+    "name": "测试数据问题",
+    "messageRegex": ".*data.*|.*fixture.*|.*test data.*",
+    "matchedStatuses": ["failed", "broken"]
+  },
+  {
+    "name": "环境问题",
+    "messageRegex": ".*environment.*|.*config.*|.*setup.*|.*teardown.*",
+    "matchedStatuses": ["broken"]
+  },
+  {
+    "name": "已知问题",
+    "messageRegex": ".*TODO.*|.*FIXME.*|.*XXX.*",
+    "matchedStatuses": ["failed", "broken", "skipped"]
+  }
+]
