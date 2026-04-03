@@ -26,11 +26,12 @@ class TestCategoriesDemo:
     @allure.story("元素未找到")
     @allure.severity(allure.severity_level.BLOCKER)
     @allure.title("测试元素未找到 - 应该归类为元素未找到")
+    @pytest.mark.skip(reason="CI 环境中会失败，仅用于本地验证 Categories 功能")
     def test_element_not_found(self, page):
         """这个测试会失败，用于验证元素未找到的分类"""
         # 导航到页面
         page.goto("https://demo.playwright.dev/todomvc")
-        
+
         # 尝试找一个不存在的元素（会超时失败）
         with allure.step("查找不存在的元素"):
             # 这个元素不存在，会超时
@@ -41,6 +42,7 @@ class TestCategoriesDemo:
     @allure.story("已知问题")
     @allure.severity(allure.severity_level.MINOR)
     @allure.title("测试已知问题 - 使用 TODO 标记")
+    @pytest.mark.skip(reason="已知问题，测试未实现")
     def test_known_issue(self, page):
         """这个测试会失败，包含 TODO 标记"""
         # TODO: 这个功能还没实现，测试会失败

@@ -7,10 +7,12 @@
 - 响应验证（状态码、字段值、响应时间）
 - 错误处理
 - Allure 报告集成
+
+注意：这些测试需要真实的 API 后端。
+如果没有真实 API，请运行 tests/api/test_mock_api.py 中的 Mock 测试。
 """
 import allure
 import pytest
-import requests
 
 from core.utils.api_client import APIClient, APIAssertions
 from core.utils.logger import get_logger
@@ -196,7 +198,7 @@ class TestUserAPI:
                 response = self.api_client.get("/api/users")
                 elapsed_ms = response.elapsed.total_seconds() * 1000
                 response_times.append(elapsed_ms)
-                logger.info(f"第 {i+1} 次请求耗时：{elapsed_ms:.2f}ms")
+                logger.info(f"第 {i + 1} 次请求耗时：{elapsed_ms:.2f}ms")
 
         with allure.step("计算平均响应时间"):
             avg_time = sum(response_times) / len(response_times)
@@ -204,4 +206,6 @@ class TestUserAPI:
             allure.attach.body(f"平均响应时间：{avg_time:.2f}ms", attachment_type=allure.attachment_type.TEXT)
 
         with allure.step("验证性能指标"):
+            # 注意：真实 API 的性能测试，如果 API 不可用会失败
+            # CI 环境中建议跳过或使用 Mock 测试
             assert avg_time < 1000, f"平均响应时间 {avg_time:.2f}ms 超过阈值 1000ms"
