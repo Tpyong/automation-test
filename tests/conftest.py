@@ -9,7 +9,7 @@ import pytest
 from playwright.sync_api import Browser, BrowserContext, Page, Playwright, sync_playwright
 
 # 添加项目根目录到 Python 路径
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))  # noqa: E402
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))  # noqa: E402
 
 # 导入核心模块
 from config.settings import Settings  # noqa: E402
@@ -177,17 +177,12 @@ def pytest_sessionfinish(session: Any, exitstatus: int) -> None:
                         for test_dir in os.listdir(suite_path):
                             test_path = os.path.join(suite_path, test_dir)
                             if os.path.isdir(test_path):
-                                video_files = [
-                                    f for f in os.listdir(test_path) if f.endswith(".webm")
-                                ]
+                                video_files = [f for f in os.listdir(test_path) if f.endswith(".webm")]
                                 if video_files:
                                     non_empty_videos = []
                                     for video_file in video_files:
                                         video_path = os.path.join(test_path, video_file)
-                                        if (
-                                            os.path.exists(video_path)
-                                            and os.path.getsize(video_path) > 0
-                                        ):
+                                        if os.path.exists(video_path) and os.path.getsize(video_path) > 0:
                                             non_empty_videos.append(video_file)
                                         else:
                                             try:
@@ -205,9 +200,7 @@ def pytest_sessionfinish(session: Any, exitstatus: int) -> None:
                                                 break
 
                                         if timestamp_start_index > 0:
-                                            test_name_part = "_".join(
-                                                test_name_parts[:timestamp_start_index]
-                                            )
+                                            test_name_part = "_".join(test_name_parts[:timestamp_start_index])
                                         else:
                                             last_underscore = test_dir.rfind("_")
                                             if last_underscore > 0:
@@ -217,35 +210,21 @@ def pytest_sessionfinish(session: Any, exitstatus: int) -> None:
 
                                         for video_file in non_empty_videos:
                                             try:
-                                                original_video_path = os.path.join(
-                                                    test_path, video_file
-                                                )
+                                                original_video_path = os.path.join(test_path, video_file)
                                                 mtime = os.path.getmtime(original_video_path)
-                                                timestamp = datetime.fromtimestamp(mtime).strftime(
-                                                    "%H%M%S"
-                                                )
-                                                new_video_name = (
-                                                    f"{test_name_part}_{timestamp}.webm"
-                                                )
-                                                new_video_path = os.path.join(
-                                                    suite_path, new_video_name
-                                                )
+                                                timestamp = datetime.fromtimestamp(mtime).strftime("%H%M%S")
+                                                new_video_name = f"{test_name_part}_{timestamp}.webm"
+                                                new_video_path = os.path.join(suite_path, new_video_name)
 
                                                 if os.path.exists(new_video_path):
                                                     try:
                                                         os.remove(new_video_path)
-                                                        logger.info(
-                                                            f"已删除已存在的视频文件: {new_video_name}"
-                                                        )
+                                                        logger.info(f"已删除已存在的视频文件: {new_video_name}")
                                                     except Exception as e:
-                                                        logger.warning(
-                                                            f"删除已存在的视频文件时出错: {e}"
-                                                        )
+                                                        logger.warning(f"删除已存在的视频文件时出错: {e}")
 
                                                 os.rename(original_video_path, new_video_path)
-                                                logger.info(
-                                                    f"视频文件已移动并重命名: {new_video_name}"
-                                                )
+                                                logger.info(f"视频文件已移动并重命名: {new_video_name}")
                                             except Exception as e:
                                                 logger.error(f"移动并重命名视频文件时出错: {e}")
 
@@ -361,11 +340,13 @@ def browser(playwright: Playwright, request: Any) -> Generator[Browser, Any, Non
                 logger.warning(f"尝试 {attempt + 1}/{max_retries} 获取浏览器失败，等待 {retry_delay}s 后重试...")
                 if attempt < max_retries - 1:
                     import time
+
                     time.sleep(retry_delay)
         except Exception as e:
             logger.error(f"尝试 {attempt + 1}/{max_retries} 获取浏览器时出错：{e}")
             if attempt < max_retries - 1:
                 import time
+
                 time.sleep(retry_delay)
 
     if not browser_obj:
@@ -397,9 +378,7 @@ def browser_context_args(request: Any, settings: Settings) -> Dict[str, Any]:
 
     test_node = request.node
     test_fixtures = getattr(test_node, "fixturenames", [])
-    uses_browser = any(
-        fixture in test_fixtures for fixture in ["page", "browser", "browser_context"]
-    )
+    uses_browser = any(fixture in test_fixtures for fixture in ["page", "browser", "browser_context"])
 
     if settings.video_enabled and uses_browser:
         test_file = test_node.fspath.basename if hasattr(test_node, "fspath") else "unknown"
@@ -456,9 +435,7 @@ def _attach_test_artifacts(item: Any) -> None:
     附加测试附件到 Allure 报告
     """
     try:
-        test_name = getattr(
-            item, "test_name", item.nodeid.split("::")[-1].replace("/", "_").replace("\\", "_")
-        )
+        test_name = getattr(item, "test_name", item.nodeid.split("::")[-1].replace("/", "_").replace("\\", "_"))
         print(f"[DEBUG] 开始附加附件到 Allure 报告，测试名称: {test_name}")
     except Exception as e:
         test_name = "unknown_test"
@@ -504,9 +481,7 @@ def _attach_test_artifacts(item: Any) -> None:
                         video_path = os.path.join(video_dir, video_file)
                         print(f"[DEBUG] 视频文件路径: {video_path}")
                         if os.path.exists(video_path) and os.path.getsize(video_path) > 0:
-                            print(
-                                f"[DEBUG] 视频文件存在，大小: {os.path.getsize(video_path)} bytes"
-                            )
+                            print(f"[DEBUG] 视频文件存在，大小: {os.path.getsize(video_path)} bytes")
                             allure.attach.file(
                                 video_path,
                                 name=f"{test_name}_video",
@@ -558,9 +533,7 @@ def pytest_runtest_makereport(item: Any, call: Any) -> Generator[None, Any, Any]
             report_gen = _get_report_generator()
             error_msg = str(rep.longrepr) if rep.failed else None
             duration = rep.duration if rep.duration else 0.0
-            report_gen.add_result(
-                nodeid=item.nodeid, outcome=rep.outcome, duration=duration, error_msg=error_msg
-            )
+            report_gen.add_result(nodeid=item.nodeid, outcome=rep.outcome, duration=duration, error_msg=error_msg)
             print("[DEBUG] 测试结果已添加到报告生成器")
         except Exception as e:
             print(f"[DEBUG] 添加测试结果到报告生成器时出错: {e}")
