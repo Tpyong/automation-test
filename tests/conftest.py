@@ -282,7 +282,7 @@ def pytest_sessionfinish(session: Any, exitstatus: int) -> None:
     except Exception as e:
         logger.warning(f"关闭数据库连接池时出错: {e}")
 
-    logger.info(f"测试汇总报告已生成:")
+    logger.info("测试汇总报告已生成:")
     logger.info(f"  - HTML: {html_report}")
     logger.info(f"  - JSON: {json_report}")
     logger.info(f"  - 历史记录: {history_file}")
@@ -310,10 +310,10 @@ def browser(playwright: Playwright, request: Any) -> Generator[Browser, Any, Non
     # 从 pytest-playwright 获取浏览器类型
     browser_name = request.config.getoption("--browser", default=None)
     
-    logger.info(f"=== Browser Fixture 调试 ===")
+    logger.info("=== Browser Fixture 调试 ===")
     logger.info(f"request.config.getoption('--browser') = {browser_name}")
     logger.info(f"TEST_BROWSER 环境变量 = {os.getenv('TEST_BROWSER', 'not set')}")
-    logger.info(f"===========================")
+    logger.info("===========================")
     
     # 如果命令行参数为空，从 TEST_BROWSER 环境变量读取（避免与 pytest-playwright 冲突）
     if not browser_name:
@@ -497,7 +497,7 @@ def _attach_test_artifacts(item: Any) -> None:
             video_dir = getattr(item, "video_dir", None)
             print(f"[DEBUG] 视频目录: {video_dir}")
             if video_dir and os.path.exists(video_dir):
-                print(f"[DEBUG] 视频目录存在")
+                print("[DEBUG] 视频目录存在")
                 import time
 
                 time.sleep(1)
@@ -566,7 +566,7 @@ def pytest_runtest_makereport(item: Any, call: Any) -> Generator[None, Any, Any]
             report_gen.add_result(
                 nodeid=item.nodeid, outcome=rep.outcome, duration=duration, error_msg=error_msg
             )
-            print(f"[DEBUG] 测试结果已添加到报告生成器")
+            print("[DEBUG] 测试结果已添加到报告生成器")
         except Exception as e:
             print(f"[DEBUG] 添加测试结果到报告生成器时出错: {e}")
 
@@ -593,7 +593,7 @@ def test_data_cleanup(request: Any) -> Generator[Dict[str, Any], Any, None]:
     for cleanup_func in cleanup_data.get("cleanup_funcs", []):
         try:
             cleanup_func()
-            logger.info(f"清理函数执行成功")
+            logger.info("清理函数执行成功")
         except Exception as e:
             logger.error(f"清理函数执行失败: {e}")
 
