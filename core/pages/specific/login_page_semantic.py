@@ -8,8 +8,8 @@ from typing import Any, Dict, Optional
 import allure
 from playwright.sync_api import Page
 
-from core.utils.locators import SmartPage
-from core.utils.logger import get_logger
+from core.pages.locators import SmartPage
+from utils.common.logger import get_logger
 
 logger = get_logger(__name__)
 

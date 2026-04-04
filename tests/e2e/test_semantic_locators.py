@@ -7,8 +7,8 @@ import allure
 import pytest
 
 from core.pages.specific.login_page_semantic import LoginPageSemantic
-from core.utils.assertions import Assertions
-from core.utils.locators import SmartLocator
+from utils.api.assertions import Assertions
+from core.pages.locators import SmartLocator
 
 
 @allure.epic("定位器管理")

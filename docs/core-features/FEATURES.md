@@ -107,7 +107,7 @@ pytest
 **使用示例：**
 ```python
 # RESTful API 测试
-from core.utils.api_client import APIClient, APIAssertions
+from utils.api.api_client import APIClient, APIAssertions
 
 @allure.epic("API 测试")
 @allure.feature("用户管理")
@@ -130,7 +130,7 @@ def test_mock_api(mock_server):
     assert response.status_code == 200
 
 # API 契约测试
-from core.utils.api_contract_tester import APIContractTester
+from utils.api.api_contract_tester import APIContractTester
 
 def test_api_contract():
     tester = APIContractTester("https://api.example.com")
@@ -139,7 +139,7 @@ def test_api_contract():
     assert len(results['failed']) == 0
 
 # API 性能测试 - 负载测试
-from core.utils.api_contract_tester import APIPerformanceTester
+from utils.api.api_contract_tester import APIPerformanceTester
 
 def test_api_performance():
     tester = APIPerformanceTester("https://api.example.com")
@@ -294,13 +294,13 @@ pytest tests/e2e/
 
 企业级数据库测试解决方案：
 
-**数据库连接管理**（`core/utils/db_manager.py`）：
+**数据库连接管理**（`core/services/database/db_manager.py`）：
 - 数据库连接池管理（基于 SQLAlchemy）
 - 支持 MySQL、PostgreSQL 等主流数据库
 - 连接池配置：大小、超时、回收等
 - 自动连接管理和资源释放
 
-**测试数据管理**（`core/utils/test_data_manager.py`）：
+**测试数据管理**（`utils/data/test_data_manager.py`）：
 - 测试数据初始化和清理
 - 数据快照和恢复功能
 - 测试数据构建器（链式 API）
@@ -438,17 +438,17 @@ def test_with_data(test_data_manager):
 - **MyPy 集成**：集成 MyPy 类型检查工具，可通过 `make mypy` 或 `mypy .` 运行
 - **灵活配置**：MyPy 配置已调整为平衡模式，既保证类型安全，又允许逐步添加类型注解
 - **核心模块支持**：以下模块已添加完整的类型注解：
-  - `core/utils/locators.py` - 定位器管理
-  - `core/utils/browser_pool.py` - 浏览器池管理
+  - `core/pages/locators.py` - 定位器管理
+  - `utils/browser/browser_pool.py` - 浏览器池管理
   - `core/pages/login_page.py` - 登录页面
   - `core/pages/login_page_semantic.py` - 语义化定位登录页面
-  - `core/utils/secrets_manager.py` - 敏感信息管理
-  - `core/utils/api_client.py` - API 客户端
-  - `core/utils/data_cache.py` - 数据缓存
-  - `core/utils/data_factory.py` - 数据工厂
-  - `core/utils/allure_helper.py` - Allure 报告辅助
-  - `core/utils/report_generator.py` - 报告生成器
-  - `core/utils/mock_server.py` - Mock 服务器
+  - `utils/security/secrets_manager.py` - 敏感信息管理
+  - `utils/api/api_client.py` - API 客户端
+  - `utils/data/data_cache.py` - 数据缓存
+  - `utils/data/data_factory.py` - 数据工厂
+  - `utils/reporting/allure_helper.py` - Allure 报告辅助
+  - `utils/reporting/report_generator.py` - 报告生成器
+  - `core/services/api/mock_server.py` - Mock 服务器
   - `config/settings.py` - 配置管理
   - `conftest.py` - pytest 配置
   - `scripts/secrets_tool.py` - 敏感信息管理工具
@@ -501,7 +501,7 @@ python scripts/config_wizard.py
 
 **使用方法：**
 ```bash
-python -c "from core.utils.test_advisor import get_test_advisor; advisor = get_test_advisor(); advisor.generate_advisor_report()"
+python -c "from utils.reporting.test_advisor import get_test_advisor; advisor = get_test_advisor(); advisor.generate_advisor_report()"
 ```
 
 ## 功能对比

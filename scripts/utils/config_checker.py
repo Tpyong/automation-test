@@ -12,7 +12,7 @@ from pathlib import Path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from config.settings import Settings, load_env_file
-from core.utils.logger import get_logger
+from utils.common.logger import get_logger
 
 logger = get_logger(__name__)
 

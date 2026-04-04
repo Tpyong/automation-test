@@ -5,7 +5,7 @@
 import allure
 import pytest
 
-from core.utils.assertions import Assertions
+from utils.api.assertions import Assertions
 
 
 @allure.epic("测试验证")

@@ -86,7 +86,7 @@ complex_element:
 ### 方式一：使用 SmartPage（推荐）
 
 ```python
-from core.utils.locators import SmartPage
+from core.pages.locators import SmartPage
 from playwright.sync_api import Page
 
 class LoginPage(SmartPage):
@@ -103,7 +103,7 @@ class LoginPage(SmartPage):
 ### 方式二：直接使用 LocatorManager
 
 ```python
-from core.utils.locators import LocatorManager
+from core.pages.locators import LocatorManager
 from playwright.sync_api import Page
 
 class LoginPage:

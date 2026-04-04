@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Tuple
 from urllib.parse import urlparse
 
-from core.utils.logger import get_logger
+from utils.common.logger import get_logger
 from config.validators import validate_config
 
 logger = get_logger(__name__)
@@ -16,7 +16,7 @@ def load_env_file(env_file: str = ".env") -> None:
     """
     decrypt_func: Callable[[str], str]
     try:
-        from core.utils.secrets_manager import decrypt_value
+        from utils.secrets_manager import decrypt_value
 
         decrypt_func = decrypt_value
     except ImportError:

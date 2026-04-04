@@ -6,7 +6,7 @@ TodoMVC 功能测试示例
 import allure
 import pytest
 
-from core.utils.assertions import Assertions
+from utils.api.assertions import Assertions
 
 
 @allure.epic("TodoMVC")

@@ -13,7 +13,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 # 导入核心模块
 from config.settings import Settings  # noqa: E402
-from core.utils.logger import get_logger  # noqa: E402
+from utils.common.logger import get_logger  # noqa: E402
 
 # 延迟导入可选模块，按需加载
 _allure_helper: Any = None
@@ -28,7 +28,7 @@ def _get_allure_helper() -> Any:
     """延迟加载 AllureHelper"""
     global _allure_helper
     if _allure_helper is None:
-        from core.utils.allure_helper import AllureHelper
+        from utils.reporting.allure_helper import AllureHelper
 
         _allure_helper = AllureHelper()
     return _allure_helper
@@ -38,7 +38,7 @@ def _get_report_generator() -> Any:
     """延迟加载 ReportGenerator"""
     global _report_generator
     if _report_generator is None:
-        from core.utils.report_generator import get_report_generator
+        from utils.reporting.report_generator import get_report_generator
 
         _report_generator = get_report_generator()
     return _report_generator
@@ -48,7 +48,7 @@ def _get_browser_pool() -> Any:
     """延迟加载 BrowserPool"""
     global _browser_pool
     if _browser_pool is None:
-        from core.utils.browser.browser_pool import get_browser_pool
+        from utils.browser.browser_pool import get_browser_pool
 
         _browser_pool = get_browser_pool()
     return _browser_pool
@@ -58,7 +58,7 @@ def _get_db_manager() -> Any:
     """延迟加载 DatabaseManager"""
     global _db_manager
     if _db_manager is None:
-        from core.utils.db_manager import get_db_manager
+        from core.services.database.db_manager import get_db_manager
 
         _db_manager = get_db_manager()
     return _db_manager
@@ -68,7 +68,7 @@ def _get_test_data_manager() -> Any:
     """延迟加载 TestDataManager"""
     global _test_data_manager
     if _test_data_manager is None:
-        from core.utils.test_data_manager import TestDataManager
+        from utils.data.test_data_manager import TestDataManager
 
         _test_data_manager = TestDataManager(_get_db_manager())
     return _test_data_manager
@@ -78,7 +78,7 @@ def _get_test_advisor() -> Any:
     """延迟加载 TestAdvisor"""
     global _test_advisor
     if _test_advisor is None:
-        from core.utils.test_advisor import get_test_advisor
+        from utils.reporting.test_advisor import get_test_advisor
 
         _test_advisor = get_test_advisor()
     return _test_advisor
@@ -619,7 +619,7 @@ def test_data_manager(db_manager: Any) -> Generator[Any, Any, None]:
 
 @pytest.fixture(scope="function")
 def mock_server() -> Generator[Any, Any, None]:
-    from core.utils.mock_server import MockServer
+    from core.services.api.mock_server import MockServer
 
     server = MockServer()
     server.start()

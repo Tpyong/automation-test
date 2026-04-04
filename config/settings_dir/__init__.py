@@ -2,10 +2,10 @@
 配置设置模块
 """
 
-from .base import *
-from .development import *
-from .testing import *
-from .production import *
+from .base.base import *
+from .development.development import *
+from .testing.testing import *
+from .production.production import *
 
 __all__ = [
     "BASE_URL",

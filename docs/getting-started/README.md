@@ -186,8 +186,8 @@ pytest -n auto --dist=loadfile
 # 查看测试数据文件
 data/test_data/login_data.yaml
 
-# 在测试中使用
-from core.utils.test_data_loader import TestDataLoader
+# 在测试中使用```python
+from utils.data.test_data_loader import TestDataLoader
 
 data = TestDataLoader.get_login_data('login_success')
 ```
@@ -197,7 +197,7 @@ data = TestDataLoader.get_login_data('login_success')
 使用 ExceptionHandler 处理异常：
 
 ```python
-from core.utils.exception_handler import ExceptionHandler, retry_on_exception
+from utils.common.exception_handler import ExceptionHandler, retry_on_exception
 
 # 安全执行
 result = ExceptionHandler.safe_execute(some_function, arg1, arg2)
@@ -214,7 +214,7 @@ def flaky_function():
 使用 AllureHelper 增强测试报告：
 
 ```python
-from core.utils.allure_helper import AllureHelper
+from utils.reporting.allure_helper import AllureHelper
 
 # 添加测试参数
 AllureHelper.add_parameters({

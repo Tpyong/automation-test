@@ -72,7 +72,7 @@ TEST_ENV=staging pytest
 import allure
 import pytest
 from core.pages.base_page import BasePage
-from core.utils.assertions import Assertions
+from utils.api.assertions import Assertions
 
 @allure.epic("测试套件")
 @allure.feature("功能模块")
@@ -125,7 +125,7 @@ tests/
 ```python
 # tests/unit/test_utils.py
 import pytest
-from core.utils.data_factory import DataFactory
+from utils.data.data_factory import DataFactory
 
 class TestDataFactory:
     """DataFactory 单元测试"""
@@ -173,7 +173,7 @@ class TestDatabaseOperations:
 ```python
 # tests/api/test_users_api.py
 import pytest
-from core.utils.api_client import APIClient
+from utils.api.api_client import APIClient
 
 class TestUsersAPI:
     """用户 API 测试"""
@@ -261,7 +261,7 @@ class LoginPage(BasePage):
 ### 使用语义化定位器
 
 ```python
-from core.utils.locators import SmartPage
+from core.pages.locators import SmartPage
 
 class LoginPage(SmartPage):
     def __init__(self, page):
@@ -277,7 +277,7 @@ class LoginPage(SmartPage):
 ### 使用数据工厂
 
 ```python
-from core.utils.data_factory import get_data_factory
+from utils.data.data_factory import get_data_factory
 
 def test_with_factory():
     factory = get_data_factory()
@@ -293,7 +293,7 @@ def test_with_factory():
 ### 使用数据提供者
 
 ```python
-from core.utils.data_provider import DataProvider
+from utils.data.data_provider import DataProvider
 
 # 从 JSON 文件加载数据
 test_data = DataProvider.get_test_data("login_data.json")
@@ -309,7 +309,7 @@ def test_login(page, data):
 ### 基础 API 测试
 
 ```python
-from core.utils.api_client import APIClient, APIAssertions
+from utils.api.api_client import APIClient, APIAssertions
 
 def test_api():
     api = APIClient("https://api.example.com")
@@ -326,7 +326,7 @@ def test_api():
 ### API 契约测试
 
 ```python
-from core.utils.api_contract_tester import APIContractTester
+from utils.api.api_contract_tester import APIContractTester
 
 def test_api_contract():
     """测试 API 是否符合 OpenAPI 规范"""
@@ -345,7 +345,7 @@ def test_api_contract():
 ### API 性能测试
 
 ```python
-from core.utils.api_contract_tester import APIPerformanceTester
+from utils.api.api_contract_tester import APIPerformanceTester
 
 def test_api_load():
     """API 负载测试"""
@@ -429,7 +429,7 @@ class TestDatabaseOperations:
 ```python
 # tests/integration/test_data_management.py
 import pytest
-from core.utils.test_data_manager import TestDataBuilder
+from utils.data.test_data_manager import TestDataBuilder
 
 class TestDataManagement:
     """测试数据管理"""
@@ -602,7 +602,7 @@ login_failure:
 #### 使用测试数据
 
 ```python
-from core.utils.test_data_loader import TestDataLoader
+from utils.data.test_data_loader import TestDataLoader
 
 # 加载登录测试数据
 login_data = TestDataLoader.get_login_data('login_success')
@@ -621,7 +621,7 @@ def test_login_success(page, data):
 #### 安全执行函数
 
 ```python
-from core.utils.exception_handler import ExceptionHandler
+from utils.common.exception_handler import ExceptionHandler
 
 def test_with_safe_execute(page):
     # 安全执行可能失败的操作
@@ -641,7 +641,7 @@ def test_with_safe_execute(page):
 #### 使用异常重试装饰器
 
 ```python
-from core.utils.exception_handler import retry_on_exception
+from utils.common.exception_handler import retry_on_exception
 
 @retry_on_exception(max_retries=3, delay=1)
 def test_flaky_operation(page):
@@ -653,7 +653,7 @@ def test_flaky_operation(page):
 #### 自定义异常
 
 ```python
-from core.utils.exception_handler import TestExecutionException
+from utils.common.exception_handler import TestExecutionException
 
 def test_custom_exception(page):
     if not page.is_visible("#element"):
@@ -665,7 +665,7 @@ def test_custom_exception(page):
 #### 添加测试参数
 
 ```python
-from core.utils.allure_helper import AllureHelper
+from utils.reporting.allure_helper import AllureHelper
 
 def test_with_parameters(page, settings):
     # 添加测试参数
@@ -681,7 +681,7 @@ def test_with_parameters(page, settings):
 #### 添加链接和问题
 
 ```python
-from core.utils.allure_helper import AllureHelper
+from utils.reporting.allure_helper import AllureHelper
 
 def test_with_links():
     # 添加问题链接
@@ -697,7 +697,7 @@ def test_with_links():
 #### 添加 HTML 描述
 
 ```python
-from core.utils.allure_helper import AllureHelper
+from utils.reporting.allure_helper import AllureHelper
 
 def test_with_html_description():
     html_desc = """
@@ -717,7 +717,7 @@ def test_with_html_description():
 #### 附加 JSON 数据
 
 ```python
-from core.utils.allure_helper import AllureHelper
+from utils.reporting.allure_helper import AllureHelper
 
 def test_with_json_data():
     test_data = {
@@ -889,7 +889,7 @@ python scripts/config_wizard.py
 
 ```bash
 # 生成智能测试建议报告
-python -c "from core.utils.test_advisor import get_test_advisor; advisor = get_test_advisor(); advisor.generate_advisor_report()"
+python -c "from utils.reporting.test_advisor import get_test_advisor; advisor = get_test_advisor(); advisor.generate_advisor_report()"
 ```
 
 #### 分析内容

@@ -163,6 +163,17 @@ allure open reports/allure-report
 
 ## 最近变更
 
+### 2026-04-05: 目录结构重构与规范
+
+- ✅ **config/settings_dir/ 重构** - 删除根目录下的配置文件，仅保留子目录中的配置
+- ✅ **机密文件位置优化** - 将 .secrets.key 和 .secrets.salt 移动到 config/secrets/ 目录
+- ✅ **utils/ 目录移动** - 将 core/utils/ 移动到根目录，作为全局通用工具
+- ✅ **utils/ 文件分类** - 将所有工具文件分类到对应的子目录（api、browser、data、reporting、security、core）
+- ✅ **服务模块迁移** - 将 db_manager.py、mock_server.py 移动到 core/services/
+- ✅ **定位器模块迁移** - 将 locators.py 移动到 core/pages/
+- ✅ **logs/ 和 reports/ 说明** - 为这两个目录添加了 README 说明文档
+- ✅ **目录结构规范文档** - 创建了 docs/best-practices/DIRECTORY_STRUCTURE.md，包含详细的目录说明和新文件归类决策树
+
 ### 2026-04-04: API 测试重构与文档更新
 
 - ✅ **API 测试重构** - 完全重构了 API 测试，使用内置 Mock 服务器替代真实 API 调用
@@ -236,14 +247,22 @@ allure open reports/allure-report
 │   │   ├── .env.development   # 开发环境
 │   │   ├── .env.testing       # 测试环境
 │   │   └── .env.staging       # 预发布环境
+│   ├── secrets/               # 机密文件（密钥、盐值等）
+│   │   ├── .secrets.key       # 加密密钥
+│   │   └── .secrets.salt      # 加密盐值
 │   ├── settings.py            # 配置管理类
 │   ├── validators.py          # 配置验证器
 │   ├── settings_dir/          # 配置模块目录
 │   │   ├── __init__.py
-│   │   ├── base.py            # 基础配置
-│   │   ├── development.py     # 开发环境配置
-│   │   ├── production.py      # 生产环境配置
-│   │   └── testing.py         # 测试环境配置
+│   │   ├── base/              # 基础配置
+│   │   │   └── base.py
+│   │   ├── development/       # 开发环境配置
+│   │   │   └── development.py
+│   │   ├── production/        # 生产环境配置
+│   │   │   └── production.py
+│   │   └── testing/           # 测试环境配置
+│   │       └── testing.py
+│   ├── categories.json        # Allure 报告分类配置
 │   └── __init__.py
 ├── core/                      # 核心模块
 │   ├── pages/                 # 页面对象
@@ -253,50 +272,54 @@ allure open reports/allure-report
 │   │   ├── specific/          # 特定页面对象
 │   │   │   ├── login_page.py
 │   │   │   └── login_page_semantic.py
-│   │   └── __init__.py
-│   ├── utils/                 # 工具类
-│   │   ├── api/               # API 工具
-│   │   │   ├── api_client.py
-│   │   │   └── api_contract_tester.py
-│   │   ├── browser/           # 浏览器工具
-│   │   │   ├── browser_pool.py
-│   │   │   └── smart_waiter.py
-│   │   ├── data/              # 数据工具
-│   │   │   ├── data_cache.py
-│   │   │   ├── data_factory.py
-│   │   │   ├── data_provider.py
-│   │   │   ├── test_data_loader.py
-│   │   │   └── test_data_manager.py
-│   │   ├── reporting/         # 报告工具
-│   │   │   ├── generator.py
-│   │   │   ├── history_manager.py
-│   │   │   ├── models.py
-│   │   │   └── worker_merger.py
-│   │   ├── security/          # 安全工具
-│   │   │   ├── compliance_checker.py
-│   │   │   ├── data_masking.py
-│   │   │   └── secrets_manager.py
-│   │   ├── alert_manager.py   # 告警管理器
-│   │   ├── allure_helper.py   # Allure 辅助工具
-│   │   ├── assertions.py      # 断言工具
-│   │   ├── audit_logger.py    # 审计日志
-│   │   ├── circuit_breaker.py # 断路器
-│   │   ├── db_manager.py      # 数据库管理器
-│   │   ├── exception_handler.py # 异常处理器
 │   │   ├── locators.py        # 定位器管理器
-│   │   ├── logger.py          # 日志工具
-│   │   ├── mock_server.py     # Mock 服务器
-│   │   ├── path_helper.py     # 路径工具
-│   │   ├── report_generator.py # 报告生成器
-│   │   ├── test_advisor.py    # 测试建议
-│   │   ├── test_monitor.py    # 测试监控
 │   │   └── __init__.py
 │   ├── services/              # 服务层
 │   │   ├── api/               # API 服务
+│   │   │   ├── __init__.py
+│   │   │   └── mock_server.py # Mock 服务器
 │   │   ├── auth/              # 认证服务
+│   │   │   └── __init__.py
 │   │   └── database/          # 数据库服务
+│   │       ├── __init__.py
+│   │       └── db_manager.py  # 数据库管理器
 │   ├── exceptions/            # 异常定义
 │   ├── models/                # 数据模型
+│   └── __init__.py
+├── utils/                     # 通用工具（从 core/utils/ 移到根目录）
+│   ├── api/                   # API 测试工具
+│   │   ├── api_client.py
+│   │   ├── api_contract_tester.py
+│   │   ├── assertions.py      # 断言工具
+│   │   └── circuit_breaker.py # 断路器
+│   ├── browser/               # 浏览器自动化工具
+│   │   ├── browser_pool.py
+│   │   └── smart_waiter.py
+│   ├── core/                  # 核心工具
+│   │   ├── exception_handler.py # 异常处理器
+│   │   ├── logger.py          # 日志工具
+│   │   └── path_helper.py     # 路径工具
+│   ├── data/                  # 数据管理工具
+│   │   ├── data_cache.py
+│   │   ├── data_factory.py
+│   │   ├── data_provider.py
+│   │   ├── test_data_loader.py
+│   │   └── test_data_manager.py
+│   ├── reporting/             # 报告生成工具
+│   │   ├── alert_manager.py   # 告警管理器
+│   │   ├── allure_helper.py   # Allure 辅助工具
+│   │   ├── generator.py
+│   │   ├── history_manager.py
+│   │   ├── models.py
+│   │   ├── report_generator.py # 报告生成器
+│   │   ├── test_advisor.py    # 测试建议
+│   │   ├── test_monitor.py    # 测试监控
+│   │   └── worker_merger.py
+│   ├── security/              # 安全相关工具
+│   │   ├── audit_logger.py    # 审计日志
+│   │   ├── compliance_checker.py
+│   │   ├── data_masking.py
+│   │   └── secrets_manager.py # 机密管理器
 │   └── __init__.py
 ├── tests/                     # 测试用例
 │   ├── unit/                  # 单元测试
@@ -324,7 +347,16 @@ allure open reports/allure-report
 │   ├── config_checker.py      # 配置检查工具
 │   └── __init__.py
 ├── docs/                      # 文档
-├── reports/                   # 测试报告
+│   ├── getting-started/       # 入门指南
+│   ├── core-features/         # 核心功能说明
+│   ├── best-practices/        # 最佳实践
+│   │   └── DIRECTORY_STRUCTURE.md # 目录结构规范
+│   ├── ci-cd/                 # CI/CD 相关文档
+│   └── README.md
+├── logs/                      # 日志文件（gitignore）
+│   └── README.md              # 日志目录说明
+├── reports/                   # 测试报告（gitignore）
+│   └── README.md              # 报告目录说明
 ├── ci-cd/                     # CI/CD 配置
 │   ├── .gitlab-ci.yml         # GitLab CI 配置
 │   └── Jenkinsfile            # Jenkins 配置
@@ -386,7 +418,7 @@ python scripts/interactive_runner.py
 python scripts/config_wizard.py
 
 # 生成智能测试建议报告
-python -c "from core.utils.test_advisor import get_test_advisor; advisor = get_test_advisor(); advisor.generate_advisor_report()"
+python -c "from utils.reporting.test_advisor import get_test_advisor; advisor = get_test_advisor(); advisor.generate_advisor_report()"
 ```
 
 ### 传统命令
@@ -439,7 +471,7 @@ class TestExample:
 **真实 API 测试**：
 ```python
 import allure
-from core.utils.api_client import APIClient, APIAssertions
+from utils.api.api_client import APIClient, APIAssertions
 
 @allure.epic("API 测试")
 @allure.feature("用户管理")

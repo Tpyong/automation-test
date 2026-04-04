@@ -2,9 +2,9 @@ import allure
 from playwright.sync_api import Locator, Page
 from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
 
-from core.utils.allure_helper import AllureHelper
-from core.utils.logger import get_logger
-from core.utils.path_helper import PathHelper
+from utils.reporting.allure_helper import AllureHelper
+from utils.common.logger import get_logger
+from utils.common.path_helper import PathHelper
 
 logger = get_logger(__name__)
 

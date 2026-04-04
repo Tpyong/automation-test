@@ -12,7 +12,7 @@ import allure
 import pytest
 import requests
 
-from core.utils.logger import get_logger
+from utils.common.logger import get_logger
 
 logger = get_logger(__name__)
 

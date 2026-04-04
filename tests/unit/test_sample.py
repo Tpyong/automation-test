@@ -2,8 +2,8 @@ import allure
 import pytest
 
 from core.pages.base.base_page import BasePage
-from core.utils.assertions import Assertions
-from core.utils.logger import get_logger
+from utils.api.assertions import Assertions
+from utils.common.logger import get_logger
 
 logger = get_logger(__name__)
 
