@@ -12,11 +12,11 @@
 """
 
 import json
-import time
 import threading
+import time
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from typing import Any, Dict, Generator
-from http.server import HTTPServer, BaseHTTPRequestHandler
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import parse_qs, urlparse
 
 import allure
 import pytest
