@@ -9,7 +9,7 @@ import pytest
 from playwright.sync_api import Browser, BrowserContext, Page, Playwright, sync_playwright
 
 # 添加项目根目录到 Python 路径
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))  # noqa: E402
 
 # 导入核心模块
 from config.settings import Settings
@@ -105,20 +105,20 @@ def pytest_configure(config: Any) -> None:
 def _prepare_allure_categories() -> None:
     """
     准备 Allure categories.json 配置文件
-    
+
     从 config/categories.json 复制到 reports/allure-results/
     确保每次生成报告时都有正确的分类配置
     """
     import shutil
-    
+
     # 获取项目根目录（tests 的父目录）
     project_root = Path(__file__).parent.parent
     source_file = project_root / "config" / "categories.json"
     target_file = project_root / "reports" / "allure-results" / "categories.json"
-    
+
     # 确保目标目录存在
     target_file.parent.mkdir(parents=True, exist_ok=True)
-    
+
     # 复制配置文件
     if source_file.exists():
         shutil.copy2(source_file, target_file)
@@ -306,36 +306,36 @@ def playwright() -> Generator[Playwright, Any, None]:
 def browser(playwright: Playwright, request: Any) -> Generator[Browser, Any, None]:
     """使用浏览器实例池的浏览器 fixture，基于 pytest-playwright 的 browser 类型"""
     import os
-    
+
     # 从 pytest-playwright 获取浏览器类型
     browser_name = request.config.getoption("--browser", default=None)
-    
+
     logger.info("=== Browser Fixture 调试 ===")
     logger.info(f"request.config.getoption('--browser') = {browser_name}")
     logger.info(f"TEST_BROWSER 环境变量 = {os.getenv('TEST_BROWSER', 'not set')}")
     logger.info("===========================")
-    
+
     # 如果命令行参数为空，从 TEST_BROWSER 环境变量读取（避免与 pytest-playwright 冲突）
     if not browser_name:
         browser_name = os.getenv("TEST_BROWSER", "chromium")
-    
+
     # 如果是列表，取第一个元素（pytest-playwright 的行为）
     if isinstance(browser_name, list):
         browser_name = browser_name[0] if browser_name else "chromium"
-    
+
     headless = os.getenv("HEADLESS", "true").lower() == "true"
     slow_mo = int(os.getenv("SLOW_MO", "0"))
-    
+
     # 添加调试日志，确认环境变量读取正确
     logger.info(f"HEADLESS 环境变量：{os.getenv('HEADLESS', 'not set')}")
     logger.info(f"解析后的 headless 值：{headless}")
-    
+
     # 强制确保在 CI 环境中使用 headless 模式
     if os.getenv("CI", "false").lower() == "true" and not headless:
         logger.warning("CI 环境中检测到 HEADLESS=false，强制设置为 true")
         headless = True
         logger.info(f"修正后的 headless 值：{headless}")
-    
+
     viewport_width = int(os.getenv("VIEWPORT_WIDTH", "1920"))
     viewport_height = int(os.getenv("VIEWPORT_HEIGHT", "1080"))
     viewport = {"width": viewport_width, "height": viewport_height}
@@ -350,7 +350,7 @@ def browser(playwright: Playwright, request: Any) -> Generator[Browser, Any, Non
     browser_obj = None
     max_retries = 3
     retry_delay = 2  # 秒
-    
+
     for attempt in range(max_retries):
         try:
             browser_obj = pool.acquire_browser()
@@ -367,7 +367,7 @@ def browser(playwright: Playwright, request: Any) -> Generator[Browser, Any, Non
             if attempt < max_retries - 1:
                 import time
                 time.sleep(retry_delay)
-    
+
     if not browser_obj:
         error_msg = (
             f"无法获取浏览器实例 (已重试 {max_retries} 次). "
@@ -483,11 +483,6 @@ def _attach_test_artifacts(item: Any) -> None:
 
     # 2. 附加视频
     try:
-        import sys
-        import os
-
-        # 添加项目根目录到 Python 路径
-        sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
         from config.settings import Settings
 
