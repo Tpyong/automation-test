@@ -124,6 +124,9 @@ per-file-ignores = [
 # ==============================
 # pylint 代码规范弱校验（适配测试脚本）
 # ==============================
+[tool.pylint]
+max-line-length = 120
+
 [tool.pylint.messages_control]
 disable = [
     "C0103",  # 宽松变量名校验
