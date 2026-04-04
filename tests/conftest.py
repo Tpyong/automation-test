@@ -12,8 +12,8 @@ from playwright.sync_api import Browser, BrowserContext, Page, Playwright, sync_
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))  # noqa: E402
 
 # 导入核心模块
-from config.settings import Settings
-from core.utils.logger import get_logger
+from config.settings import Settings  # noqa: E402
+from core.utils.logger import get_logger  # noqa: E402
 
 # 延迟导入可选模块，按需加载
 _allure_helper: Any = None
