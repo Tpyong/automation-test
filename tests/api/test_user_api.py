@@ -268,8 +268,8 @@ class TestUserAPI:
         with allure.step('准备测试数据'):
             for i in range(5):
                 user_data = {
-                    'name': f'用户{i+1}',
-                    'email': f'user{i+1}@example.com',
+                    'name': f'用户{i + 1}',
+                    'email': f'user{i + 1}@example.com',
                     'age': 25 + i,
                     'role': 'user'
                 }
@@ -415,8 +415,8 @@ class TestUserAPI:
         with allure.step('准备测试数据'):
             for i in range(10):
                 user_data = {
-                    'name': f'用户{i+1}',
-                    'email': f'user{i+1}@example.com',
+                    'name': f'用户{i + 1}',
+                    'email': f'user{i + 1}@example.com',
                     'age': 25,
                     'role': 'user'
                 }
@@ -475,8 +475,8 @@ class TestUserAPI:
         with allure.step('准备测试数据'):
             for i in range(10):
                 user_data = {
-                    'name': f'用户{i+1}',
-                    'email': f'user{i+1}@example.com',
+                    'name': f'用户{i + 1}',
+                    'email': f'user{i + 1}@example.com',
                     'age': 25,
                     'role': 'user'
                 }
@@ -486,7 +486,7 @@ class TestUserAPI:
             response_times = []
             for i in range(5):
                 start_time = time.time()
-                response = api_client.get(f'{base_url}/api/users')
+                api_client.get(f'{base_url}/api/users')
                 elapsed_ms = (time.time() - start_time) * 1000
                 response_times.append(elapsed_ms)
                 logger.info(f'第 {i + 1} 次请求耗时：{elapsed_ms:.2f}ms')

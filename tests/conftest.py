@@ -8,23 +8,12 @@ import allure
 import pytest
 from playwright.sync_api import Browser, BrowserContext, Page, Playwright, sync_playwright
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-
-import sys
-import os
-
 # 添加项目根目录到 Python 路径
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-# 直接导入 settings.py 模块
-import sys
-import os
-
-# 确保导入的是 config/settings.py 而不是 config/settings 包
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from config.settings import Settings, ConfigValidationError
+# 导入核心模块
+from config.settings import Settings
 from core.utils.logger import get_logger
-from core.utils.path_helper import PathHelper
 
 # 延迟导入可选模块，按需加载
 _allure_helper: Any = None
@@ -147,27 +136,13 @@ def pytest_sessionstart(session: Any) -> None:
     # 自动复制 Allure categories.json 配置文件
     _prepare_allure_categories()
 
-    import sys
-import os
+    settings = Settings()
+    config_summary = settings.get_config_summary()
+    logger.info("配置摘要：%s", config_summary)
 
-# 添加项目根目录到 Python 路径
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-# 直接导入 settings.py 模块
-import sys
-import os
-
-# 确保导入的是 config/settings.py 而不是 config/settings 包
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from config.settings import Settings, ConfigValidationError
-
-settings = Settings()
-config_summary = settings.get_config_summary()
-logger.info("配置摘要：%s", config_summary)
-
-report_gen = _get_report_generator()
-report_gen.start_session()
-logger.info("报告生成器会话已开始")
+    report_gen = _get_report_generator()
+    report_gen.start_session()
+    logger.info("报告生成器会话已开始")
 
 
 def pytest_sessionfinish(session: Any, exitstatus: int) -> None:
@@ -463,7 +438,9 @@ def page(context: BrowserContext, request: Any, settings: Settings) -> Generator
     yield page_obj
 
     try:
-        screenshot_path = PathHelper.get_screenshot_path(request.node.name)
+        screenshot_dir = Path("reports", "screenshots", datetime.now().strftime("%Y%m%d"))
+        screenshot_dir.mkdir(parents=True, exist_ok=True)
+        screenshot_path = screenshot_dir / f"{request.node.name}.png"
         page_obj.screenshot(path=screenshot_path, full_page=True)
         setattr(request.node, "screenshot_path", screenshot_path)
         print(f"[DEBUG] 测试截图已保存: {screenshot_path}")
