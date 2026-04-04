@@ -40,7 +40,7 @@ jobs:
 
     - name: Run security scan
       run: |
-        python scripts/security_scan.py
+        python scripts/security/security_scan.py
 
     - name: Upload security report
       if: always()
