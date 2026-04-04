@@ -15,7 +15,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict
 
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# 添加项目根目录到 Python 路径
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from core.utils.logger import get_logger
 
