@@ -29,7 +29,7 @@ class LoginPageSemantic(SmartPage):
     def navigate(self, url: str) -> None:
         """导航到登录页面"""
         self.page.goto(url)
-        logger.info(f"导航到登录页面: {url}")
+        logger.info("导航到登录页面: %s", url)
 
     @allure.step("输入用户名: {username}")
     def enter_username(self, username: str) -> None:
@@ -39,7 +39,7 @@ class LoginPageSemantic(SmartPage):
         """
         # 使用语义化定位 - label 方式
         self.fill("username_input", username)
-        logger.info(f"输入用户名: {username}")
+        logger.info("输入用户名: %s", username)
 
     @allure.step("输入密码")
     def enter_password(self, password: str) -> None:
@@ -95,7 +95,7 @@ class LoginPageSemantic(SmartPage):
         """
         self.wait_for_visible("error_message", timeout=5000)
         message: Optional[str] = self.get_text("error_message")
-        logger.info(f"错误提示: {message}")
+        logger.info("错误提示: %s", message)
         return message.strip() if message else ""
 
     @allure.step("检查错误信息是否显示")
@@ -121,7 +121,7 @@ class LoginPageSemantic(SmartPage):
         test_id 是最稳定的定位方式（需要开发配合）
         """
         self.fill("username_field", username)
-        logger.info(f"使用 test_id 输入用户名: {username}")
+        logger.info("使用 test_id 输入用户名: %s", username)
 
     @allure.step("使用 placeholder 定位搜索框并输入: {text}")
     def search(self, text: str) -> None:
@@ -131,7 +131,7 @@ class LoginPageSemantic(SmartPage):
         """
         self.fill("search_input", text)
         self.page.keyboard.press("Enter")
-        logger.info(f"搜索: {text}")
+        logger.info("搜索: %s", text)
 
     @allure.step("点击帮助图标")
     def click_help(self) -> None:
@@ -155,7 +155,7 @@ class LoginPageSemantic(SmartPage):
         if self.locators is None:
             return {}
         config: Any = self.locators.get(element_name)
-        logger.info(f"元素 '{element_name}' 的定位器配置: {config}")
+        logger.info("元素 '%s' 的定位器配置: %s", element_name, config)
         if isinstance(config, dict):
             return config
         return {}

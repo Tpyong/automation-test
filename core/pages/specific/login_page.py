@@ -27,7 +27,7 @@ class LoginPage:
     def navigate(self, url: str) -> None:
         """导航到登录页面"""
         self.page.goto(url)
-        logger.info(f"导航到登录页面: {url}")
+        logger.info("导航到登录页面: %s", url)
 
     @allure.step("输入用户名: {username}")
     def enter_username(self, username: str) -> None:
@@ -35,7 +35,7 @@ class LoginPage:
         # 方式1: 使用属性访问
         locator: Union[str, dict[Any, Any]] = self.locators.username_input
         self.page.fill(str(locator), username)
-        logger.info(f"输入用户名: {username}")
+        logger.info("输入用户名: %s", username)
 
     @allure.step("输入密码")
     def enter_password(self, password: str) -> None:
@@ -84,7 +84,7 @@ class LoginPage:
         locator = self.locators.error_message
         self.page.wait_for_selector(str(locator), state="visible", timeout=5000)
         message: Optional[str] = self.page.text_content(str(locator))
-        logger.info(f"错误提示: {message}")
+        logger.info("错误提示: %s", message)
         return message.strip() if message else ""
 
     @allure.step("获取成功提示信息")
@@ -93,7 +93,7 @@ class LoginPage:
         locator = self.locators.success_message
         self.page.wait_for_selector(str(locator), state="visible", timeout=5000)
         message: Optional[str] = self.page.text_content(str(locator))
-        logger.info(f"成功提示: {message}")
+        logger.info("成功提示: %s", message)
         return message.strip() if message else ""
 
     @allure.step("检查错误信息是否显示")

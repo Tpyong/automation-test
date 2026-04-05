@@ -15,7 +15,7 @@ class BasePage:
 
     @allure.step("导航到: {url}")
     def navigate(self, url: str) -> None:
-        logger.info(f"导航到: {url}")
+        logger.info("导航到: %s", url)
         self.page.goto(url)
 
     @allure.step("等待页面加载完成")
@@ -28,18 +28,18 @@ class BasePage:
 
     @allure.step("点击元素: {selector}")
     def click(self, selector: str, timeout: int = 30000) -> None:
-        logger.info(f"点击元素: {selector}")
+        logger.info("点击元素: %s", selector)
         self.page.click(selector, timeout=timeout)
 
     @allure.step("填充输入框: {selector} = {value}")
     def fill(self, selector: str, value: str, timeout: int = 30000) -> None:
-        logger.info(f"填充输入框: {selector} = {value}")
+        logger.info("填充输入框: %s = %s", selector, value)
         self.page.fill(selector, value, timeout=timeout)
 
     @allure.step("获取元素文本: {selector}")
     def get_text(self, selector: str, timeout: int = 30000) -> str:
         text = self.page.locator(selector).text_content(timeout=timeout)
-        logger.info(f"获取元素文本: {selector} = {text}")
+        logger.info("获取元素文本: %s = %s", selector, text)
         return text or ""
 
     @allure.step("验证元素可见: {selector}")
@@ -52,24 +52,24 @@ class BasePage:
 
     @allure.step("等待元素可见: {selector}")
     def wait_for_visible(self, selector: str, timeout: int = 30000) -> None:
-        logger.info(f"等待元素可见: {selector}")
+        logger.info("等待元素可见: %s", selector)
         self.page.wait_for_selector(selector, state="visible", timeout=timeout)
 
     @allure.step("等待元素不可见: {selector}")
     def wait_for_hidden(self, selector: str, timeout: int = 30000) -> None:
-        logger.info(f"等待元素不可见: {selector}")
+        logger.info("等待元素不可见: %s", selector)
         self.page.wait_for_selector(selector, state="hidden", timeout=timeout)
 
     @allure.step("获取页面标题")
     def get_title(self) -> str:
         title = self.page.title()
-        logger.info(f"页面标题: {title}")
+        logger.info("页面标题: %s", title)
         return title
 
     @allure.step("获取当前URL")
     def get_url(self) -> str:
         url = self.page.url
-        logger.info(f"当前URL: {url}")
+        logger.info("当前URL: %s", url)
         return url
 
     @allure.step("截图: {name}")
@@ -77,5 +77,5 @@ class BasePage:
         # 使用统一的命名格式：{name}_{timestamp}.png（目录已经按日期分类）
         screenshot_path = PathHelper.get_screenshot_path(name)
         self.page.screenshot(path=screenshot_path, full_page=True)
-        logger.info(f"截图已保存: {screenshot_path}")
+        logger.info("截图已保存: %s", screenshot_path)
         AllureHelper.attach_screenshot(screenshot_path, name=name)

@@ -92,13 +92,13 @@ class MockRequestHandler(BaseHTTPRequestHandler):
             endpoint.call_count += 1
             endpoint.last_request = request_data
 
-            logger.info(f"Mock 端点被调用: {method} {path} (调用次数: {endpoint.call_count})")
+            logger.info("Mock 端点被调用: %s %s (调用次数: %d)", method, path, endpoint.call_count)
 
             # 发送响应
             self._send_response(endpoint.response)
         else:
             # 未找到匹配的端点
-            logger.warning(f"未找到 Mock 端点: {method} {path}")
+            logger.warning("未找到 Mock 端点: %s %s", method, path)
             self._send_response(
                 MockResponse(
                     status_code=404,
@@ -125,7 +125,7 @@ class MockRequestHandler(BaseHTTPRequestHandler):
 
     def log_message(self, format, *args):
         """重写日志方法，使用我们的 logger"""
-        logger.debug(f"{self.address_string()} - {format % args}")
+        logger.debug("%s - %s", self.address_string(), format % args)
 
 
 class MockServer:
@@ -167,7 +167,7 @@ class MockServer:
         self._thread.start()
         self._running = True
 
-        logger.info(f"Mock 服务器已启动: http://{self.host}:{self.port}")
+        logger.info("Mock 服务器已启动: http://%s:%d", self.host, self.port)
 
     def stop(self) -> None:
         """停止 Mock 服务器"""
@@ -179,7 +179,7 @@ class MockServer:
                 self._server.shutdown()
                 self._server.server_close()
         except Exception as e:
-            logger.warning(f"关闭服务器时出错: {e}")
+            logger.warning("关闭服务器时出错: %s", e)
 
         try:
             if self._thread and self._thread.is_alive():
@@ -187,7 +187,7 @@ class MockServer:
                 if self._thread.is_alive():
                     logger.warning("Mock 服务器线程未能正常退出")
         except Exception as e:
-            logger.warning(f"等待线程结束时出错: {e}")
+            logger.warning("等待线程结束时出错: %s", e)
 
         self._running = False
         logger.info("Mock 服务器已停止")
@@ -200,12 +200,13 @@ class MockServer:
         self,
         method: str,
         path: str,
+        *,  # 强制使用关键字参数
         status_code: int = 200,
         body: Optional[Dict[str, Any]] = None,
         headers: Optional[Dict[str, str]] = None,
         delay: float = 0.0,
         name: Optional[str] = None,
-    ) -> MockEndpoint:  # pylint: disable=too-many-arguments
+    ) -> MockEndpoint:
         """
         添加 Mock 端点
 
@@ -228,7 +229,7 @@ class MockServer:
         key = f"{method.upper()}:{path}"
         self.endpoints[key] = endpoint
 
-        logger.info(f"添加 Mock 端点: {method} {path}")
+        logger.info("添加 Mock 端点: %s %s", method, path)
         return endpoint
 
     def remove_endpoint(self, method: str, path: str):
@@ -236,7 +237,7 @@ class MockServer:
         key = f"{method.upper()}:{path}"
         if key in self.endpoints:
             del self.endpoints[key]
-            logger.info(f"移除 Mock 端点: {method} {path}")
+            logger.info("移除 Mock 端点: %s %s", method, path)
 
     def clear_endpoints(self):
         """清空所有端点"""

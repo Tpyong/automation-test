@@ -58,25 +58,25 @@ class LocatorManager:
             self._load_json(json_file)
             return
 
-        logger.warning(f"未找到定位器文件: {self.page_name}")
+        logger.warning("未找到定位器文件: %s", self.page_name)
 
     def _load_yaml(self, file_path: Path) -> None:
         """加载 YAML 定位器文件"""
         try:
             with open(file_path, "r", encoding="utf-8") as f:
                 self.locators = yaml.safe_load(f) or {}
-            logger.info(f"成功加载 YAML 定位器: {file_path}")
+            logger.info("成功加载 YAML 定位器: %s", file_path)
         except Exception as e:
-            logger.error(f"加载 YAML 定位器失败: {file_path}, 错误: {e}")
+            logger.error("加载 YAML 定位器失败: %s, 错误: %s", file_path, e)
 
     def _load_json(self, file_path: Path) -> None:
         """加载 JSON 定位器文件"""
         try:
             with open(file_path, "r", encoding="utf-8") as f:
                 self.locators = json.load(f)
-            logger.info(f"成功加载 JSON 定位器: {file_path}")
+            logger.info("成功加载 JSON 定位器: %s", file_path)
         except Exception as e:
-            logger.error(f"加载 JSON 定位器失败: {file_path}, 错误: {e}")
+            logger.error("加载 JSON 定位器失败: %s, 错误: %s", file_path, e)
 
     def get(self, element_name: str) -> Union[str, Dict[str, Any]]:
         """

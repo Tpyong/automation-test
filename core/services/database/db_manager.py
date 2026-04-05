@@ -8,6 +8,14 @@ import os
 from contextlib import contextmanager
 from typing import Any, Dict, Generator, List, Optional
 
+try:
+    from sqlalchemy import create_engine
+    from sqlalchemy.pool import QueuePool
+    from sqlalchemy.orm import sessionmaker
+    HAS_SQLALCHEMY = True
+except ImportError:
+    HAS_SQLALCHEMY = False
+
 from utils.common.logger import get_logger
 
 logger = get_logger(__name__)
@@ -18,6 +26,7 @@ class DatabaseConfig:
 
     def __init__(
         self,
+        *,  # 所有参数都使用关键字参数
         host: str = "localhost",
         port: int = 3306,
         user: str = "root",
@@ -77,14 +86,16 @@ class DatabaseManager:
 
         self.config = config or DatabaseConfig.from_env()
         self._initialized = True
-        logger.info(f"DatabaseManager 初始化完成: {self.config.host}:{self.config.port}/{self.config.database}")
+        logger.info("DatabaseManager 初始化完成: %s:%s/%s", self.config.host, self.config.port, self.config.database)
 
     def initialize(self) -> None:
         """初始化数据库连接池"""
-        try:
-            from sqlalchemy import create_engine
-            from sqlalchemy.pool import QueuePool
+        if not HAS_SQLALCHEMY:
+            logger.warning("SQLAlchemy 未安装，数据库功能不可用")
+            self._engine = None
+            return
 
+        try:
             self._engine = create_engine(
                 self.config.to_connection_string(),
                 poolclass=QueuePool,
@@ -95,8 +106,8 @@ class DatabaseManager:
                 echo=False,
             )
             logger.info("数据库连接池初始化完成")
-        except ImportError:
-            logger.warning("SQLAlchemy 未安装，数据库功能不可用")
+        except Exception as e:
+            logger.error("数据库连接池初始化失败: %s", e)
             self._engine = None
 
     @property
@@ -121,10 +132,11 @@ class DatabaseManager:
     @contextmanager
     def get_session(self) -> Generator[Any, None, None]:
         """获取数据库会话（上下文管理器）"""
-        from sqlalchemy.orm import sessionmaker
+        if not HAS_SQLALCHEMY:
+            raise RuntimeError("SQLAlchemy 未安装，数据库功能不可用")
 
-        Session = sessionmaker(bind=self.engine)
-        session = Session()
+        session_maker = sessionmaker(bind=self.engine)
+        session = session_maker()
         try:
             yield session
             session.commit()
@@ -155,12 +167,12 @@ class DatabaseManager:
 
 
 # 全局数据库管理器实例
-_db_manager: Optional[DatabaseManager] = None
+DB_MANAGER: Optional[DatabaseManager] = None
 
 
 def get_db_manager(config: Optional[DatabaseConfig] = None) -> DatabaseManager:
     """获取全局数据库管理器实例"""
-    global _db_manager
-    if _db_manager is None:
-        _db_manager = DatabaseManager(config)
-    return _db_manager
+    global DB_MANAGER
+    if DB_MANAGER is None:
+        DB_MANAGER = DatabaseManager(config)
+    return DB_MANAGER
