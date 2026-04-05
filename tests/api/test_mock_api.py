@@ -8,6 +8,7 @@ Mock API 测试示例
 - 性能测试和压力测试
 """
 
+import time
 import allure
 import pytest
 import requests
@@ -47,7 +48,7 @@ class TestMockUserAPI:
                 },
             )
             base_url = mock_server.get_base_url()
-            logger.info(f"Mock 服务器地址：{base_url}")
+            logger.info("Mock 服务器地址：%s", base_url)
 
         with allure.step("发送 GET 请求"):
             response = requests.get(f"{base_url}/api/users", timeout=10)
@@ -65,7 +66,7 @@ class TestMockUserAPI:
             elapsed_ms = response.elapsed.total_seconds() * 1000
             # Mock 服务器首次启动较慢，放宽时间阈值
             assert elapsed_ms < 3000, f"响应时间 {elapsed_ms}ms 超过阈值 3000ms"
-            logger.info(f"响应时间：{elapsed_ms:.2f}ms")
+            logger.info("响应时间：%.2fms", elapsed_ms)
 
     @pytest.mark.api
     @allure.story("POST 请求 Mock")
@@ -218,15 +219,13 @@ class TestMockUserAPI:
             base_url = mock_server.get_base_url()
 
         with allure.step("发送请求并测量时间"):
-            import time
-
             start_time = time.time()
             response = requests.get(f"{base_url}/api/slow-endpoint", timeout=10)
             elapsed = time.time() - start_time
 
         with allure.step("验证响应"):
             assert response.status_code == 200
-            logger.info(f"实际耗时：{elapsed:.2f}秒")
+            logger.info("实际耗时：%.2f秒", elapsed)
             # 验证延迟生效（允许一定误差）
             assert elapsed >= 1.8, f"延迟应该至少 1.8 秒，实际 {elapsed:.2f}秒"
 

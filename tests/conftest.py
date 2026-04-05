@@ -16,72 +16,72 @@ from config.settings import Settings  # noqa: E402
 from utils.common.logger import get_logger  # noqa: E402
 
 # 延迟导入可选模块，按需加载
-_allure_helper: Any = None
-_report_generator: Any = None
-_browser_pool: Any = None
-_db_manager: Any = None
-_test_data_manager: Any = None
-_test_advisor: Any = None
+_ALLURE_HELPER: Any = None
+_REPORT_GENERATOR: Any = None
+_BROWSER_POOL: Any = None
+_DB_MANAGER: Any = None
+_TEST_DATA_MANAGER: Any = None
+_TEST_ADVISOR: Any = None
 
 
 def _get_allure_helper() -> Any:
     """延迟加载 AllureHelper"""
-    global _allure_helper
-    if _allure_helper is None:
+    global _ALLURE_HELPER
+    if _ALLURE_HELPER is None:
         from utils.reporting.allure_helper import AllureHelper
 
-        _allure_helper = AllureHelper()
-    return _allure_helper
+        _ALLURE_HELPER = AllureHelper()
+    return _ALLURE_HELPER
 
 
 def _get_report_generator() -> Any:
     """延迟加载 ReportGenerator"""
-    global _report_generator
-    if _report_generator is None:
+    global _REPORT_GENERATOR
+    if _REPORT_GENERATOR is None:
         from utils.reporting.report_generator import get_report_generator
 
-        _report_generator = get_report_generator()
-    return _report_generator
+        _REPORT_GENERATOR = get_report_generator()
+    return _REPORT_GENERATOR
 
 
 def _get_browser_pool() -> Any:
     """延迟加载 BrowserPool"""
-    global _browser_pool
-    if _browser_pool is None:
+    global _BROWSER_POOL
+    if _BROWSER_POOL is None:
         from utils.browser.browser_pool import get_browser_pool
 
-        _browser_pool = get_browser_pool()
-    return _browser_pool
+        _BROWSER_POOL = get_browser_pool()
+    return _BROWSER_POOL
 
 
 def _get_db_manager() -> Any:
     """延迟加载 DatabaseManager"""
-    global _db_manager
-    if _db_manager is None:
+    global _DB_MANAGER
+    if _DB_MANAGER is None:
         from core.services.database.db_manager import get_db_manager
 
-        _db_manager = get_db_manager()
-    return _db_manager
+        _DB_MANAGER = get_db_manager()
+    return _DB_MANAGER
 
 
 def _get_test_data_manager() -> Any:
     """延迟加载 TestDataManager"""
-    global _test_data_manager
-    if _test_data_manager is None:
+    global _TEST_DATA_MANAGER
+    if _TEST_DATA_MANAGER is None:
         from utils.data.test_data_manager import TestDataManager
 
-        _test_data_manager = TestDataManager(_get_db_manager())
-    return _test_data_manager
+        _TEST_DATA_MANAGER = TestDataManager(_get_db_manager())
+    return _TEST_DATA_MANAGER
 
 
 def _get_test_advisor() -> Any:
     """延迟加载 TestAdvisor"""
-    global _test_advisor
-    if _test_advisor is None:
+    global _TEST_ADVISOR
+    if _TEST_ADVISOR is None:
         from utils.reporting.test_advisor import get_test_advisor
 
-        _test_advisor = get_test_advisor()
-    return _test_advisor
+        _TEST_ADVISOR = get_test_advisor()
+    return _TEST_ADVISOR
 
 
 logger = get_logger(__name__)
@@ -147,7 +147,7 @@ def pytest_sessionstart(session: Any) -> None:
 
 def pytest_sessionfinish(session: Any, exitstatus: int) -> None:
     logger.info("=" * 50)
-    logger.info(f"测试会话结束，退出码: {exitstatus}")
+    logger.info("测试会话结束，退出码: %d", exitstatus)
     logger.info("=" * 50)
 
     report_gen = _get_report_generator()
@@ -162,9 +162,9 @@ def pytest_sessionfinish(session: Any, exitstatus: int) -> None:
     try:
         test_advisor = _get_test_advisor()
         advisor_report = test_advisor.generate_advisor_report()
-        logger.info(f"  - 智能测试建议报告: {advisor_report}")
+        logger.info("  - 智能测试建议报告: %s", advisor_report)
     except Exception as e:
-        logger.warning(f"生成智能测试建议报告时出错: {e}")
+        logger.warning("生成智能测试建议报告时出错: %s", e)
 
     try:
         settings = Settings()
@@ -187,9 +187,9 @@ def pytest_sessionfinish(session: Any, exitstatus: int) -> None:
                                         else:
                                             try:
                                                 os.remove(video_path)
-                                                logger.info(f"已删除空视频文件: {video_file}")
+                                                logger.info("已删除空视频文件: %s", video_file)
                                             except Exception as e:
-                                                logger.warning(f"删除空视频文件时出错: {e}")
+                                                logger.warning("删除空视频文件时出错: %s", e)
 
                                     if non_empty_videos:
                                         test_name_parts = test_dir.split("_")
@@ -219,14 +219,14 @@ def pytest_sessionfinish(session: Any, exitstatus: int) -> None:
                                                 if os.path.exists(new_video_path):
                                                     try:
                                                         os.remove(new_video_path)
-                                                        logger.info(f"已删除已存在的视频文件: {new_video_name}")
+                                                        logger.info("已删除已存在的视频文件: %s", new_video_name)
                                                     except Exception as e:
-                                                        logger.warning(f"删除已存在的视频文件时出错: {e}")
+                                                        logger.warning("删除已存在的视频文件时出错: %s", e)
 
                                                 os.rename(original_video_path, new_video_path)
-                                                logger.info(f"视频文件已移动并重命名: {new_video_name}")
+                                                logger.info("视频文件已移动并重命名: %s", new_video_name)
                                             except Exception as e:
-                                                logger.error(f"移动并重命名视频文件时出错: {e}")
+                                                logger.error("移动并重命名视频文件时出错: %s", e)
 
         video_root_dir = os.path.join("reports", "videos", datetime.now().strftime("%Y%m%d"))
         if os.path.exists(video_root_dir):
@@ -238,17 +238,17 @@ def pytest_sessionfinish(session: Any, exitstatus: int) -> None:
                         if os.path.isdir(test_path) and not os.listdir(test_path):
                             try:
                                 os.rmdir(test_path)
-                                logger.info(f"已删除空测试目录: {test_dir}")
+                                logger.info("已删除空测试目录: %s", test_dir)
                             except Exception as e:
-                                logger.warning(f"删除空测试目录时出错: {e}")
+                                logger.warning("删除空测试目录时出错: %s", e)
                     if not os.listdir(suite_path):
                         try:
                             os.rmdir(suite_path)
-                            logger.info(f"已删除空套件目录: {suite_dir}")
+                            logger.info("已删除空套件目录: %s", suite_dir)
                         except Exception as e:
-                            logger.warning(f"删除空套件目录时出错: {e}")
+                            logger.warning("删除空套件目录时出错: %s", e)
     except Exception as e:
-        logger.error(f"处理视频文件时出错: {e}")
+        logger.error("处理视频文件时出错: %s", e)
 
     pool = _get_browser_pool()
     pool.cleanup()
@@ -259,14 +259,14 @@ def pytest_sessionfinish(session: Any, exitstatus: int) -> None:
         db_manager.close()
         logger.info("数据库连接池已关闭")
     except Exception as e:
-        logger.warning(f"关闭数据库连接池时出错: {e}")
+        logger.warning("关闭数据库连接池时出错: %s", e)
 
     logger.info("测试汇总报告已生成:")
-    logger.info(f"  - HTML: {html_report}")
-    logger.info(f"  - JSON: {json_report}")
-    logger.info(f"  - 历史记录: {history_file}")
+    logger.info("  - HTML: %s", html_report)
+    logger.info("  - JSON: %s", json_report)
+    logger.info("  - 历史记录: %s", history_file)
     if trend_report:
-        logger.info(f"  - 趋势报告: {trend_report}")
+        logger.info("  - 趋势报告: %s", trend_report)
 
 
 @pytest.fixture(scope="session")
@@ -290,8 +290,8 @@ def browser(playwright: Playwright, request: Any) -> Generator[Browser, Any, Non
     browser_name = request.config.getoption("--browser", default=None)
 
     logger.info("=== Browser Fixture 调试 ===")
-    logger.info(f"request.config.getoption('--browser') = {browser_name}")
-    logger.info(f"TEST_BROWSER 环境变量 = {os.getenv('TEST_BROWSER', 'not set')}")
+    logger.info("request.config.getoption('--browser') = %s", browser_name)
+    logger.info("TEST_BROWSER 环境变量 = %s", os.getenv("TEST_BROWSER", "not set"))
     logger.info("===========================")
 
     # 如果命令行参数为空，从 TEST_BROWSER 环境变量读取（避免与 pytest-playwright 冲突）
@@ -306,21 +306,21 @@ def browser(playwright: Playwright, request: Any) -> Generator[Browser, Any, Non
     slow_mo = int(os.getenv("SLOW_MO", "0"))
 
     # 添加调试日志，确认环境变量读取正确
-    logger.info(f"HEADLESS 环境变量：{os.getenv('HEADLESS', 'not set')}")
-    logger.info(f"解析后的 headless 值：{headless}")
+    logger.info("HEADLESS 环境变量：%s", os.getenv("HEADLESS", "not set"))
+    logger.info("解析后的 headless 值：%s", headless)
 
     # 强制确保在 CI 环境中使用 headless 模式
     if os.getenv("CI", "false").lower() == "true" and not headless:
         logger.warning("CI 环境中检测到 HEADLESS=false，强制设置为 true")
         headless = True
-        logger.info(f"修正后的 headless 值：{headless}")
+        logger.info("修正后的 headless 值：%s", headless)
 
     viewport_width = int(os.getenv("VIEWPORT_WIDTH", "1920"))
     viewport_height = int(os.getenv("VIEWPORT_HEIGHT", "1080"))
     viewport = {"width": viewport_width, "height": viewport_height}
 
-    logger.info(f"最终选择的浏览器类型：{browser_name}")
-    logger.info(f"初始化浏览器池：{browser_name}, headless: {headless}, viewport: {viewport}")
+    logger.info("最终选择的浏览器类型：%s", browser_name)
+    logger.info("初始化浏览器池：%s, headless: %s, viewport: %s", browser_name, headless, viewport)
 
     pool = _get_browser_pool()
     pool.initialize(playwright, browser_name, headless, slow_mo)
@@ -334,16 +334,15 @@ def browser(playwright: Playwright, request: Any) -> Generator[Browser, Any, Non
         try:
             browser_obj = pool.acquire_browser()
             if browser_obj:
-                logger.info(f"成功获取浏览器实例 (尝试 {attempt + 1}/{max_retries}): {id(browser_obj)}")
+                logger.info("成功获取浏览器实例 (尝试 %d/%d): %d", attempt + 1, max_retries, id(browser_obj))
                 break
-            else:
-                logger.warning(f"尝试 {attempt + 1}/{max_retries} 获取浏览器失败，等待 {retry_delay}s 后重试...")
-                if attempt < max_retries - 1:
-                    import time
+            logger.warning("尝试 %d/%d 获取浏览器失败，等待 %ds 后重试...", attempt + 1, max_retries, retry_delay)
+            if attempt < max_retries - 1:
+                import time
 
-                    time.sleep(retry_delay)
+                time.sleep(retry_delay)
         except Exception as e:
-            logger.error(f"尝试 {attempt + 1}/{max_retries} 获取浏览器时出错：{e}")
+            logger.error("尝试 %d/%d 获取浏览器时出错：%s", attempt + 1, max_retries, e)
             if attempt < max_retries - 1:
                 import time
 
@@ -358,12 +357,12 @@ def browser(playwright: Playwright, request: Any) -> Generator[Browser, Any, Non
         logger.error(error_msg)
         raise RuntimeError(error_msg)
 
-    logger.info(f"成功获取浏览器实例：{id(browser_obj)}")
+    logger.info("成功获取浏览器实例：%d", id(browser_obj))
 
     yield browser_obj
 
     pool.release_browser(browser_obj)
-    logger.info(f"浏览器实例已释放：{id(browser_obj)}")
+    logger.info("浏览器实例已释放：%d", id(browser_obj))
 
 
 @pytest.fixture(scope="function")
@@ -404,7 +403,7 @@ def browser_context_args(request: Any, settings: Settings) -> Dict[str, Any]:
 
         args["record_video_dir"] = video_dir
         args["record_video_size"] = settings.video_size
-        logger.info(f"为测试 {test_node.name} 启用录屏功能，视频保存目录: {video_dir}")
+        logger.info("为测试 %s 启用录屏功能，视频保存目录: %s", test_node.name, video_dir)
 
     return args
 
@@ -489,8 +488,7 @@ def _attach_test_artifacts(item: Any) -> None:
                             )
                             print(f"[DEBUG] 视频文件已附加到 Allure 报告: {video_path}")
                             break
-                        else:
-                            print(f"[DEBUG] 视频文件不存在或为空: {video_path}")
+                        print(f"[DEBUG] 视频文件不存在或为空: {video_path}")
                 else:
                     print(f"[DEBUG] 视频目录中没有视频文件: {video_dir}")
             else:
@@ -556,16 +554,16 @@ def test_data_cleanup(request: Any) -> Generator[Dict[str, Any], Any, None]:
 
     yield cleanup_data
 
-    logger.info(f"开始清理测试数据: {request.node.name}")
+    logger.info("开始清理测试数据: %s", request.node.name)
 
     for cleanup_func in cleanup_data.get("cleanup_funcs", []):
         try:
             cleanup_func()
             logger.info("清理函数执行成功")
         except Exception as e:
-            logger.error(f"清理函数执行失败: {e}")
+            logger.error("清理函数执行失败: %s", e)
 
-    logger.info(f"测试数据清理完成: {request.node.name}")
+    logger.info("测试数据清理完成: %s", request.node.name)
 
 
 @pytest.fixture(scope="function")
@@ -579,9 +577,9 @@ def setup_teardown(request: Any) -> Generator[Callable[..., None], Any, None]:
         if setup_func:
             try:
                 setup_func()
-                logger.info(f"Setup 执行成功: {request.node.name}")
+                logger.info("Setup 执行成功: %s", request.node.name)
             except Exception as e:
-                logger.error(f"Setup 执行失败: {e}")
+                logger.error("Setup 执行失败: %s", e)
                 raise
 
         if teardown_func:
@@ -592,9 +590,9 @@ def setup_teardown(request: Any) -> Generator[Callable[..., None], Any, None]:
     for teardown_func in reversed(teardown_funcs):
         try:
             teardown_func()
-            logger.info(f"Teardown 执行成功: {request.node.name}")
+            logger.info("Teardown 执行成功: %s", request.node.name)
         except Exception as e:
-            logger.error(f"Teardown 执行失败: {e}")
+            logger.error("Teardown 执行失败: %s", e)
 
 
 @pytest.fixture(scope="session")

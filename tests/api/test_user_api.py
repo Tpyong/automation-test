@@ -53,7 +53,7 @@ class UserAPIHandler(BaseHTTPRequestHandler):
             return json.loads(body)
         return {}
 
-    def do_GET(self):
+    def do_GET(self):  # pylint: disable=invalid-name
         """处理 GET 请求"""
         parsed_path = urlparse(self.path)
         path = parsed_path.path
@@ -88,7 +88,7 @@ class UserAPIHandler(BaseHTTPRequestHandler):
 
         self._send_json_response(404, {"error": "Not found"})
 
-    def do_POST(self):
+    def do_POST(self):  # pylint: disable=invalid-name
         """处理 POST 请求"""
         parsed_path = urlparse(self.path)
         path = parsed_path.path
@@ -123,7 +123,7 @@ class UserAPIHandler(BaseHTTPRequestHandler):
 
         self._send_json_response(404, {"error": "Not found"})
 
-    def do_PUT(self):
+    def do_PUT(self):  # pylint: disable=invalid-name
         """处理 PUT 请求"""
         parsed_path = urlparse(self.path)
         path = parsed_path.path
@@ -146,15 +146,15 @@ class UserAPIHandler(BaseHTTPRequestHandler):
                 user["updated_at"] = time.strftime("%Y-%m-%dT%H:%M:%S")
 
                 self._send_json_response(200, user)
-            except (ValueError, IndexError):
-                self._send_json_response(400, {"error": "Invalid user ID"})
             except json.JSONDecodeError:
                 self._send_json_response(400, {"error": "Invalid JSON"})
+            except (ValueError, IndexError):
+                self._send_json_response(400, {"error": "Invalid user ID"})
             return
 
         self._send_json_response(404, {"error": "Not found"})
 
-    def do_DELETE(self):
+    def do_DELETE(self):  # pylint: disable=invalid-name
         """处理 DELETE 请求"""
         parsed_path = urlparse(self.path)
         path = parsed_path.path
@@ -198,7 +198,7 @@ class UserAPIMockService:
         self.thread.start()
 
         base_url = f"http://{self.host}:{self.port}"
-        logger.info(f"用户 API Mock 服务已启动: {base_url}")
+        logger.info("用户 API Mock 服务已启动: %s", base_url)
         return base_url
 
     def stop(self):
@@ -298,7 +298,7 @@ class TestUserAPI:
         }
 
         with allure.step("准备用户数据"):
-            logger.info(f"创建用户数据：{user_data}")
+            logger.info("创建用户数据：%s", user_data)
             allure.attach(str(user_data), name="请求数据", attachment_type=allure.attachment_type.JSON)
 
         with allure.step("发送 POST 请求创建用户"):
@@ -470,11 +470,11 @@ class TestUserAPI:
                 api_client.get(f"{base_url}/api/users")
                 elapsed_ms = (time.time() - start_time) * 1000
                 response_times.append(elapsed_ms)
-                logger.info(f"第 {i + 1} 次请求耗时：{elapsed_ms:.2f}ms")
+                logger.info("第 %d 次请求耗时：%.2fms", i + 1, elapsed_ms)
 
         with allure.step("计算平均响应时间"):
             avg_time = sum(response_times) / len(response_times)
-            logger.info(f"平均响应时间：{avg_time:.2f}ms")
+            logger.info("平均响应时间：%.2fms", avg_time)
             allure.attach(
                 f"平均响应时间：{avg_time:.2f}ms", name="性能指标", attachment_type=allure.attachment_type.TEXT
             )
