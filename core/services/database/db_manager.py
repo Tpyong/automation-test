@@ -10,8 +10,8 @@ from typing import Any, Dict, Generator, List, Optional
 
 try:
     from sqlalchemy import create_engine
-    from sqlalchemy.pool import QueuePool
     from sqlalchemy.orm import sessionmaker
+    from sqlalchemy.pool import QueuePool
 
     HAS_SQLALCHEMY = True
 except ImportError:

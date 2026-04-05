@@ -6,9 +6,9 @@
 import allure
 import pytest
 
+from core.pages.locators import SmartLocator
 from core.pages.specific.login_page_semantic import LoginPageSemantic
 from utils.api.assertions import Assertions
-from core.pages.locators import SmartLocator
 
 
 @allure.epic("定位器管理")
