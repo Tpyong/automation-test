@@ -12,6 +12,7 @@ try:
     from sqlalchemy import create_engine
     from sqlalchemy.pool import QueuePool
     from sqlalchemy.orm import sessionmaker
+
     HAS_SQLALCHEMY = True
 except ImportError:
     HAS_SQLALCHEMY = False
