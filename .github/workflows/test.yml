@@ -43,10 +43,15 @@ jobs:
         echo "Installing Playwright browser: ${{ matrix.browser }}..."
         # 先更新系统包
         sudo apt-get update || true
+        # 确保使用正确的 playwright 命令
+        which playwright || echo "playwright command not found"
+        # 显示 Python 路径
+        which python
+        python --version
         # 安装浏览器及其依赖
-        playwright install --with-deps ${{ matrix.browser }}
+        python -m playwright install --with-deps ${{ matrix.browser }}
         # 再次确保系统依赖完整
-        playwright install-deps ${{ matrix.browser }} || echo "Note: install-deps failed, continuing..."
+        python -m playwright install-deps ${{ matrix.browser }} || echo "Note: install-deps failed, continuing..."
         echo "Browser installation completed for ${{ matrix.browser }}"
         # 验证安装
         python -c "from playwright.sync_api import sync_playwright; p = sync_playwright().start(); b = p.${{ matrix.browser }}.launch(); print('Browser OK'); b.close(); p.stop()"
