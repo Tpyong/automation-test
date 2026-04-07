@@ -111,6 +111,12 @@ def pytest_configure(config: Any) -> None:
         config.option.browser = [browser_env.strip()]
         logger.info("从环境变量 PLAYWRIGHT_BROWSER 读取浏览器配置: %s", browser_env)
 
+    # 从 TEST_BROWSER 环境变量读取浏览器配置（兼容 CI 工作流）
+    test_browser_env = os.getenv("TEST_BROWSER")
+    if test_browser_env and not browsers_env and not browser_env:
+        config.option.browser = [test_browser_env.strip()]
+        logger.info("从环境变量 TEST_BROWSER 读取浏览器配置: %s", test_browser_env)
+
 
 def _prepare_allure_categories() -> None:
     """
