@@ -40,7 +40,7 @@ jobs:
 
     - name: Install Playwright browsers
       run: |
-        echo "Installing Playwright browser: ${{ matrix.browser }}..."
+        echo "Installing Playwright browsers: chromium, firefox, webkit..."
         # 先更新系统包
         sudo apt-get update || true
         # 确保使用正确的 playwright 命令
@@ -48,13 +48,11 @@ jobs:
         # 显示 Python 路径
         which python
         python --version
-        # 安装浏览器及其依赖
-        python -m playwright install --with-deps ${{ matrix.browser }}
+        # 安装所有浏览器及其依赖（包括 chrome-headless-shell）
+        python -m playwright install --with-deps
         # 再次确保系统依赖完整
-        python -m playwright install-deps ${{ matrix.browser }} || echo "Note: install-deps failed, continuing..."
-        echo "Browser installation completed for ${{ matrix.browser }}"
-        # 验证安装
-        python -c "from playwright.sync_api import sync_playwright; p = sync_playwright().start(); b = p.${{ matrix.browser }}.launch(); print('Browser OK'); b.close(); p.stop()"
+        python -m playwright install-deps || echo "Note: install-deps failed, continuing..."
+        echo "All browsers installation completed"
         # 列出已安装的浏览器
         ls -la ~/.cache/ms-playwright/ || true
 

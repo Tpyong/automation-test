@@ -302,20 +302,14 @@ def browser_type_launch_args(browser_type_launch_args):
 
     # 强制在 CI 环境中使用无头模式
     is_ci = os.getenv("CI", "false").lower() == "true"
-    launch_args = {**browser_type_launch_args}
-
     if is_ci:
         headless = True
         logger.info("CI 环境中强制使用无头模式")
-        # 在 CI 环境中使用传统的无头模式，避免 chrome-headless-shell 依赖
-        launch_args["args"] = launch_args.get("args", []) + ["--headless=new"]
-        # 确保 headless 参数不被设置，避免冲突
-        launch_args.pop("headless", None)
-    else:
-        # 本地环境正常使用 headless 参数
-        launch_args["headless"] = headless
 
-    return launch_args
+    return {
+        **browser_type_launch_args,
+        "headless": headless,
+    }
 
 
 @pytest.fixture(scope="function")

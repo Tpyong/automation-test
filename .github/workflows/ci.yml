@@ -87,21 +87,21 @@ jobs:
 
     - name: Install Playwright browsers
       run: |
-        echo "Installing Playwright browser: ${{ matrix.browser }}..."
+        echo "Installing Playwright browsers: chromium, firefox, webkit..."
         # 确保使用正确的 playwright 命令
         which playwright || echo "playwright command not found"
         # 显示 Python 路径
         which python
         python --version
-        # 安装浏览器
-        python -m playwright install --with-deps ${{ matrix.browser }}
+        # 安装所有浏览器及其依赖（包括 chrome-headless-shell）
+        python -m playwright install --with-deps
         echo "Verifying browser installation..."
         # 检查浏览器安装路径
         echo "Checking browser installation paths..."
         ls -la /home/runner/.cache/ms-playwright/
         # 验证浏览器安装
-        python -m playwright install-deps ${{ matrix.browser }} || echo "Note: install-deps failed, continuing..."
-        echo "Browser installation completed"
+        python -m playwright install-deps || echo "Note: install-deps failed, continuing..."
+        echo "All browsers installation completed"
 
     - name: Create environment file
       run: |
@@ -209,21 +209,21 @@ jobs:
 
     - name: Install Playwright browsers
       run: |
-        echo "Installing Playwright browser: chromium..."
+        echo "Installing Playwright browsers: chromium, firefox, webkit..."
         # 确保使用正确的 playwright 命令
         which playwright || echo "playwright command not found"
         # 显示 Python 路径
         which python
         python --version
-        # 安装浏览器
-        python -m playwright install --with-deps chromium
+        # 安装所有浏览器及其依赖（包括 chrome-headless-shell）
+        python -m playwright install --with-deps
         echo "Verifying browser installation..."
         # 检查浏览器安装路径
         echo "Checking browser installation paths..."
         ls -la /home/runner/.cache/ms-playwright/
         # 验证浏览器安装
-        python -m playwright install-deps chromium || echo "Note: install-deps failed, continuing..."
-        echo "Browser installation completed"
+        python -m playwright install-deps || echo "Note: install-deps failed, continuing..."
+        echo "All browsers installation completed"
 
     - name: Create environment file
       run: |
