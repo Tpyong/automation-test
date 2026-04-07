@@ -292,6 +292,11 @@ def browser_type_launch_args(browser_type_launch_args):
     """扩展 pytest-playwright 的 browser_type_launch_args fixture，从环境变量读取配置"""
     # 从环境变量读取配置
     headless = os.getenv("PLAYWRIGHT_HEADLESS", "true").lower() == "true"
+    
+    # 从 HEADLESS 环境变量读取配置（兼容 CI 工作流）
+    headless_env = os.getenv("HEADLESS")
+    if headless_env is not None:
+        headless = headless_env.lower() == "true"
 
     return {
         **browser_type_launch_args,
