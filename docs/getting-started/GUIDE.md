@@ -54,6 +54,10 @@ TEST_ENV=staging pytest
 | VIEWPORT_WIDTH | 浏览器宽度 | 1920 |
 | VIEWPORT_HEIGHT | 浏览器高度 | 1080 |
 | VIDEO_ENABLED | 启用录屏 | true |
+| PLAYWRIGHT_BROWSER | 单个浏览器配置 | chromium |
+| PLAYWRIGHT_BROWSERS | 多个浏览器配置（逗号分隔） | chromium,firefox |
+| PLAYWRIGHT_HEADLESS | Playwright 无头模式 | 1 |
+| PLAYWRIGHT_SLOWMO | Playwright 慢速执行（毫秒） | 0 |
 
 ### 配置验证
 
@@ -565,6 +569,80 @@ pytest -n auto
 # 指定并行数
 pytest -n 4
 ```
+
+## 多浏览器测试
+
+### 环境变量配置
+
+在 `.env` 文件中配置多浏览器：
+
+```bash
+# 设置单个浏览器
+PLAYWRIGHT_BROWSER=chromium
+
+# 设置多个浏览器（逗号分隔）
+PLAYWRIGHT_BROWSERS=chromium,firefox
+
+# 禁用无头模式（查看浏览器执行过程）
+PLAYWRIGHT_HEADLESS=0
+
+# 慢速执行（毫秒）
+PLAYWRIGHT_SLOWMO=100
+```
+
+### 运行多浏览器测试
+
+```bash
+# 使用环境变量中配置的浏览器
+pytest -v tests/e2e/test_todomvc.py
+
+# 命令行参数覆盖环境变量
+pytest -v tests/e2e/test_todomvc.py --browser=chromium --browser=firefox
+
+# 多浏览器并行测试
+pytest -n auto -v tests/e2e/test_todomvc.py --browser=chromium --browser=firefox
+```
+
+### 查看多浏览器测试结果
+
+多浏览器测试结果会在 Allure 报告中清晰展示，每个浏览器的测试结果都会单独显示，便于分析不同浏览器的兼容性问题。
+
+## 附件功能
+
+框架会自动为每个测试用例生成截图和视频，并附加到 Allure 报告中：
+
+### 功能特点
+
+- **自动截图**：测试完成后自动生成，保存在 `reports/screenshots/` 目录
+- **自动录屏**：测试过程中自动录制，保存在 `reports/videos/` 目录
+- **视频尺寸**：与视口大小匹配（默认 1920x1080），确保录制整个浏览器窗口
+- **附件附加**：在测试拆卸阶段附加到 Allure 报告，确保截图和视频在生成后再附加
+- **视频文件处理**：改进了视频文件的处理逻辑，确保 Firefox 浏览器的视频文件正确生成
+
+### 配置选项
+
+在 `.env` 文件中配置附件功能：
+
+```bash
+# 启用视频录制
+VIDEO_ENABLED=true
+
+# 视口大小（影响视频录制尺寸）
+VIEWPORT_WIDTH=1920
+VIEWPORT_HEIGHT=1080
+```
+
+### 查看附件
+
+1. 运行测试后，截图和视频会自动保存到 `reports/` 目录
+2. Allure 报告中会显示每个测试用例的截图和视频
+3. 点击测试用例详情，在 "Attachments" 部分查看附件
+
+### 注意事项
+
+- **浏览器兼容性**：Chrome 和 Firefox 浏览器都支持截图和视频录制
+- **性能影响**：视频录制会增加测试执行时间，建议在 CI/CD 环境中使用无头模式
+- **存储空间**：视频文件可能较大，建议定期清理 `reports/videos/` 目录
 
 ## 测试重试
 

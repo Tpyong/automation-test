@@ -172,7 +172,7 @@ python_files = ["test_*.py", "*_test.py"]              # 识别用例文件
 python_classes = ["Test*"]                             # 识别用例类
 python_functions = ["test_*"]                         # 识别用例函数
 # 默认运行参数：详情+简短报错+多报告+覆盖率门槛  --cov-fail-under=20覆盖率后续需要修改
-addopts = "-v --tb=short --strict-markers --html=reports/report.html --self-contained-html --cov=core --cov=config --cov-report=term-missing --cov-report=html:reports/coverage --cov-report=xml:reports/coverage.xml --cov-fail-under=20"
+addopts = "-v --tb=short --strict-markers --html=reports/report.html --self-contained-html --cov=core --cov=config --cov-report=term-missing --cov-report=html:reports/coverage --cov-report=xml:reports/coverage.xml --cov-fail-under=20 -n auto"
 # 用例标签（可按标签跑指定用例）
 markers = [
     "smoke: 冒烟测试",

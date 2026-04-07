@@ -75,8 +75,14 @@ pytest -v
 # 指定浏览器（Chromium/Firefox/WebKit）
 pytest -v --browser=firefox
 
+# 多浏览器并行测试
+pytest -v --browser=chromium --browser=firefox
+
 # 并行运行测试
 pytest -v -n auto
+
+# 多浏览器并行执行
+pytest -n auto -v --browser=chromium --browser=firefox
 ```
 
 **浏览器配置说明：**
@@ -85,6 +91,24 @@ pytest -v -n auto
 - **CI/CD**：使用 `TEST_BROWSER` 环境变量指定浏览器类型（避免与 pytest-playwright 冲突）
 - **支持的浏览器**：chromium、firefox、webkit
 - **默认浏览器**：chromium
+
+**多浏览器配置：**
+
+在 `.env` 文件中配置：
+
+```bash
+# 设置单个浏览器
+PLAYWRIGHT_BROWSER=chromium
+
+# 设置多个浏览器（逗号分隔）
+PLAYWRIGHT_BROWSERS=chromium,firefox
+
+# 启用无头模式
+PLAYWRIGHT_HEADLESS=1
+
+# 慢速执行（毫秒）
+PLAYWRIGHT_SLOWMO=100
+```
 
 ### 4. 查看报告
 
@@ -119,6 +143,7 @@ allure open reports/allure-report
 - [CI/CD 配置](docs/ci-cd/CI_CD.md) - 持续集成配置
 - [GitHub Actions 配置](docs/ci-cd/GITHUB_SETUP.md) - GitHub Actions 详细配置
 - [定位器使用指南](docs/best-practices/LOCATORS_GUIDE.md) - 元素定位器最佳实践
+- [pytest-playwright 使用指南](docs/best-practices/PLAYWRIGHT_GUIDE.md) - pytest-playwright 插件使用指南
 
 ## 核心特性
 
@@ -211,6 +236,15 @@ allure open reports/allure-report
 - ✅ **环境变量优化** - 使用 `TEST_BROWSER` 环境变量代替 `BROWSER`，避免与 pytest-playwright 插件冲突
 - ✅ **CI/CD 配置更新** - GitHub Actions 和 GitLab CI 已更新为使用正确的浏览器配置
 - ✅ **调试代码清理** - 移除了调试日志，保持代码简洁
+
+### 2026-04-08: 多浏览器测试和附件功能优化
+
+- ✅ **多浏览器测试** - 支持在 Chromium 和 Firefox 浏览器中运行测试
+- ✅ **附件功能修复** - 修复了 Allure 报告中缺少截图和视频的问题
+- ✅ **视频录制优化** - 确保录制整个浏览器窗口，视频尺寸与视口大小匹配
+- ✅ **附件附加时机** - 优化了附件附加的时机，确保截图和视频在生成后再附加到报告
+- ✅ **视频文件处理** - 改进了视频文件的处理逻辑，确保 Firefox 浏览器的视频文件正确生成
+- ✅ **文档更新** - 更新了所有相关文档，详细说明多浏览器测试和附件功能的使用方法
 
 ### 代码质量修复
 

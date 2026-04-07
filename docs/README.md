@@ -17,6 +17,7 @@
 
 ### 最佳实践
 - [定位器使用指南](best-practices/LOCATORS_GUIDE.md) - 元素定位器的最佳使用实践
+- [pytest-playwright 使用指南](best-practices/PLAYWRIGHT_GUIDE.md) - pytest-playwright 插件使用指南
 
 ### 参考文档
 - [API 参考](reference/API.md) - 框架 API 参考文档（待更新）
