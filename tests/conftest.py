@@ -290,13 +290,21 @@ def settings() -> Settings:
 @pytest.fixture(scope="session")
 def browser_type_launch_args(browser_type_launch_args):
     """扩展 pytest-playwright 的 browser_type_launch_args fixture，从环境变量读取配置"""
-    # 从环境变量读取配置
-    headless = os.getenv("PLAYWRIGHT_HEADLESS", "true").lower() == "true"
-    
-    # 从 HEADLESS 环境变量读取配置（兼容 CI 工作流）
+    # 首先检查 HEADLESS 环境变量（CI 工作流使用）
     headless_env = os.getenv("HEADLESS")
     if headless_env is not None:
         headless = headless_env.lower() == "true"
+        logger.info(f"从环境变量 HEADLESS 读取无头模式配置: {headless}")
+    else:
+        # 然后检查 PLAYWRIGHT_HEADLESS 环境变量
+        headless = os.getenv("PLAYWRIGHT_HEADLESS", "true").lower() == "true"
+        logger.info(f"从环境变量 PLAYWRIGHT_HEADLESS 读取无头模式配置: {headless}")
+
+    # 强制在 CI 环境中使用无头模式
+    is_ci = os.getenv("CI", "false").lower() == "true"
+    if is_ci:
+        headless = True
+        logger.info("CI 环境中强制使用无头模式")
 
     return {
         **browser_type_launch_args,
