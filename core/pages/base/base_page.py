@@ -28,14 +28,17 @@ class BasePage:
         self.page = page
 
     @allure.step("导航到: {url}")
-    def navigate(self, url: str, wait_until: Literal["load", "domcontentloaded", "networkidle", "commit"] = "networkidle", timeout: int = 30000) -> Optional[Response]:
+    def navigate(self,
+                 url: str,
+                 wait_until: Literal["load", "domcontentloaded", "networkidle", "commit"] = "networkidle",
+                 timeout: int = 30000) -> Optional[Response]:
         """导航到指定 URL
-        
+
         Args:
             url: 目标 URL
             wait_until: 等待条件 (load, domcontentloaded, networkidle, commit)
             timeout: 超时时间（毫秒）
-            
+
         Returns:
             导航响应对象
         """
@@ -45,9 +48,11 @@ class BasePage:
         return response
 
     @allure.step("等待页面加载完成")
-    def wait_for_page_load(self, state: Literal["load", "domcontentloaded", "networkidle"] = "networkidle", timeout: int = 30000) -> None:
+    def wait_for_page_load(self,
+                           state: Literal["load", "domcontentloaded", "networkidle"] = "networkidle",
+                           timeout: int = 30000) -> None:
         """等待页面加载完成
-        
+
         Args:
             state: 等待状态 (load, domcontentloaded, networkidle)
             timeout: 超时时间（毫秒）
@@ -57,10 +62,10 @@ class BasePage:
 
     def get_locator(self, selector: Union[str, Dict[str, Any]]) -> Locator:
         """获取元素定位器
-        
+
         Args:
             selector: CSS 选择器字符串或定位策略字典
-            
+
         Returns:
             Playwright 定位器对象
         """
@@ -210,13 +215,15 @@ class BasePage:
         logger.info("网络空闲")
 
     @allure.step("刷新页面")
-    def refresh(self, wait_until: Literal["load", "domcontentloaded", "networkidle", "commit"] = "networkidle", timeout: int = 30000) -> Optional[Response]:
+    def refresh(self,
+                wait_until: Literal["load", "domcontentloaded", "networkidle", "commit"] = "networkidle",
+                timeout: int = 30000) -> Optional[Response]:
         """刷新页面
-        
+
         Args:
             wait_until: 等待条件 (load, domcontentloaded, networkidle, commit)
             timeout: 超时时间（毫秒）
-            
+
         Returns:
             刷新响应对象
         """
@@ -226,13 +233,15 @@ class BasePage:
         return response
 
     @allure.step("返回上一页")
-    def go_back(self, wait_until: Literal["load", "domcontentloaded", "networkidle", "commit"] = "networkidle", timeout: int = 30000) -> Optional[Response]:
+    def go_back(self,
+                wait_until: Literal["load", "domcontentloaded", "networkidle", "commit"] = "networkidle",
+                timeout: int = 30000) -> Optional[Response]:
         """返回上一页
-        
+
         Args:
             wait_until: 等待条件 (load, domcontentloaded, networkidle, commit)
             timeout: 超时时间（毫秒）
-            
+
         Returns:
             导航响应对象
         """
@@ -242,13 +251,15 @@ class BasePage:
         return response
 
     @allure.step("前进到下一页")
-    def go_forward(self, wait_until: Literal["load", "domcontentloaded", "networkidle", "commit"] = "networkidle", timeout: int = 30000) -> Optional[Response]:
+    def go_forward(self,
+                   wait_until: Literal["load", "domcontentloaded", "networkidle", "commit"] = "networkidle",
+                   timeout: int = 30000) -> Optional[Response]:
         """前进到下一页
-        
+
         Args:
             wait_until: 等待条件 (load, domcontentloaded, networkidle, commit)
             timeout: 超时时间（毫秒）
-            
+
         Returns:
             导航响应对象
         """
