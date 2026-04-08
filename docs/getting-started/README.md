@@ -20,8 +20,8 @@
 ### 2. 安装依赖
 
 ```bash
-# 安装运行依赖
-pip install -r requirements.lock
+# 以开发模式安装依赖
+pip install -e .
 
 # 安装开发依赖（可选）
 pip install -r requirements-dev.txt
@@ -37,50 +37,46 @@ playwright install
 
 ### 1. 配置环境
 
-从 `config/envs/` 目录下提供了多个配置模板，选择合适的复制到项目根目录：
+框架会自动加载 `config/envs/.env.base` 作为基础配置，然后根据当前环境加载对应的配置文件。
 
-```bash
-# 推荐：最小配置（适合新手）
-cp config/envs/.env.minimal .env
+\*\*环境配置文件说明：
 
-# 或者使用标准配置
-cp config/envs/.env.standard .env
-
-# 或者使用完整配置
-cp config/envs/.env.full .env
-```
-
-**环境配置文件说明：
-- `config/envs/.env.minimal` - 最小配置（推荐新手使用）
-- `config/envs/.env.standard` - 标准配置
-- `config/envs/.env.full` - 完整配置（包含所有选项）
-- `config/envs/.env.example` - 示例配置
+- `config/envs/.env.base` - 基础配置（所有环境的默认值）
 - `config/envs/.env.development` - 开发环境配置
 - `config/envs/.env.testing` - 测试环境配置
-- `config/envs/.env.staging` - 预发布环境配置
+- `config/envs/.env.production` - 生产环境配置
 
-最小配置示例：
+**配置模式：**
 
-```bash
-BASE_URL=https://demo.playwright.dev/todomvc
-BROWSER=chromium
-HEADLESS=false
-```
+- `strict` - 严格模式，配置错误会导致测试失败
+- `relaxed` - 宽松模式，配置错误会产生警告但不影响测试执行
+
+**配置优先级：**
+
+1. 环境变量
+2. 特定环境配置文件（如 `.env.development`）
+3. 项目根目录的 `.env` 文件
+4. 基础配置文件（`.env.base`）
+5. 默认值
 
 ### 2. 运行第一个测试
 
 ```bash
-# 运行单元测试示例
-pytest tests/unit/test_sample.py -v
+# 运行 E2E 测试示例（推荐）
+pytest tests/e2e/test_todomvc.py -v
 
-# 运行 Mock API 测试（推荐，无需真实 API）
+# 运行 API 测试示例
 pytest tests/api/test_mock_api.py -v
 
-# 运行 UI 测试示例
-pytest tests/e2e/test_todomvc.py -v
+# 运行集成测试示例
+pytest tests/integration/test_mock_server.py -v
+
+# 运行单元测试示例
+pytest tests/unit/test_sample.py -v
 ```
 
 **测试分层说明：**
+
 - `tests/unit/` - 单元测试（测试独立逻辑）
 - `tests/integration/` - 集成测试（测试组件交互）
 - `tests/api/` - API 测试（测试 RESTful 接口）
@@ -89,15 +85,13 @@ pytest tests/e2e/test_todomvc.py -v
 ### 3. 查看报告
 
 **Allure报告**：
+
 ```bash
 # 运行测试并收集Allure结果数据
 pytest --alluredir=reports/allure-results
 
-# 生成Allure报告
-allure generate reports/allure-results -o reports/allure-report --clean
-
 # 在浏览器中查看报告
-allure open reports/allure-report
+allure serve reports/allure-results
 ```
 
 **自定义HTML报告**：
@@ -105,32 +99,22 @@ allure open reports/allure-report
 
 ## 常用命令
 
-### 使用 Makefile（推荐）
+### 代码质量检查
 
 ```bash
-# 安装依赖和浏览器
-make install
-
-# 运行所有测试
-make test
-
 # 代码检查
-make lint
+pylint core/ utils/ config/ scripts/ tests/
+flake8 core/ utils/ config/ scripts/ tests/
 
 # 代码格式化
-make format
+black core/ utils/ config/ scripts/ tests/
+isort core/ utils/ config/ scripts/ tests/
 
-# 类型检查
-make mypy
-
-# 生成覆盖率报告
-make coverage
-
-# 清理测试结果
-make clean
+# 类型检查（MyPy）
+mypy core/ utils/ config/ scripts/
 ```
 
-### 传统命令
+### 测试执行
 
 ```bash
 # 运行所有测试
@@ -139,171 +123,106 @@ pytest
 # 运行冒烟测试
 pytest -m smoke
 
-# 并行运行（注意：并行测试时报告生成器可能无法正确收集测试结果）
+# 并行运行
 pytest -n auto
 
 # 生成覆盖率报告
-pytest --cov=core --cov-report=html:reports/coverage-html
+pytest --cov=core --cov-report=html:reports/coverage
 
-# 代码检查
-pylint core/ tests/
-flake8 core/ tests/
+# 只运行特定浏览器的测试
+pytest --browser chromium tests/e2e/
 
-# 代码格式化
-black core/ tests/
-isort core/ tests/
-
-# 类型检查（MyPy）
-mypy . --exclude=venv --exclude=allure-results --exclude=allure-report
+# 运行多个浏览器的测试
+pytest --browser chromium --browser firefox tests/e2e/
 ```
 
-### 并行测试说明
-
-默认情况下，测试以串行方式执行，以确保测试报告生成器能够正确收集所有测试结果。
-
-如果需要启用并行测试以提高执行速度，可以使用以下命令：
+### 配置管理
 
 ```bash
-# 使用所有可用的CPU核心并行运行
-pytest -n auto
+# 运行配置检查
+python scripts/utils/config_checker.py
 
-# 指定并行worker数量
-pytest -n 4
+# 运行配置向导
+python scripts/cli/config_wizard.py
 
-# 按文件分发测试（确保同一文件的测试在同一个worker中执行）
-pytest -n auto --dist=loadfile
+# 运行交互式测试运行器
+python scripts/cli/interactive_runner.py
 ```
-
-**注意**：启用并行测试后，自定义的HTML/JSON测试报告可能无法正确收集所有测试结果。Allure报告不受影响。
 
 ## 新功能
 
-### 1. 测试数据管理
+### 1. pytest-playwright 集成
 
-使用 YAML 文件管理测试数据：
-
-```bash
-# 查看测试数据文件
-data/test_data/login_data.yaml
-
-# 在测试中使用```python
-from utils.data.test_data_loader import TestDataLoader
-
-data = TestDataLoader.get_login_data('login_success')
-```
-
-### 2. 统一异常处理
-
-使用 ExceptionHandler 处理异常：
+框架已完全集成 pytest-playwright 插件，提供更强大的浏览器自动化能力：
 
 ```python
-from utils.common.exception_handler import ExceptionHandler, retry_on_exception
-
-# 安全执行
-result = ExceptionHandler.safe_execute(some_function, arg1, arg2)
-
-# 异常重试
-@retry_on_exception(max_retries=3, delay=1)
-def flaky_function():
-    # 可能失败的操作
-    pass
+# 在测试中使用 page fixture
+def test_example(page):
+    page.goto("https://example.com")
+    page.fill("#username", "test")
+    page.fill("#password", "password")
+    page.click("#login")
 ```
 
-### 3. 增强的 Allure 报告
+### 2. 配置管理增强
 
-使用 AllureHelper 增强测试报告：
+- **配置模式**：支持 strict/relaxed 两种配置模式
+- **配置验证**：自动验证配置的有效性
+- **配置变更日志**：记录配置变更历史
+- **环境变量管理**：优化环境变量加载和处理
 
-```python
-from utils.reporting.allure_helper import AllureHelper
+### 3. 智能定位器
 
-# 添加测试参数
-AllureHelper.add_parameters({
-    "browser": "chromium",
-    "environment": "test"
-})
+支持多种定位策略，提高测试稳定性：
 
-# 添加链接
-AllureHelper.add_issue("https://example.com/issue/123", "Bug #123")
+- **CSS 选择器**：传统的 CSS 定位
+- **XPath**：强大的 XPath 定位
+- **语义化定位**：基于角色和文本的定位
+- **数据属性定位**：基于自定义数据属性的定位
 
-# 附加文件
-AllureHelper.attach_json({"key": "value"}, "测试数据")
-```
+### 4. 浏览器池与智能等待
 
-### 4. 依赖管理优化
+- **浏览器池**：优化浏览器启动和管理
+- **智能等待**：自动等待元素可见和可交互
+- **显式等待**：提供灵活的等待方法
+- **超时管理**：统一的超时配置
 
-使用锁定版本的依赖：
+### 5. Mock 服务
 
-```bash
-# 安装锁定版本依赖
-pip install -r requirements.lock
+内置 Mock 服务，支持 API 测试：
 
-# 更新依赖
-pip-compile requirements.in -o requirements.lock
+- **模拟 API 响应**：返回自定义响应数据
+- **请求验证**：验证请求参数和 headers
+- **延迟响应**：模拟网络延迟
+- **错误响应**：模拟各种错误状态码
 
-# 安装开发依赖
-make install-dev
-```
+### 6. 测试数据管理
 
-### 5. 代码质量工具
+- **数据驱动测试**：支持 YAML/JSON/Excel 格式的测试数据
+- **测试数据工厂**：动态生成测试数据
+- **测试数据清理**：自动清理测试数据
+- **测试数据隔离**：确保测试之间数据隔离
 
-所有代码质量工具配置已统一至 `pyproject.toml`：
+### 7. 增强的报告系统
 
-- **Black**：代码格式化
-- **isort**：导入排序
-- **Flake8**：代码风格检查
-- **Pylint**：代码质量检查
-- **MyPy**：类型检查
+- **Allure 报告**：详细的测试报告和趋势分析
+- **自定义报告**：HTML 和 JSON 格式的测试摘要
+- **测试趋势**：历史测试结果分析
+- **智能测试建议**：基于历史数据的测试优化建议
 
-### 6. 预提交钩子
+### 8. 安全管理
 
-配置预提交钩子，自动检查代码质量：
-
-```bash
-# 安装 pre-commit
-pip install pre-commit
-
-# 安装钩子
-pre-commit install
-
-# 手动运行所有钩子
-pre-commit run --all-files
-```
-
-### 7. 测试结果历史存储
-
-框架会自动存储测试结果到历史记录，方便后续分析：
-
-- 历史记录存储在 `reports/history/` 目录
-- 每个测试会话生成一个历史文件
-- 支持查看历史测试结果
-
-### 8. 测试趋势分析
-
-框架会自动生成测试趋势报告：
-
-- 趋势报告存储在 `reports/test-trend.html`
-- 包含通过率、测试数量、执行时长等趋势图表
-- 支持查看最近7天的测试趋势
-- 提供统计概览数据
+- **敏感信息加密**：加密环境变量中的敏感信息
+- **审计日志**：记录敏感操作
+- **数据掩码**：在报告中掩码敏感数据
+- **合规检查**：检查代码中的安全问题
 
 ### 9. 类型注解与 MyPy 类型检查
 
 框架核心模块已添加完整的类型注解，提高代码可读性和可维护性：
 
-```bash
-# 运行 MyPy 类型检查
-make mypy
-
-# 或者使用传统命令
-mypy . --exclude=venv --exclude=allure-results --exclude=allure-report
-```
-
-**MyPy 配置特点**：
-- 灵活配置，允许逐步添加类型注解
-- 核心模块已添加完整的类型注解
-- 支持类型安全检查，提高代码质量
-
 **已添加类型注解的模块**：
+
 - 基础页面（`core/pages/base/base_page.py`）
 - 登录页面（`core/pages/specific/login_page.py`）
 - 语义化登录页面（`core/pages/specific/login_page_semantic.py`）
@@ -326,9 +245,11 @@ mypy . --exclude=venv --exclude=allure-results --exclude=allure-report
 ## 下一步
 
 - 查看 [完整指南](GUIDE.md) 了解详细用法
-- 查看 [功能特性](FEATURES.md) 了解框架能力
-- 查看 [CI/CD 配置](CI_CD.md) 了解持续集成
-- 查看 [API 文档](API.md) 了解 API 参考
+- 查看 [系统架构文档](../architecture/SYSTEM_ARCHITECTURE.md) 了解系统架构
+- 查看 [API 接口文档](../api/API_DOCUMENTATION.md) 了解 API 参考
+- 查看 [部署与运维文档](../deployment/DEPLOYMENT_AND_OPERATION.md) 了解部署和运维
+- 查看 [开发规范与代码审查指南](../development/DEVELOPMENT_GUIDELINES.md) 了解开发规范
+- 查看 [故障排查手册](../troubleshooting/TROUBLESHOOTING.md) 了解常见问题和解决方案
 
 ## 项目结构
 
@@ -337,13 +258,9 @@ mypy . --exclude=venv --exclude=allure-results --exclude=allure-report
 ├── config/                    # 配置管理
 │   ├── envs/                  # 环境配置文件目录
 │   │   ├── .env.base          # 基础配置
-│   │   ├── .env.example       # 示例配置
-│   │   ├── .env.minimal       # 最小配置
-│   │   ├── .env.standard      # 标准配置
-│   │   ├── .env.full          # 完整配置
-│   │   ├── .env.development   # 开发环境
-│   │   ├── .env.testing       # 测试环境
-│   │   └── .env.staging       # 预发布环境
+│   │   ├── .env.development   # 开发环境配置
+│   │   ├── .env.testing       # 测试环境配置
+│   │   └── .env.production    # 生产环境配置
 │   ├── settings_dir/          # 配置设置目录
 │   │   ├── base/              # 基础设置
 │   │   ├── development/       # 开发环境设置
@@ -367,11 +284,7 @@ mypy . --exclude=venv --exclude=allure-results --exclude=allure-report
 │   └── __init__.py
 ├── resources/                 # 资源文件
 │   ├── data/                  # 测试数据
-│   │   ├── datasets/          # 数据集
-│   │   └── fixtures/          # 测试固件
 │   ├── locators/              # 定位器文件
-│   │   ├── mobile/            # 移动设备定位器
-│   │   └── web/               # Web 定位器
 │   └── templates/             # 模板文件
 ├── tests/                     # 测试用例
 │   ├── api/                   # API 测试
@@ -401,10 +314,8 @@ mypy . --exclude=venv --exclude=allure-results --exclude=allure-report
 │   └── utils/                 # 脚本工具
 ├── docs/                      # 文档
 ├── reports/                   # 测试报告
-├── .env                       # 当前使用的环境配置（不提交到版本控制）
-├── pyproject.toml             # 统一配置文件（Black、isort、Flake8、Pylint、MyPy、Pytest）
-├── Makefile                   # 常用命令快捷方式
-├── .pre-commit-config.yaml    # 预提交钩子配置
+├── pyproject.toml             # 统一配置文件
 ├── requirements.in            # 依赖定义文件
 └── requirements.lock          # 锁定版本依赖
 ```
+

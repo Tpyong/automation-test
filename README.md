@@ -2,7 +2,7 @@
 
 基于 Python + Pytest + Playwright + Allure 的企业级自动化测试可复用标准框架。
 
----
+***
 
 ## 技术栈
 
@@ -60,6 +60,7 @@ cp config/envs/.env.full .env
 **配置继承机制：**
 
 框架实现了三层配置继承机制，优先级从高到低：
+
 1. `.env.{env}` - 环境特定配置（最高优先级）
 2. `.env` - 项目级配置
 3. `.env.base` - 基础配置（所有环境的默认值）
@@ -126,6 +127,7 @@ allure open reports/allure-report
 ```
 
 **CI/CD 报告查看**：
+
 - 访问 GitHub Actions 页面
 - 选择成功的 workflow 运行
 - 在页面底部 "Artifacts" 区域下载 `allure-report-html.zip`
@@ -190,14 +192,14 @@ allure open reports/allure-report
 
 ### 2026-04-05: 目录结构重构与规范
 
-- ✅ **config/settings_dir/ 重构** - 删除根目录下的配置文件，仅保留子目录中的配置
+- ✅ **config/settings\_dir/ 重构** - 删除根目录下的配置文件，仅保留子目录中的配置
 - ✅ **机密文件位置优化** - 将 .secrets.key 和 .secrets.salt 移动到 config/secrets/ 目录
 - ✅ **utils/ 目录移动** - 将 core/utils/ 移动到根目录，作为全局通用工具
 - ✅ **utils/ 文件分类** - 将所有工具文件分类到对应的子目录（api、browser、data、reporting、security、core）
-- ✅ **服务模块迁移** - 将 db_manager.py、mock_server.py 移动到 core/services/
+- ✅ **服务模块迁移** - 将 db\_manager.py、mock\_server.py 移动到 core/services/
 - ✅ **定位器模块迁移** - 将 locators.py 移动到 core/pages/
 - ✅ **logs/ 和 reports/ 说明** - 为这两个目录添加了 README 说明文档
-- ✅ **目录结构规范文档** - 创建了 docs/best-practices/DIRECTORY_STRUCTURE.md，包含详细的目录说明和新文件归类决策树
+- ✅ **目录结构规范文档** - 创建了 docs/best-practices/DIRECTORY\_STRUCTURE.md，包含详细的目录说明和新文件归类决策树
 
 ### 2026-04-04: API 测试重构与文档更新
 
@@ -219,7 +221,7 @@ allure open reports/allure-report
 - ✅ **配置管理优化** - 实现了三层配置继承（.env.{env} > .env > .env.base），减少配置重复
 - ✅ **基础配置文件** - 创建了 .env.base 基础配置文件，包含所有环境的默认配置
 - ✅ **配置文件清理** - 移除了各环境配置文件中的重复配置项
-- ✅ **VIDEO_ENABLED 默认值** - 将默认值从 false 改为 true，启用视频录制功能
+- ✅ **VIDEO\_ENABLED 默认值** - 将默认值从 false 改为 true，启用视频录制功能
 
 ### 2026-04-02: CI/CD Pipeline 完整修复
 
@@ -503,6 +505,7 @@ class TestExample:
 ### API 测试示例
 
 **真实 API 测试**：
+
 ```python
 import allure
 from utils.api.api_client import APIClient, APIAssertions
@@ -524,6 +527,7 @@ def test_get_users(api_client):
 ```
 
 **Mock API 测试**（无需真实后端）：
+
 ```python
 import pytest
 import requests
@@ -549,6 +553,7 @@ def test_mock_get_users(mock_server):
 ```
 
 **运行 API 测试**：
+
 ```bash
 # 运行所有 API 测试
 pytest tests/api/ -v

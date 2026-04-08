@@ -27,9 +27,7 @@ class TestConfigWizard:
 
         return config
 
-    def get_valid_input(
-        self, prompt: str, default: str, validation_pattern: Optional[str] = None
-    ) -> str:
+    def get_valid_input(self, prompt: str, default: str, validation_pattern: Optional[str] = None) -> str:
         """获取有效的用户输入"""
         while True:
             user_input = input(f"{prompt} [{default}]: ").strip()
@@ -81,17 +79,42 @@ class TestConfigWizard:
         )
 
         config["HEADLESS"] = str(
+            self.get_yes_no_input("是否以无头模式运行浏览器", config.get("HEADLESS", "false").lower() == "true")
+        ).lower()
+
+        config["SLOW_MO"] = self.get_valid_input("请输入浏览器操作延迟（毫秒）", config.get("SLOW_MO", "0"), r"^\d+$")
+
+        config["TIMEOUT"] = self.get_valid_input("请输入默认超时时间（毫秒）", config.get("TIMEOUT", "30000"), r"^\d+$")
+
+        # 配置模式
+        print("\n=== 配置模式 ===")
+        config_mode_choices = ["strict", "relaxed"]
+        print(f"配置模式选择: {', '.join(config_mode_choices)}")
+        config["CONFIG_MODE"] = self.get_valid_input(
+            "请输入配置模式", config.get("CONFIG_MODE", "strict"), f"({'|'.join(config_mode_choices)})"
+        )
+
+        # pytest-playwright 配置
+        print("\n=== pytest-playwright 配置 ===")
+        print(f"浏览器选择: {', '.join(browser_choices)}")
+        config["PLAYWRIGHT_BROWSER"] = self.get_valid_input(
+            "请输入 Playwright 浏览器类型",
+            config.get("PLAYWRIGHT_BROWSER", "chromium"),
+            f"({'|'.join(browser_choices)})",
+        )
+
+        config["PLAYWRIGHT_HEADLESS"] = str(
             self.get_yes_no_input(
-                "是否以无头模式运行浏览器", config.get("HEADLESS", "false").lower() == "true"
+                "是否以无头模式运行 Playwright", config.get("PLAYWRIGHT_HEADLESS", "false").lower() == "true"
             )
         ).lower()
 
-        config["SLOW_MO"] = self.get_valid_input(
-            "请输入浏览器操作延迟（毫秒）", config.get("SLOW_MO", "0"), r"^\d+$"
+        config["PLAYWRIGHT_SLOWMO"] = self.get_valid_input(
+            "请输入 Playwright 操作延迟（毫秒）", config.get("PLAYWRIGHT_SLOWMO", "0"), r"^\d+$"
         )
 
-        config["TIMEOUT"] = self.get_valid_input(
-            "请输入默认超时时间（毫秒）", config.get("TIMEOUT", "30000"), r"^\d+$"
+        config["PLAYWRIGHT_TIMEOUT"] = self.get_valid_input(
+            "请输入 Playwright 超时时间（毫秒）", config.get("PLAYWRIGHT_TIMEOUT", "30000"), r"^\d+$"
         )
 
         # 视口配置
@@ -117,27 +140,37 @@ class TestConfigWizard:
         # 录屏配置
         print("\n=== 录屏配置 ===")
         config["VIDEO_ENABLED"] = str(
-            self.get_yes_no_input(
-                "是否启用录屏功能", config.get("VIDEO_ENABLED", "false").lower() == "true"
-            )
+            self.get_yes_no_input("是否启用录屏功能", config.get("VIDEO_ENABLED", "false").lower() == "true")
         ).lower()
+
+        # 截图配置
+        print("\n=== 截图配置 ===")
+        config["SCREENSHOT_ENABLED"] = str(
+            self.get_yes_no_input("是否启用截图功能", config.get("SCREENSHOT_ENABLED", "true").lower() == "true")
+        ).lower()
+
+        config["SCREENSHOT_PATH"] = self.get_valid_input(
+            "请输入截图保存路径", config.get("SCREENSHOT_PATH", "screenshots")
+        )
+
+        # Allure 报告配置
+        print("\n=== Allure 报告配置 ===")
+        config["ALLURE_ENABLED"] = str(
+            self.get_yes_no_input("是否启用 Allure 报告", config.get("ALLURE_ENABLED", "true").lower() == "true")
+        ).lower()
+
+        config["ALLURE_OUTPUT_DIR"] = self.get_valid_input(
+            "请输入 Allure 报告输出目录", config.get("ALLURE_OUTPUT_DIR", "allure-results")
+        )
 
         # 数据库配置
         print("\n=== 数据库配置 ===")
         if self.get_yes_no_input("是否配置数据库连接", False):
-            config["DB_HOST"] = self.get_valid_input(
-                "请输入数据库主机", config.get("DB_HOST", "localhost")
-            )
-            config["DB_PORT"] = self.get_valid_input(
-                "请输入数据库端口", config.get("DB_PORT", "3306"), r"^\d+$"
-            )
-            config["DB_USER"] = self.get_valid_input(
-                "请输入数据库用户名", config.get("DB_USER", "root")
-            )
+            config["DB_HOST"] = self.get_valid_input("请输入数据库主机", config.get("DB_HOST", "localhost"))
+            config["DB_PORT"] = self.get_valid_input("请输入数据库端口", config.get("DB_PORT", "3306"), r"^\d+$")
+            config["DB_USER"] = self.get_valid_input("请输入数据库用户名", config.get("DB_USER", "root"))
             config["DB_PASSWORD"] = input("请输入数据库密码: ").strip()
-            config["DB_NAME"] = self.get_valid_input(
-                "请输入数据库名称", config.get("DB_NAME", "test_db")
-            )
+            config["DB_NAME"] = self.get_valid_input("请输入数据库名称", config.get("DB_NAME", "test_db"))
 
         # 测试环境配置
         print("\n=== 测试环境配置 ===")
@@ -168,9 +201,18 @@ class TestConfigWizard:
                 # 按类别分组写入
                 categories = {
                     "基础配置": ["BASE_URL", "BROWSER", "HEADLESS", "SLOW_MO", "TIMEOUT"],
+                    "配置模式": ["CONFIG_MODE"],
+                    "pytest-playwright 配置": [
+                        "PLAYWRIGHT_BROWSER",
+                        "PLAYWRIGHT_HEADLESS",
+                        "PLAYWRIGHT_SLOWMO",
+                        "PLAYWRIGHT_TIMEOUT",
+                    ],
                     "视口配置": ["VIEWPORT_WIDTH", "VIEWPORT_HEIGHT"],
                     "API 配置": ["API_BASE_URL", "API_TIMEOUT"],
                     "录屏配置": ["VIDEO_ENABLED"],
+                    "截图配置": ["SCREENSHOT_ENABLED", "SCREENSHOT_PATH"],
+                    "Allure 报告配置": ["ALLURE_ENABLED", "ALLURE_OUTPUT_DIR"],
                     "数据库配置": ["DB_HOST", "DB_PORT", "DB_USER", "DB_PASSWORD", "DB_NAME"],
                     "测试环境配置": ["TEST_ENV"],
                 }

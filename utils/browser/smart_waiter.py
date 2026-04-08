@@ -216,7 +216,9 @@ class SmartWaiter:
                 raise ValueError(f"不支持的定位策略: {selector}")
         return page.locator(selector)
 
-    def wait_for_element(self, page: Page, selector: Union[str, Dict[str, Any]], timeout: Optional[float] = None) -> bool:
+    def wait_for_element(
+        self, page: Page, selector: Union[str, Dict[str, Any]], timeout: Optional[float] = None
+    ) -> bool:
         """等待元素出现
 
         Args:
@@ -233,7 +235,9 @@ class SmartWaiter:
 
         return self.wait(condition=element_exists, timeout=timeout, error_message=f"元素未找到: {selector}")
 
-    def wait_for_text(self, page: Page, selector: Union[str, Dict[str, Any]], text: str, timeout: Optional[float] = None) -> bool:
+    def wait_for_text(
+        self, page: Page, selector: Union[str, Dict[str, Any]], text: str, timeout: Optional[float] = None
+    ) -> bool:
         """等待文本出现
 
         Args:
@@ -273,7 +277,9 @@ class SmartWaiter:
 
         return self.wait(condition=url_matches, timeout=timeout, error_message=f"URL未匹配: {url_pattern}")
 
-    def wait_for_element_visible(self, page: Page, selector: Union[str, Dict[str, Any]], timeout: Optional[float] = None) -> bool:
+    def wait_for_element_visible(
+        self, page: Page, selector: Union[str, Dict[str, Any]], timeout: Optional[float] = None
+    ) -> bool:
         """等待元素可见
 
         Args:
@@ -293,7 +299,9 @@ class SmartWaiter:
 
         return self.wait(condition=element_visible, timeout=timeout, error_message=f"元素不可见: {selector}")
 
-    def wait_for_element_hidden(self, page: Page, selector: Union[str, Dict[str, Any]], timeout: Optional[float] = None) -> bool:
+    def wait_for_element_hidden(
+        self, page: Page, selector: Union[str, Dict[str, Any]], timeout: Optional[float] = None
+    ) -> bool:
         """等待元素隐藏
 
         Args:
@@ -313,7 +321,12 @@ class SmartWaiter:
 
         return self.wait(condition=element_hidden, timeout=timeout, error_message=f"元素未隐藏: {selector}")
 
-    def wait_for_load_state(self, page: Page, state: Literal["domcontentloaded", "load", "networkidle"] = "networkidle", timeout: Optional[float] = None) -> bool:
+    def wait_for_load_state(
+        self,
+        page: Page,
+        state: Literal["domcontentloaded", "load", "networkidle"] = "networkidle",
+        timeout: Optional[float] = None,
+    ) -> bool:
         """等待页面加载状态
 
         Args:
@@ -526,4 +539,3 @@ def smart_retry(
         return wrapper
 
     return decorator
-

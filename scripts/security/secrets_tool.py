@@ -11,7 +11,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from utils.common.logger import get_logger
-from utils.secrets_manager import get_secrets_manager
+from utils.security.secrets_manager import get_secrets_manager
 
 logger = get_logger(__name__)
 

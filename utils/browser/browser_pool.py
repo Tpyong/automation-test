@@ -82,24 +82,14 @@ class BrowserPool:
         try:
             if self._browser_type == "chromium":
                 return self._playwright.chromium.launch(
-                    headless=self._headless, 
+                    headless=self._headless,
                     slow_mo=self._slow_mo,
-                    args=[
-                        "--disable-gpu",
-                        "--no-sandbox",
-                        "--disable-dev-shm-usage"
-                    ]
+                    args=["--disable-gpu", "--no-sandbox", "--disable-dev-shm-usage"],
                 )
             elif self._browser_type == "firefox":
-                return self._playwright.firefox.launch(
-                    headless=self._headless, 
-                    slow_mo=self._slow_mo
-                )
+                return self._playwright.firefox.launch(headless=self._headless, slow_mo=self._slow_mo)
             elif self._browser_type == "webkit":
-                return self._playwright.webkit.launch(
-                    headless=self._headless, 
-                    slow_mo=self._slow_mo
-                )
+                return self._playwright.webkit.launch(headless=self._headless, slow_mo=self._slow_mo)
             else:
                 raise ValueError(f"不支持的浏览器类型: {self._browser_type}")
         except Exception as e:
@@ -150,7 +140,7 @@ class BrowserPool:
                         context.close()
                 except Exception as e:
                     logger.error(f"清理浏览器上下文失败: {e}")
-                
+
                 self._pool.append(browser)
                 logger.debug(f"浏览器实例回收到池中: {browser_id}")
             else:
@@ -271,4 +261,3 @@ def reset_browser_pool() -> None:
         _browser_pool.cleanup()
     _browser_pool = None
     logger.info("重置全局浏览器池实例")
-

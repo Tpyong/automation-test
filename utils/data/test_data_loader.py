@@ -6,8 +6,8 @@
 import os
 from typing import Any, Dict, List
 
-from utils.data.data_cache import get_data_cache
 from utils.common.logger import get_logger
+from utils.data.data_cache import get_data_cache
 
 logger = get_logger(__name__)
 

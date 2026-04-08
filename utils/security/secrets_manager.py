@@ -39,7 +39,7 @@ class SecretsManager:
 
     def _get_or_generate_salt(self) -> bytes:
         """获取或生成盐值"""
-        project_root = Path(__file__).parent.parent.parent.parent
+        project_root = Path(__file__).parent.parent.parent
         salt_file = project_root / "config" / "secrets" / ".secrets.salt"
 
         if salt_file.exists():
@@ -63,7 +63,7 @@ class SecretsManager:
                 logger.warning(f"环境变量中的密钥无效: {e}")
 
         # 其次从密钥文件获取
-        project_root = Path(__file__).parent.parent.parent.parent
+        project_root = Path(__file__).parent.parent.parent
         key_file = project_root / "config" / "secrets" / ".secrets.key"
         if key_file.exists():
             with open(key_file, "rb") as f:

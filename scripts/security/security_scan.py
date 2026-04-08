@@ -36,9 +36,7 @@ class SecurityScanner:
         logger.info("开始 safety 依赖安全扫描...")
 
         try:
-            result = subprocess.run(
-                ["safety", "check", "--json"], capture_output=True, text=True, timeout=300
-            )
+            result = subprocess.run(["safety", "check", "--json"], capture_output=True, text=True, timeout=300)
 
             if result.returncode == 0:
                 logger.info("✅ Safety 扫描通过，未发现安全漏洞")
@@ -147,9 +145,7 @@ class SecurityScanner:
 
     def generate_report(self) -> str:
         """生成综合安全报告"""
-        report_file = (
-            self.output_dir / f"security-report-{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-        )
+        report_file = self.output_dir / f"security-report-{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
 
         summary = {
             "timestamp": datetime.now().isoformat(),

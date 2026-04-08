@@ -2,8 +2,8 @@ import time
 import traceback
 from typing import Any, Optional
 
-from utils.reporting.allure_helper import AllureHelper
 from utils.common.logger import get_logger
+from utils.reporting.allure_helper import AllureHelper
 
 logger = get_logger(__name__)
 

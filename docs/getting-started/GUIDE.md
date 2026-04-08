@@ -44,24 +44,25 @@ TEST_ENV=staging pytest
 
 ### 配置项说明
 
-| 配置项 | 说明 | 默认值 |
-|--------|------|--------|
-| BASE_URL | 测试网站地址 | https://www.example.com |
-| BROWSER | 浏览器类型 | chromium |
-| HEADLESS | 无头模式 | true |
-| SLOW_MO | 操作延迟 | 0 |
-| TIMEOUT | 超时时间 | 30000 |
-| VIEWPORT_WIDTH | 浏览器宽度 | 1920 |
-| VIEWPORT_HEIGHT | 浏览器高度 | 1080 |
-| VIDEO_ENABLED | 启用录屏 | true |
-| PLAYWRIGHT_BROWSER | 单个浏览器配置 | chromium |
-| PLAYWRIGHT_BROWSERS | 多个浏览器配置（逗号分隔） | chromium,firefox |
-| PLAYWRIGHT_HEADLESS | Playwright 无头模式 | 1 |
-| PLAYWRIGHT_SLOWMO | Playwright 慢速执行（毫秒） | 0 |
+| 配置项                  | 说明                  | 默认值                       |
+| -------------------- | ------------------- | ------------------------- |
+| BASE\_URL            | 测试网站地址              | <https://www.example.com> |
+| BROWSER              | 浏览器类型               | chromium                  |
+| HEADLESS             | 无头模式                | true                      |
+| SLOW\_MO             | 操作延迟                | 0                         |
+| TIMEOUT              | 超时时间                | 30000                     |
+| VIEWPORT\_WIDTH      | 浏览器宽度               | 1920                      |
+| VIEWPORT\_HEIGHT     | 浏览器高度               | 1080                      |
+| VIDEO\_ENABLED       | 启用录屏                | true                      |
+| PLAYWRIGHT\_BROWSER  | 单个浏览器配置             | chromium                  |
+| PLAYWRIGHT\_BROWSERS | 多个浏览器配置（逗号分隔）       | chromium,firefox          |
+| PLAYWRIGHT\_HEADLESS | Playwright 无头模式     | 1                         |
+| PLAYWRIGHT\_SLOWMO   | Playwright 慢速执行（毫秒） | 0                         |
 
 ### 配置验证
 
 框架内置配置验证功能，会在测试启动时自动验证配置的正确性：
+
 - 验证环境配置的完整性
 - 检查数据库连接配置
 - 验证报告配置
@@ -557,7 +558,7 @@ def test_with_cleanup(page, test_data_cleanup):
 4. 智能录屏控制：仅为使用浏览器 fixture 的测试启用录屏
 5. 空视频文件过滤：自动检测并删除 0B 的视频文件
 6. 视频文件与测试用例关联：确保视频正确附加到对应的测试用例
-7. 集成测试优化：使用 mock_server 的集成测试不会生成视频文件
+7. 集成测试优化：使用 mock\_server 的集成测试不会生成视频文件
 8. 自动附加到 Allure 报告：视频文件会自动附加到 Allure 测试报告中
 
 ## 并行测试

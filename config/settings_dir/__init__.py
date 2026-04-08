@@ -4,8 +4,8 @@
 
 from .base.base import *
 from .development.development import *
-from .testing.testing import *
 from .production.production import *
+from .testing.testing import *
 
 __all__ = [
     "BASE_URL",

@@ -12,6 +12,7 @@ class InteractiveTestRunner:
     def __init__(self):
         self.test_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "tests")
         self.test_categories = ["unit", "integration", "api", "e2e"]
+        self.browser_choices = ["chromium", "firefox", "webkit"]
 
     def list_test_modules(self, category: str) -> List[str]:
         """列出指定类别的测试模块"""
@@ -83,6 +84,25 @@ class InteractiveTestRunner:
             except ValueError:
                 print("请输入有效的数字")
 
+    def get_browser_option(self) -> Optional[str]:
+        """获取浏览器选择"""
+        print("\n选择浏览器:")
+        browser_choice = self.display_menu(self.browser_choices, "选择浏览器")
+        if browser_choice == 0:
+            return None
+        return self.browser_choices[browser_choice - 1]
+
+    def get_headless_option(self) -> bool:
+        """获取无头模式选择"""
+        while True:
+            headless_input = input("是否以无头模式运行浏览器? (y/n): ").strip().lower()
+            if headless_input == "y":
+                return True
+            elif headless_input == "n":
+                return False
+            else:
+                print("请输入 y 或 n")
+
     def run_tests(self, category: str, module: str, cases: Optional[List[str]] = None):
         """运行选定的测试"""
         test_path = os.path.join(self.test_dir, category, module)
@@ -95,6 +115,16 @@ class InteractiveTestRunner:
 
         # 添加常用选项
         cmd.extend(["-v", "--tb=short"])
+
+        # 对于 e2e 测试，添加 Playwright 相关选项
+        if category == "e2e":
+            browser = self.get_browser_option()
+            if browser:
+                cmd.extend(["--browser", browser])
+
+            headless = self.get_headless_option()
+            if headless:
+                cmd.extend(["--headless"])
 
         print(f"\n运行测试: {category}/{module}")
         print(f"命令: {' '.join(cmd)}")
