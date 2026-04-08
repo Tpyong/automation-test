@@ -2,6 +2,7 @@
 视频文件管理器
 负责视频文件的查找、清理和重命名
 """
+
 import os
 from datetime import datetime
 from typing import List, Optional
@@ -21,9 +22,7 @@ class VideoManager:
         Args:
             video_root_dir: 视频根目录，默认为 reports/videos/{date}
         """
-        self.video_root_dir = video_root_dir or os.path.join(
-            "reports", "videos", datetime.now().strftime("%Y%m%d")
-        )
+        self.video_root_dir = video_root_dir or os.path.join("reports", "videos", datetime.now().strftime("%Y%m%d"))
 
     def clean_empty_videos(self) -> None:
         """清理空视频文件"""

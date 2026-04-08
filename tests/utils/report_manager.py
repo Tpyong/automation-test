@@ -2,6 +2,7 @@
 报告管理器
 负责测试报告的生成和管理
 """
+
 from typing import Any
 
 from utils.common.logger import get_logger

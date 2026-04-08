@@ -2,6 +2,7 @@
 附件管理器
 负责将测试附件（截图、视频等）附加到 Allure 报告
 """
+
 import os
 from typing import Any, Optional
 

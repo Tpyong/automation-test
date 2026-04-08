@@ -1,22 +1,23 @@
 import os
 import sys
-from datetime import datetime
-from pathlib import Path
-from typing import Any, Callable, Dict, Generator, List, Optional
-
-import allure
-import pytest
-from playwright.sync_api import BrowserContext, Page
 
 # 添加项目根目录到 Python 路径
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
+from datetime import datetime  # noqa: E402
+from pathlib import Path  # noqa: E402
+from typing import Any, Callable, Dict, Generator, List, Optional  # noqa: E402
+
+import allure  # noqa: E402
+import pytest  # noqa: E402
+from playwright.sync_api import BrowserContext, Page  # noqa: E402
+
 # 导入核心模块
-from config.settings import Settings, load_env_file
-from tests.utils.attachment_manager import AttachmentManager
-from tests.utils.report_manager import ReportManager
-from tests.utils.video_manager import VideoManager
-from utils.common.logger import get_logger
+from config.settings import Settings, load_env_file  # noqa: E402
+from tests.utils.attachment_manager import AttachmentManager  # noqa: E402
+from tests.utils.report_manager import ReportManager  # noqa: E402
+from tests.utils.video_manager import VideoManager  # noqa: E402
+from utils.common.logger import get_logger  # noqa: E402
 
 logger = get_logger(__name__)
 
@@ -101,7 +102,6 @@ def pytest_sessionfinish(session: Any, exitstatus: int) -> None:
     logger.info("=" * 50)
 
     # 完成报告生成
-    global _report_manager
     if _report_manager:
         reports = _report_manager.finalize(exitstatus)
         logger.info("测试汇总报告已生成:")
@@ -269,7 +269,6 @@ def pytest_runtest_makereport(item: Any, call: Any) -> Generator[None, Any, Any]
 
     if rep.when == "call":
         # 记录测试结果到报告生成器
-        global _report_manager
         if _report_manager:
             error_msg = str(rep.longrepr) if rep.failed else None
             duration = rep.duration if rep.duration else 0.0
