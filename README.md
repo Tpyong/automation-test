@@ -248,6 +248,16 @@ allure open reports/allure-report
 - ✅ **视频文件处理** - 改进了视频文件的处理逻辑，确保 Firefox 浏览器的视频文件正确生成
 - ✅ **文档更新** - 更新了所有相关文档，详细说明多浏览器测试和附件功能的使用方法
 
+### 2026-04-08: conftest.py 重构
+
+- ✅ **创建 tests/utils 目录** - 用于存放测试专用的工具类
+- ✅ **实现 VideoManager 类** - 封装视频文件的查找、清理和重命名逻辑
+- ✅ **实现 AttachmentManager 类** - 封装 Allure 附件附加逻辑
+- ✅ **实现 ReportManager 类** - 封装报告生成相关逻辑
+- ✅ **重构 conftest.py 文件** - 从 645 行减少到 382 行，使用新创建的管理器类简化代码结构
+- ✅ **验证重构结果** - 运行测试验证框架正常运行
+- ✅ **提高代码可维护性** - 实现单一职责原则，降低代码复杂度
+
 ### 代码质量修复
 
 - ✅ **类型错误修复** - 修复了 MyPy 类型检查发现的 58 个类型错误
@@ -362,6 +372,10 @@ allure open reports/allure-report
 │   ├── integration/           # 集成测试
 │   ├── api/                   # API 测试
 │   ├── e2e/                   # 端到端测试
+│   ├── utils/                 # 测试专用工具
+│   │   ├── video_manager.py   # 视频文件管理器
+│   │   ├── attachment_manager.py # 附件管理器
+│   │   └── report_manager.py  # 报告管理器
 │   ├── conftest.py            # 测试配置
 │   └── README.md              # 测试说明
 ├── resources/                 # 资源文件
