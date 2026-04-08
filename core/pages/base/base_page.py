@@ -28,10 +28,12 @@ class BasePage:
         self.page = page
 
     @allure.step("导航到: {url}")
-    def navigate(self,
-                 url: str,
-                 wait_until: Literal["load", "domcontentloaded", "networkidle", "commit"] = "networkidle",
-                 timeout: int = 30000) -> Optional[Response]:
+    def navigate(
+        self,
+        url: str,
+        wait_until: Literal["load", "domcontentloaded", "networkidle", "commit"] = "networkidle",
+        timeout: int = 30000,
+    ) -> Optional[Response]:
         """导航到指定 URL
 
         Args:
@@ -48,9 +50,9 @@ class BasePage:
         return response
 
     @allure.step("等待页面加载完成")
-    def wait_for_page_load(self,
-                           state: Literal["load", "domcontentloaded", "networkidle"] = "networkidle",
-                           timeout: int = 30000) -> None:
+    def wait_for_page_load(
+        self, state: Literal["load", "domcontentloaded", "networkidle"] = "networkidle", timeout: int = 30000
+    ) -> None:
         """等待页面加载完成
 
         Args:
@@ -215,9 +217,11 @@ class BasePage:
         logger.info("网络空闲")
 
     @allure.step("刷新页面")
-    def refresh(self,
-                wait_until: Literal["load", "domcontentloaded", "networkidle", "commit"] = "networkidle",
-                timeout: int = 30000) -> Optional[Response]:
+    def refresh(
+        self,
+        wait_until: Literal["load", "domcontentloaded", "networkidle", "commit"] = "networkidle",
+        timeout: int = 30000,
+    ) -> Optional[Response]:
         """刷新页面
 
         Args:
@@ -233,9 +237,11 @@ class BasePage:
         return response
 
     @allure.step("返回上一页")
-    def go_back(self,
-                wait_until: Literal["load", "domcontentloaded", "networkidle", "commit"] = "networkidle",
-                timeout: int = 30000) -> Optional[Response]:
+    def go_back(
+        self,
+        wait_until: Literal["load", "domcontentloaded", "networkidle", "commit"] = "networkidle",
+        timeout: int = 30000,
+    ) -> Optional[Response]:
         """返回上一页
 
         Args:
@@ -251,9 +257,11 @@ class BasePage:
         return response
 
     @allure.step("前进到下一页")
-    def go_forward(self,
-                   wait_until: Literal["load", "domcontentloaded", "networkidle", "commit"] = "networkidle",
-                   timeout: int = 30000) -> Optional[Response]:
+    def go_forward(
+        self,
+        wait_until: Literal["load", "domcontentloaded", "networkidle", "commit"] = "networkidle",
+        timeout: int = 30000,
+    ) -> Optional[Response]:
         """前进到下一页
 
         Args:

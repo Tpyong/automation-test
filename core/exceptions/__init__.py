@@ -43,11 +43,13 @@ class LocatorError(TestError):
 class APIError(TestError):
     """API 错误"""
 
-    def __init__(self,
-                 message: str,
-                 status_code: Optional[int] = None,
-                 response: Optional[Dict[Any, Any]] = None,
-                 details: Optional[Dict[Any, Any]] = None):
+    def __init__(
+        self,
+        message: str,
+        status_code: Optional[int] = None,
+        response: Optional[Dict[Any, Any]] = None,
+        details: Optional[Dict[Any, Any]] = None,
+    ):
         """
         初始化 API 错误
 

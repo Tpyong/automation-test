@@ -30,10 +30,12 @@ class LoginPage(BasePage):
         logger.info("登录页面对象初始化完成")
 
     @allure.step("导航到登录页面: {url}")
-    def navigate(self,
-                 url: str,
-                 wait_until: Literal["load", "domcontentloaded", "networkidle", "commit"] = "networkidle",
-                 timeout: int = 30000) -> Optional[Response]:
+    def navigate(
+        self,
+        url: str,
+        wait_until: Literal["load", "domcontentloaded", "networkidle", "commit"] = "networkidle",
+        timeout: int = 30000,
+    ) -> Optional[Response]:
         """导航到登录页面
 
         Args:
