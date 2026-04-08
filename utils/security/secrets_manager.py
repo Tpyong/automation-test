@@ -42,6 +42,9 @@ class SecretsManager:
         project_root = Path(__file__).parent.parent.parent
         salt_file = project_root / "config" / "secrets" / ".secrets.salt"
 
+        # 确保目录存在
+        salt_file.parent.mkdir(parents=True, exist_ok=True)
+
         if salt_file.exists():
             with open(salt_file, "rb") as f:
                 return f.read()
@@ -65,6 +68,10 @@ class SecretsManager:
         # 其次从密钥文件获取
         project_root = Path(__file__).parent.parent.parent
         key_file = project_root / "config" / "secrets" / ".secrets.key"
+        
+        # 确保目录存在
+        key_file.parent.mkdir(parents=True, exist_ok=True)
+        
         if key_file.exists():
             with open(key_file, "rb") as f:
                 return f.read()
