@@ -17,6 +17,15 @@ try:
 except ImportError:
     HAS_YAML = False
 
+try:
+    import toml  # type: ignore
+
+    HAS_TOML = True
+except ImportError:
+    HAS_TOML = False
+
+# 导入基础页面类
+from core.pages.base.base_page import BasePage
 from utils.common.logger import get_logger
 
 logger = get_logger(__name__)
@@ -58,6 +67,13 @@ class LocatorManager:
             self._load_json(json_file)
             return
 
+        # 尝试加载 TOML 文件（如果支持）
+        if HAS_TOML:
+            toml_file = self.locators_dir / f"{self.page_name}.toml"
+            if toml_file.exists():
+                self._load_toml(toml_file)
+                return
+
         logger.warning("未找到定位器文件: %s", self.page_name)
 
     def _load_yaml(self, file_path: Path) -> None:
@@ -77,6 +93,15 @@ class LocatorManager:
             logger.info("成功加载 JSON 定位器: %s", file_path)
         except Exception as e:
             logger.error("加载 JSON 定位器失败: %s, 错误: %s", file_path, e)
+
+    def _load_toml(self, file_path: Path) -> None:
+        """加载 TOML 定位器文件"""
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                self.locators = toml.load(f)
+            logger.info("成功加载 TOML 定位器: %s", file_path)
+        except Exception as e:
+            logger.error("加载 TOML 定位器失败: %s, 错误: %s", file_path, e)
 
     def get(self, element_name: str) -> Union[str, Dict[str, Any]]:
         """
@@ -129,6 +154,51 @@ class LocatorManager:
             return locator
         raise ValueError(f"不支持的定位器格式: {locator}")
 
+    def get_all_elements(self) -> Dict[str, Union[str, Dict[str, Any]]]:
+        """
+        获取所有元素定位器
+
+        Returns:
+            所有元素定位器的字典
+        """
+        return self.locators
+
+    def has_element(self, element_name: str) -> bool:
+        """
+        检查元素是否存在
+
+        Args:
+            element_name: 元素名称
+
+        Returns:
+            元素是否存在
+        """
+        return element_name in self.locators
+
+    def add_element(self, element_name: str, locator: Union[str, Dict[str, Any]]) -> None:
+        """
+        添加元素定位器
+
+        Args:
+            element_name: 元素名称
+            locator: 定位器字符串或字典
+        """
+        if not isinstance(locator, (str, dict)):
+            raise TypeError(f"定位器类型错误: {type(locator)}")
+        self.locators[element_name] = locator
+        logger.info("添加元素定位器: %s = %s", element_name, locator)
+
+    def remove_element(self, element_name: str) -> None:
+        """
+        移除元素定位器
+
+        Args:
+            element_name: 元素名称
+        """
+        if element_name in self.locators:
+            del self.locators[element_name]
+            logger.info("移除元素定位器: %s", element_name)
+
     def __getattr__(self, element_name: str) -> Union[str, Dict[str, Any]]:
         """支持通过属性方式访问定位器"""
         return self.get(element_name)
@@ -136,6 +206,14 @@ class LocatorManager:
     def __getitem__(self, element_name: str) -> Union[str, Dict[str, Any]]:
         """支持通过字典方式访问定位器"""
         return self.get(element_name)
+
+    def __contains__(self, element_name: str) -> bool:
+        """支持通过 in 操作符检查元素是否存在"""
+        return element_name in self.locators
+
+    def __len__(self) -> int:
+        """返回元素定位器的数量"""
+        return len(self.locators)
 
 
 class SmartLocator:
@@ -199,9 +277,11 @@ class SmartLocator:
             if "role" in config:
                 role = config["role"]
                 name = config.get("name")  # 可选的 accessible name
+                exact = config.get("exact", False)
+                include_hidden = config.get("include_hidden", False)
                 if name:
-                    return self.page.get_by_role(role, name=name)
-                return self.page.get_by_role(role)
+                    return self.page.get_by_role(role, name=name, exact=exact, include_hidden=include_hidden)
+                return self.page.get_by_role(role, include_hidden=include_hidden)
 
             # 2. get_by_label - 表单元素推荐
             if "label" in config:
@@ -238,13 +318,32 @@ class SmartLocator:
                 test_id = config["test_id"]
                 return self.page.get_by_test_id(test_id)
 
-            # 8. CSS 选择器
+            # 8. get_by_selector - 通用选择器
+            if "selector" in config:
+                return self.page.locator(config["selector"])
+
+            # 9. CSS 选择器
             if "css" in config:
                 return self.page.locator(config["css"])
 
-            # 9. XPath 选择器
+            # 10. XPath 选择器
             if "xpath" in config:
                 return self.page.locator(config["xpath"])
+
+            # 11. get_by_name - 按 name 属性定位
+            if "name" in config:
+                name = config["name"]
+                return self.page.locator(f"[name='{name}']")
+
+            # 12. get_by_id - 按 id 属性定位
+            if "id" in config:
+                element_id = config["id"]
+                return self.page.locator(f"#{element_id}")
+
+            # 13. get_by_class - 按 class 属性定位
+            if "class" in config:
+                class_name = config["class"]
+                return self.page.locator(f".{class_name}")
 
             # 默认使用第一个值作为 CSS 选择器
             first_value = list(config.values())[0]
@@ -255,8 +354,16 @@ class SmartLocator:
         except Exception as e:
             raise TypeError(f"Failed to create semantic Locator from config: {config}, error: {e}")
 
+    def __str__(self) -> str:
+        """返回定位器配置的字符串表示"""
+        return f"SmartLocator({self.config})"
 
-class SmartPage:
+    def __repr__(self) -> str:
+        """返回定位器配置的详细表示"""
+        return f"SmartLocator(page={self.page}, config={self.config})"
+
+
+class SmartPage(BasePage):
     """
     智能页面对象基类
     支持语义化定位方式
@@ -270,90 +377,188 @@ class SmartPage:
             page: Playwright page 对象
             page_name: 页面名称（用于加载定位器文件）
         """
-        self.page = page
+        super().__init__(page)
         self.locators: Optional[LocatorManager] = None
 
         if page_name:
             self.locators = LocatorManager(page_name)
 
     def get_smart_locator(self, element_name: str) -> SmartLocator:
-        """获取智能定位器"""
+        """获取智能定位器
+
+        Args:
+            element_name: 元素名称
+
+        Returns:
+            智能定位器对象
+        """
         if not self.locators:
             raise ValueError("未设置页面名称，无法使用定位器管理")
 
         config = self.locators.get(element_name)
         return SmartLocator(self.page, config)
 
-    def get_playwright_locator(self, element_name: str) -> Locator:
-        """获取 Playwright Locator 对象"""
+    def get_playwright_locator(self, selector: Union[str, Dict[str, Any]]) -> Locator:
+        """获取 Playwright Locator 对象
+
+        Args:
+            selector: 元素名称或定位策略字典
+
+        Returns:
+            Playwright Locator 对象
+        """
         try:
-            return self.get_smart_locator(element_name).get_locator()
+            if isinstance(selector, dict):
+                # 直接使用基类的 get_locator 方法处理定位策略字典
+                return self.get_locator(selector)
+            else:
+                # 使用 SmartLocator 处理元素名称
+                return self.get_smart_locator(selector).get_locator()
         except Exception as e:
-            raise TypeError(f"Failed to get Playwright Locator for element '{element_name}', error: {e}")
+            raise TypeError(f"Failed to get Playwright Locator for selector '{selector}', error: {e}")
 
-    def click(self, element_name: str, **kwargs: Any) -> None:
-        """点击元素"""
-        locator = self.get_playwright_locator(element_name)
-        locator.click(**kwargs)
+    def click(self, selector: Union[str, Dict[str, Any]], timeout: int = 30000) -> None:
+        """点击元素
 
-    def fill(self, element_name: str, value: str, **kwargs: Any) -> None:
-        """填充输入框"""
-        locator = self.get_playwright_locator(element_name)
-        locator.fill(value, **kwargs)
+        Args:
+            selector: 元素名称或定位策略字典
+            timeout: 超时时间（毫秒）
+        """
+        locator = self.get_playwright_locator(selector)
+        locator.click(timeout=timeout)
 
-    def get_text(self, element_name: str, **kwargs: Any) -> Optional[str]:
-        """获取元素文本"""
-        locator = self.get_playwright_locator(element_name)
-        return locator.text_content(**kwargs)
+    def fill(self, selector: Union[str, Dict[str, Any]], value: str, timeout: int = 30000) -> None:
+        """填充输入框
 
-    def is_visible(self, element_name: str, **kwargs: Any) -> bool:
-        """检查元素是否可见"""
-        locator = self.get_playwright_locator(element_name)
-        return locator.is_visible(**kwargs)
+        Args:
+            selector: 元素名称或定位策略字典
+            value: 要填充的值
+            timeout: 超时时间（毫秒）
+        """
+        locator = self.get_playwright_locator(selector)
+        locator.fill(value, timeout=timeout)
 
-    def is_enabled(self, element_name: str, **kwargs: Any) -> bool:
-        """检查元素是否可用"""
-        locator = self.get_playwright_locator(element_name)
-        return locator.is_enabled(**kwargs)
+    def get_text(self, selector: Union[str, Dict[str, Any]], timeout: int = 30000) -> str:
+        """获取元素文本
 
-    def is_checked(self, element_name: str, **kwargs: Any) -> bool:
-        """检查复选框/单选框是否选中"""
-        locator = self.get_playwright_locator(element_name)
-        return locator.is_checked(**kwargs)
+        Args:
+            selector: 元素名称或定位策略字典
+            timeout: 超时时间（毫秒）
 
-    def check(self, element_name: str, **kwargs: Any) -> None:
-        """勾选复选框"""
-        locator = self.get_playwright_locator(element_name)
-        locator.check(**kwargs)
+        Returns:
+            元素文本内容
+        """
+        locator = self.get_playwright_locator(selector)
+        return locator.text_content(timeout=timeout) or ""
 
-    def uncheck(self, element_name: str, **kwargs: Any) -> None:
-        """取消勾选复选框"""
-        locator = self.get_playwright_locator(element_name)
-        locator.uncheck(**kwargs)
+    def is_visible(self, selector: Union[str, Dict[str, Any]], timeout: int = 30000) -> bool:
+        """检查元素是否可见
 
-    def select_option(self, element_name: str, value: str, **kwargs: Any) -> None:
-        """选择下拉框选项"""
-        locator = self.get_playwright_locator(element_name)
-        locator.select_option(value, **kwargs)
+        Args:
+            selector: 元素名称或定位策略字典
+            timeout: 超时时间（毫秒）
 
-    def hover(self, element_name: str, **kwargs: Any) -> None:
-        """鼠标悬停"""
-        locator = self.get_playwright_locator(element_name)
-        locator.hover(**kwargs)
+        Returns:
+            元素是否可见
+        """
+        locator = self.get_playwright_locator(selector)
+        return locator.is_visible(timeout=timeout)
 
-    def scroll_into_view(self, element_name: str, **kwargs: Any) -> None:
-        """滚动到元素可见"""
-        locator = self.get_playwright_locator(element_name)
-        locator.scroll_into_view_if_needed(**kwargs)
+    def is_enabled(self, selector: Union[str, Dict[str, Any]], timeout: int = 30000) -> bool:
+        """检查元素是否可用
 
-    def wait_for_visible(self, element_name: str, timeout: int = 30000) -> None:
-        """等待元素可见"""
-        locator = self.get_playwright_locator(element_name)
+        Args:
+            selector: 元素名称或定位策略字典
+            timeout: 超时时间（毫秒）
+
+        Returns:
+            元素是否可用
+        """
+        locator = self.get_playwright_locator(selector)
+        return locator.is_enabled(timeout=timeout)
+
+    def is_checked(self, selector: Union[str, Dict[str, Any]], timeout: int = 30000) -> bool:
+        """检查复选框/单选框是否选中
+
+        Args:
+            selector: 元素名称或定位策略字典
+            timeout: 超时时间（毫秒）
+
+        Returns:
+            复选框/单选框是否选中
+        """
+        locator = self.get_playwright_locator(selector)
+        return locator.is_checked(timeout=timeout)
+
+    def check(self, selector: Union[str, Dict[str, Any]], timeout: int = 30000) -> None:
+        """勾选复选框
+
+        Args:
+            selector: 元素名称或定位策略字典
+            timeout: 超时时间（毫秒）
+        """
+        locator = self.get_playwright_locator(selector)
+        locator.check(timeout=timeout)
+
+    def uncheck(self, selector: Union[str, Dict[str, Any]], timeout: int = 30000) -> None:
+        """取消勾选复选框
+
+        Args:
+            selector: 元素名称或定位策略字典
+            timeout: 超时时间（毫秒）
+        """
+        locator = self.get_playwright_locator(selector)
+        locator.uncheck(timeout=timeout)
+
+    def select_option(self, selector: Union[str, Dict[str, Any]], value: str, timeout: int = 30000) -> None:
+        """选择下拉框选项
+
+        Args:
+            selector: 元素名称或定位策略字典
+            value: 选项值
+            timeout: 超时时间（毫秒）
+        """
+        locator = self.get_playwright_locator(selector)
+        locator.select_option(value, timeout=timeout)
+
+    def hover(self, selector: Union[str, Dict[str, Any]], timeout: int = 30000) -> None:
+        """鼠标悬停
+
+        Args:
+            selector: 元素名称或定位策略字典
+            timeout: 超时时间（毫秒）
+        """
+        locator = self.get_playwright_locator(selector)
+        locator.hover(timeout=timeout)
+
+    def scroll_into_view(self, selector: Union[str, Dict[str, Any]], timeout: int = 30000) -> None:
+        """滚动到元素可见
+
+        Args:
+            selector: 元素名称或定位策略字典
+            timeout: 超时时间（毫秒）
+        """
+        locator = self.get_playwright_locator(selector)
+        locator.scroll_into_view_if_needed(timeout=timeout)
+
+    def wait_for_visible(self, selector: Union[str, Dict[str, Any]], timeout: int = 30000) -> None:
+        """等待元素可见
+
+        Args:
+            selector: 元素名称或定位策略字典
+            timeout: 超时时间（毫秒）
+        """
+        locator = self.get_playwright_locator(selector)
         locator.wait_for(state="visible", timeout=timeout)
 
-    def wait_for_hidden(self, element_name: str, timeout: int = 30000) -> None:
-        """等待元素隐藏"""
-        locator = self.get_playwright_locator(element_name)
+    def wait_for_hidden(self, selector: Union[str, Dict[str, Any]], timeout: int = 30000) -> None:
+        """等待元素隐藏
+
+        Args:
+            selector: 元素名称或定位策略字典
+            timeout: 超时时间（毫秒）
+        """
+        locator = self.get_playwright_locator(selector)
         locator.wait_for(state="hidden", timeout=timeout)
 
 

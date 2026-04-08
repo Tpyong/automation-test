@@ -15,7 +15,7 @@ import json
 import threading
 import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from typing import Any, Dict, Generator
+from typing import Any, Dict, Generator, List
 from urllib.parse import parse_qs, urlparse
 
 import allure
@@ -33,12 +33,22 @@ class UserAPIHandler(BaseHTTPRequestHandler):
     users: Dict[int, Dict[str, Any]] = {}
     next_id: int = 1
 
-    def log_message(self, format, *args):
-        """禁用默认日志"""
+    def log_message(self, format: str, *args: Any) -> None:
+        """禁用默认日志
+
+        Args:
+            format: 日志格式
+            *args: 日志参数
+        """
         pass
 
-    def _send_json_response(self, status_code: int, data: Dict[str, Any]):
-        """发送 JSON 响应"""
+    def _send_json_response(self, status_code: int, data: Dict[str, Any]) -> None:
+        """发送 JSON 响应
+
+        Args:
+            status_code: HTTP 状态码
+            data: 响应数据
+        """
         self.send_response(status_code)
         self.send_header("Content-Type", "application/json")
         self.send_header("Access-Control-Allow-Origin", "*")
@@ -46,14 +56,18 @@ class UserAPIHandler(BaseHTTPRequestHandler):
         self.wfile.write(json.dumps(data, ensure_ascii=False).encode("utf-8"))
 
     def _read_body(self) -> Dict[str, Any]:
-        """读取请求体"""
+        """读取请求体
+
+        Returns:
+            Dict[str, Any]: 请求体数据
+        """
         content_length = int(self.headers.get("Content-Length", 0))
         if content_length > 0:
             body = self.rfile.read(content_length).decode("utf-8")
             return json.loads(body)
         return {}
 
-    def do_GET(self):  # pylint: disable=invalid-name
+    def do_GET(self) -> None:  # pylint: disable=invalid-name
         """处理 GET 请求"""
         parsed_path = urlparse(self.path)
         path = parsed_path.path
@@ -88,7 +102,7 @@ class UserAPIHandler(BaseHTTPRequestHandler):
 
         self._send_json_response(404, {"error": "Not found"})
 
-    def do_POST(self):  # pylint: disable=invalid-name
+    def do_POST(self) -> None:  # pylint: disable=invalid-name
         """处理 POST 请求"""
         parsed_path = urlparse(self.path)
         path = parsed_path.path
@@ -123,7 +137,7 @@ class UserAPIHandler(BaseHTTPRequestHandler):
 
         self._send_json_response(404, {"error": "Not found"})
 
-    def do_PUT(self):  # pylint: disable=invalid-name
+    def do_PUT(self) -> None:  # pylint: disable=invalid-name
         """处理 PUT 请求"""
         parsed_path = urlparse(self.path)
         path = parsed_path.path
@@ -154,7 +168,7 @@ class UserAPIHandler(BaseHTTPRequestHandler):
 
         self._send_json_response(404, {"error": "Not found"})
 
-    def do_DELETE(self):  # pylint: disable=invalid-name
+    def do_DELETE(self) -> None:  # pylint: disable=invalid-name
         """处理 DELETE 请求"""
         parsed_path = urlparse(self.path)
         path = parsed_path.path
@@ -180,13 +194,23 @@ class UserAPIMockService:
     """用户 API Mock 服务"""
 
     def __init__(self, host: str = "localhost", port: int = 0):
+        """初始化用户 API Mock 服务
+
+        Args:
+            host: 主机地址
+            port: 端口号
+        """
         self.host = host
         self.port = port
         self.server: HTTPServer = None
         self.thread: threading.Thread = None
 
     def start(self) -> str:
-        """启动 Mock 服务"""
+        """启动 Mock 服务
+
+        Returns:
+            str: 服务基础 URL
+        """
         self.server = HTTPServer((self.host, self.port), UserAPIHandler)
 
         # 如果端口是 0，获取实际分配的端口
@@ -201,7 +225,7 @@ class UserAPIMockService:
         logger.info("用户 API Mock 服务已启动: %s", base_url)
         return base_url
 
-    def stop(self):
+    def stop(self) -> None:
         """停止 Mock 服务"""
         if self.server:
             self.server.shutdown()
@@ -209,7 +233,7 @@ class UserAPIMockService:
         logger.info("用户 API Mock 服务已停止")
 
     @staticmethod
-    def reset_data():
+    def reset_data() -> None:
         """重置用户数据"""
         UserAPIHandler.users.clear()
         UserAPIHandler.next_id = 1
@@ -218,7 +242,11 @@ class UserAPIMockService:
 
 @pytest.fixture(scope="class")
 def user_api_mock() -> Generator[UserAPIMockService, None, None]:
-    """用户 API Mock 服务 fixture"""
+    """用户 API Mock 服务 fixture
+
+    Yields:
+        UserAPIMockService: Mock 服务实例
+    """
     mock_service = UserAPIMockService()
     mock_service.start()
     yield mock_service
@@ -227,7 +255,14 @@ def user_api_mock() -> Generator[UserAPIMockService, None, None]:
 
 @pytest.fixture(scope="function")
 def api_client(user_api_mock: UserAPIMockService) -> Generator[requests.Session, None, None]:
-    """API 客户端 fixture"""
+    """API 客户端 fixture
+
+    Args:
+        user_api_mock: Mock 服务实例
+
+    Yields:
+        requests.Session: API 客户端会话
+    """
     session = requests.Session()
     session.headers.update({"Content-Type": "application/json", "Accept": "application/json"})
 
@@ -240,7 +275,14 @@ def api_client(user_api_mock: UserAPIMockService) -> Generator[requests.Session,
 
 
 def get_base_url(user_api_mock: UserAPIMockService) -> str:
-    """获取 API 基础 URL"""
+    """获取 API 基础 URL
+
+    Args:
+        user_api_mock: Mock 服务实例
+
+    Returns:
+        str: API 基础 URL
+    """
     return f"http://{user_api_mock.host}:{user_api_mock.port}"
 
 
@@ -254,8 +296,13 @@ class TestUserAPI:
     @allure.story("获取用户列表")
     @allure.severity(allure.severity_level.CRITICAL)
     @allure.title("测试获取用户列表 - 成功场景")
-    def test_get_users_success(self, user_api_mock: UserAPIMockService, api_client: requests.Session):
-        """测试成功获取用户列表"""
+    def test_get_users_success(self, user_api_mock: UserAPIMockService, api_client: requests.Session) -> None:
+        """测试成功获取用户列表
+
+        Args:
+            user_api_mock: Mock 服务实例
+            api_client: API 客户端会话
+        """
         base_url = get_base_url(user_api_mock)
 
         # 先创建一些测试数据
@@ -265,15 +312,15 @@ class TestUserAPI:
                 api_client.post(f"{base_url}/api/users", json=user_data)
 
         with allure.step("发送 GET 请求获取用户列表"):
-            start_time = time.time()
+            start_time: float = time.time()
             response = api_client.get(f"{base_url}/api/users", params={"page": 1, "limit": 10})
-            elapsed_ms = (time.time() - start_time) * 1000
+            elapsed_ms: float = (time.time() - start_time) * 1000
 
         with allure.step("验证响应状态码"):
             assert response.status_code == 200, f"期望状态码 200，实际 {response.status_code}"
 
         with allure.step("验证响应包含用户数据"):
-            data = response.json()
+            data: Dict[str, Any] = response.json()
             assert "users" in data, "响应中缺少 users 字段"
             assert "total" in data, "响应中缺少 total 字段"
             assert data["total"] == 5, f'期望总数 5，实际 {data["total"]}'
@@ -286,8 +333,13 @@ class TestUserAPI:
     @allure.story("创建用户")
     @allure.severity(allure.severity_level.CRITICAL)
     @allure.title("测试创建用户 - 成功场景")
-    def test_create_user_success(self, user_api_mock: UserAPIMockService, api_client: requests.Session):
-        """测试成功创建用户"""
+    def test_create_user_success(self, user_api_mock: UserAPIMockService, api_client: requests.Session) -> None:
+        """测试成功创建用户
+
+        Args:
+            user_api_mock: Mock 服务实例
+            api_client: API 客户端会话
+        """
         base_url = get_base_url(user_api_mock)
 
         user_data = {
@@ -302,13 +354,13 @@ class TestUserAPI:
             allure.attach(str(user_data), name="请求数据", attachment_type=allure.attachment_type.JSON)
 
         with allure.step("发送 POST 请求创建用户"):
-            start_time = time.time()
+            start_time: float = time.time()
             response = api_client.post(f"{base_url}/api/users", json=user_data)
-            elapsed_ms = (time.time() - start_time) * 1000
+            elapsed_ms: float = (time.time() - start_time) * 1000
 
         with allure.step("验证创建成功"):
             assert response.status_code == 201, f"期望状态码 201，实际 {response.status_code}"
-            data = response.json()
+            data: Dict[str, Any] = response.json()
             assert "id" in data, "响应中缺少 id 字段"
             assert data["name"] == user_data["name"], "name 不匹配"
             assert data["email"] == user_data["email"], "email 不匹配"
@@ -320,8 +372,13 @@ class TestUserAPI:
     @allure.story("更新用户")
     @allure.severity(allure.severity_level.NORMAL)
     @allure.title("测试更新用户信息 - 成功场景")
-    def test_update_user_success(self, user_api_mock: UserAPIMockService, api_client: requests.Session):
-        """测试成功更新用户信息"""
+    def test_update_user_success(self, user_api_mock: UserAPIMockService, api_client: requests.Session) -> None:
+        """测试成功更新用户信息
+
+        Args:
+            user_api_mock: Mock 服务实例
+            api_client: API 客户端会话
+        """
         base_url = get_base_url(user_api_mock)
 
         # 先创建一个用户
@@ -339,7 +396,7 @@ class TestUserAPI:
 
         with allure.step("验证更新成功"):
             assert response.status_code == 200, f"期望状态码 200，实际 {response.status_code}"
-            data = response.json()
+            data: Dict[str, Any] = response.json()
             assert data["name"] == update_data["name"], "name 未更新"
             assert data["age"] == update_data["age"], "age 未更新"
 
@@ -347,8 +404,13 @@ class TestUserAPI:
     @allure.story("删除用户")
     @allure.severity(allure.severity_level.NORMAL)
     @allure.title("测试删除用户 - 成功场景")
-    def test_delete_user_success(self, user_api_mock: UserAPIMockService, api_client: requests.Session):
-        """测试成功删除用户"""
+    def test_delete_user_success(self, user_api_mock: UserAPIMockService, api_client: requests.Session) -> None:
+        """测试成功删除用户
+
+        Args:
+            user_api_mock: Mock 服务实例
+            api_client: API 客户端会话
+        """
         base_url = get_base_url(user_api_mock)
 
         # 先创建一个用户
@@ -372,8 +434,13 @@ class TestUserAPI:
     @allure.story("查询单个用户")
     @allure.severity(allure.severity_level.NORMAL)
     @allure.title("测试查询用户详情 - 成功场景")
-    def test_get_user_by_id(self, user_api_mock: UserAPIMockService, api_client: requests.Session):
-        """测试查询用户详情"""
+    def test_get_user_by_id(self, user_api_mock: UserAPIMockService, api_client: requests.Session) -> None:
+        """测试查询用户详情
+
+        Args:
+            user_api_mock: Mock 服务实例
+            api_client: API 客户端会话
+        """
         base_url = get_base_url(user_api_mock)
 
         # 先创建一个用户
@@ -388,7 +455,7 @@ class TestUserAPI:
 
         with allure.step("验证查询成功"):
             assert response.status_code == 200, f"期望状态码 200，实际 {response.status_code}"
-            data = response.json()
+            data: Dict[str, Any] = response.json()
             assert data["id"] == user_id, "id 不匹配"
             assert data["name"] == create_data["name"], "name 不匹配"
 
@@ -396,8 +463,13 @@ class TestUserAPI:
     @allure.story("参数验证")
     @allure.severity(allure.severity_level.MINOR)
     @allure.title("测试分页参数 - 成功场景")
-    def test_get_users_with_pagination(self, user_api_mock: UserAPIMockService, api_client: requests.Session):
-        """测试分页参数"""
+    def test_get_users_with_pagination(self, user_api_mock: UserAPIMockService, api_client: requests.Session) -> None:
+        """测试分页参数
+
+        Args:
+            user_api_mock: Mock 服务实例
+            api_client: API 客户端会话
+        """
         base_url = get_base_url(user_api_mock)
 
         # 创建测试数据
@@ -411,7 +483,7 @@ class TestUserAPI:
 
         with allure.step("验证响应"):
             assert response.status_code == 200, f"期望状态码 200，实际 {response.status_code}"
-            data = response.json()
+            data: Dict[str, Any] = response.json()
             if "users" in data:
                 assert len(data["users"]) <= 5, f'返回的用户数量 {len(data["users"])} 超过 limit 限制 5'
                 allure.attach(
@@ -422,8 +494,13 @@ class TestUserAPI:
     @allure.story("错误处理")
     @allure.severity(allure.severity_level.NORMAL)
     @allure.title("测试查询不存在的用户 - 失败场景")
-    def test_get_nonexistent_user(self, user_api_mock: UserAPIMockService, api_client: requests.Session):
-        """测试查询不存在的用户应返回 404"""
+    def test_get_nonexistent_user(self, user_api_mock: UserAPIMockService, api_client: requests.Session) -> None:
+        """测试查询不存在的用户应返回 404
+
+        Args:
+            user_api_mock: Mock 服务实例
+            api_client: API 客户端会话
+        """
         base_url = get_base_url(user_api_mock)
 
         with allure.step("发送 GET 请求查询不存在的用户"):
@@ -436,8 +513,15 @@ class TestUserAPI:
     @allure.story("错误处理")
     @allure.severity(allure.severity_level.NORMAL)
     @allure.title("测试创建用户时缺少必填字段 - 失败场景")
-    def test_create_user_missing_required_fields(self, user_api_mock: UserAPIMockService, api_client: requests.Session):
-        """测试创建用户时缺少必填字段应返回 400"""
+    def test_create_user_missing_required_fields(
+        self, user_api_mock: UserAPIMockService, api_client: requests.Session
+    ) -> None:
+        """测试创建用户时缺少必填字段应返回 400
+
+        Args:
+            user_api_mock: Mock 服务实例
+            api_client: API 客户端会话
+        """
         base_url = get_base_url(user_api_mock)
 
         # 缺少必需的字段（如 email）
@@ -453,8 +537,13 @@ class TestUserAPI:
     @allure.story("性能测试")
     @allure.severity(allure.severity_level.MINOR)
     @allure.title("测试批量获取用户的性能")
-    def test_get_users_performance(self, user_api_mock: UserAPIMockService, api_client: requests.Session):
-        """测试批量获取用户的性能"""
+    def test_get_users_performance(self, user_api_mock: UserAPIMockService, api_client: requests.Session) -> None:
+        """测试批量获取用户的性能
+
+        Args:
+            user_api_mock: Mock 服务实例
+            api_client: API 客户端会话
+        """
         base_url = get_base_url(user_api_mock)
 
         # 创建测试数据
@@ -464,16 +553,16 @@ class TestUserAPI:
                 api_client.post(f"{base_url}/api/users", json=user_data)
 
         with allure.step("多次请求获取用户列表"):
-            response_times = []
+            response_times: List[float] = []
             for i in range(5):
-                start_time = time.time()
+                start_time: float = time.time()
                 api_client.get(f"{base_url}/api/users")
-                elapsed_ms = (time.time() - start_time) * 1000
+                elapsed_ms: float = (time.time() - start_time) * 1000
                 response_times.append(elapsed_ms)
                 logger.info("第 %d 次请求耗时：%.2fms", i + 1, elapsed_ms)
 
         with allure.step("计算平均响应时间"):
-            avg_time = sum(response_times) / len(response_times)
+            avg_time: float = sum(response_times) / len(response_times)
             logger.info("平均响应时间：%.2fms", avg_time)
             allure.attach(
                 f"平均响应时间：{avg_time:.2f}ms", name="性能指标", attachment_type=allure.attachment_type.TEXT

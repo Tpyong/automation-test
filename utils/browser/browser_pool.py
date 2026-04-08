@@ -1,12 +1,12 @@
 """
 浏览器实例池管理器
-实现浏览器实例的复用，提高测试执行效率
+与 pytest-playwright 集成，实现浏览器实例的复用
 """
 
 import threading
 from typing import Dict, List, Optional, Set
 
-from playwright.sync_api import Browser, Playwright
+from playwright.sync_api import Browser, BrowserContext, Page, Playwright
 
 from utils.common.logger import get_logger
 
@@ -81,11 +81,25 @@ class BrowserPool:
 
         try:
             if self._browser_type == "chromium":
-                return self._playwright.chromium.launch(headless=self._headless, slow_mo=self._slow_mo)
+                return self._playwright.chromium.launch(
+                    headless=self._headless, 
+                    slow_mo=self._slow_mo,
+                    args=[
+                        "--disable-gpu",
+                        "--no-sandbox",
+                        "--disable-dev-shm-usage"
+                    ]
+                )
             elif self._browser_type == "firefox":
-                return self._playwright.firefox.launch(headless=self._headless, slow_mo=self._slow_mo)
+                return self._playwright.firefox.launch(
+                    headless=self._headless, 
+                    slow_mo=self._slow_mo
+                )
             elif self._browser_type == "webkit":
-                return self._playwright.webkit.launch(headless=self._headless, slow_mo=self._slow_mo)
+                return self._playwright.webkit.launch(
+                    headless=self._headless, 
+                    slow_mo=self._slow_mo
+                )
             else:
                 raise ValueError(f"不支持的浏览器类型: {self._browser_type}")
         except Exception as e:
@@ -130,6 +144,13 @@ class BrowserPool:
                 self._in_use.remove(browser_id)
 
             if browser.is_connected() and len(self._pool) < self.max_pool_size:
+                # 清理所有上下文，准备复用
+                try:
+                    for context in browser.contexts:
+                        context.close()
+                except Exception as e:
+                    logger.error(f"清理浏览器上下文失败: {e}")
+                
                 self._pool.append(browser)
                 logger.debug(f"浏览器实例回收到池中: {browser_id}")
             else:
@@ -154,7 +175,9 @@ class BrowserPool:
             }
 
     def cleanup(self) -> None:
-        """清理所有浏览器实例"""
+        """
+        清理所有浏览器实例
+        """
         with self._lock:
             logger.info("开始清理浏览器实例池")
 
@@ -162,6 +185,13 @@ class BrowserPool:
             for browser in self._pool:
                 try:
                     if browser.is_connected():
+                        # 先关闭所有上下文
+                        for context in browser.contexts:
+                            try:
+                                context.close()
+                            except Exception as e:
+                                logger.error(f"关闭浏览器上下文失败: {e}")
+                        # 再关闭浏览器
                         browser.close()
                 except Exception as e:
                     # 忽略事件循环已关闭的错误
@@ -173,6 +203,43 @@ class BrowserPool:
             self._pool.clear()
             self._in_use.clear()
             logger.info("浏览器实例池清理完成")
+
+    def create_context(self, browser: Browser, **kwargs) -> Optional[BrowserContext]:
+        """
+        创建浏览器上下文
+
+        Args:
+            browser: 浏览器实例
+            **kwargs: 上下文参数
+
+        Returns:
+            浏览器上下文
+        """
+        try:
+            context = browser.new_context(**kwargs)
+            logger.debug(f"创建浏览器上下文: {id(context)}")
+            return context
+        except Exception as e:
+            logger.error(f"创建浏览器上下文失败: {e}")
+            return None
+
+    def create_page(self, context: BrowserContext) -> Optional[Page]:
+        """
+        创建页面
+
+        Args:
+            context: 浏览器上下文
+
+        Returns:
+            页面实例
+        """
+        try:
+            page = context.new_page()
+            logger.debug(f"创建页面: {id(page)}")
+            return page
+        except Exception as e:
+            logger.error(f"创建页面失败: {e}")
+            return None
 
 
 # 全局浏览器池实例
@@ -193,3 +260,15 @@ def get_browser_pool(max_pool_size: int = 5) -> BrowserPool:
     if _browser_pool is None:
         _browser_pool = BrowserPool(max_pool_size)
     return _browser_pool
+
+
+def reset_browser_pool() -> None:
+    """
+    重置全局浏览器池实例
+    """
+    global _browser_pool
+    if _browser_pool:
+        _browser_pool.cleanup()
+    _browser_pool = None
+    logger.info("重置全局浏览器池实例")
+

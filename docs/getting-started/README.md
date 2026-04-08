@@ -304,20 +304,24 @@ mypy . --exclude=venv --exclude=allure-results --exclude=allure-report
 - 支持类型安全检查，提高代码质量
 
 **已添加类型注解的模块**：
-- 定位器管理（`core/utils/locators.py`）
-- 浏览器池管理（`core/utils/browser_pool.py`）
-- 登录页面（`core/pages/login_page.py`）
-- 语义化定位登录页面（`core/pages/login_page_semantic.py`）
-- 敏感信息管理（`core/utils/secrets_manager.py`）
-- API 客户端（`core/utils/api_client.py`）
-- 数据缓存（`core/utils/data_cache.py`）
-- 数据工厂（`core/utils/data_factory.py`）
-- Allure 报告辅助（`core/utils/allure_helper.py`）
-- 报告生成器（`core/utils/report_generator.py`）
-- Mock 服务器（`core/utils/mock_server.py`）
+- 基础页面（`core/pages/base/base_page.py`）
+- 登录页面（`core/pages/specific/login_page.py`）
+- 语义化登录页面（`core/pages/specific/login_page_semantic.py`）
+- 定位器管理（`core/pages/locators.py`）
+- 浏览器池管理（`utils/browser/browser_pool.py`）
+- 智能等待（`utils/browser/smart_waiter.py`）
+- API 客户端（`utils/api/api_client.py`）
+- 数据缓存（`utils/data/data_cache.py`）
+- 数据工厂（`utils/data/data_factory.py`）
+- 测试数据加载器（`utils/data/test_data_loader.py`）
+- 测试数据管理器（`utils/data/test_data_manager.py`）
+- Allure 报告辅助（`utils/reporting/allure_helper.py`）
+- 报告生成器（`utils/reporting/report_generator.py`）
+- Mock 服务器（`core/services/api/mock_server.py`）
 - 配置管理（`config/settings.py`）
+- 异常管理（`core/exceptions/__init__.py`）
+- 模型管理（`core/models/__init__.py`）
 - pytest 配置（`conftest.py`）
-- 敏感信息管理工具（`scripts/secrets_tool.py`）
 
 ## 下一步
 
@@ -332,6 +336,7 @@ mypy . --exclude=venv --exclude=allure-results --exclude=allure-report
 .
 ├── config/                    # 配置管理
 │   ├── envs/                  # 环境配置文件目录
+│   │   ├── .env.base          # 基础配置
 │   │   ├── .env.example       # 示例配置
 │   │   ├── .env.minimal       # 最小配置
 │   │   ├── .env.standard      # 标准配置
@@ -339,14 +344,61 @@ mypy . --exclude=venv --exclude=allure-results --exclude=allure-report
 │   │   ├── .env.development   # 开发环境
 │   │   ├── .env.testing       # 测试环境
 │   │   └── .env.staging       # 预发布环境
+│   ├── settings_dir/          # 配置设置目录
+│   │   ├── base/              # 基础设置
+│   │   ├── development/       # 开发环境设置
+│   │   ├── production/        # 生产环境设置
+│   │   └── testing/           # 测试环境设置
 │   ├── settings.py            # 配置管理类
+│   ├── validators.py          # 配置验证器
 │   └── __init__.py
 ├── core/                      # 核心模块
 │   ├── pages/                 # 页面对象
-│   └── utils/                 # 工具类
-├── data/                      # 测试数据
-│   └── test_data/             # 测试数据文件
+│   │   ├── base/              # 基础页面类
+│   │   ├── components/        # 页面组件
+│   │   ├── specific/          # 特定页面
+│   │   └── locators.py        # 定位器管理
+│   ├── services/              # 服务模块
+│   │   ├── api/               # API 服务
+│   │   ├── auth/              # 认证服务
+│   │   └── database/          # 数据库服务
+│   ├── exceptions/            # 异常管理
+│   ├── models/                # 数据模型
+│   └── __init__.py
+├── resources/                 # 资源文件
+│   ├── data/                  # 测试数据
+│   │   ├── datasets/          # 数据集
+│   │   └── fixtures/          # 测试固件
+│   ├── locators/              # 定位器文件
+│   │   ├── mobile/            # 移动设备定位器
+│   │   └── web/               # Web 定位器
+│   └── templates/             # 模板文件
 ├── tests/                     # 测试用例
+│   ├── api/                   # API 测试
+│   │   ├── contracts/         # 契约测试
+│   │   └── endpoints/         # 端点测试
+│   ├── e2e/                   # 端到端测试
+│   │   ├── flows/             # 测试流程
+│   │   └── scenarios/         # 测试场景
+│   ├── integration/           # 集成测试
+│   │   ├── components/        # 组件测试
+│   │   └── services/          # 服务测试
+│   ├── unit/                  # 单元测试
+│   │   ├── core/              # 核心模块测试
+│   │   └── utils/             # 工具模块测试
+│   └── conftest.py            # 测试配置
+├── utils/                     # 工具模块
+│   ├── api/                   # API 工具
+│   ├── browser/               # 浏览器工具
+│   ├── common/                # 通用工具
+│   ├── data/                  # 数据工具
+│   ├── reporting/             # 报告工具
+│   └── security/              # 安全工具
+├── scripts/                   # 脚本文件
+│   ├── automation/            # 自动化脚本
+│   ├── cli/                   # 命令行工具
+│   ├── security/              # 安全脚本
+│   └── utils/                 # 脚本工具
 ├── docs/                      # 文档
 ├── reports/                   # 测试报告
 ├── .env                       # 当前使用的环境配置（不提交到版本控制）

@@ -282,12 +282,20 @@ class APIPerformanceTester:
                 "p95_response_time": response_times[int(total_requests * 0.95)],
                 "p99_response_time": response_times[int(total_requests * 0.99)],
                 "requests_per_second": (total_requests / sum(response_times) if sum(response_times) > 0 else 0),
+                "errors": errors,
             }
         else:
             results = {
                 "total_requests": 0,
                 "failed_requests": len(errors),
                 "error_rate": 100.0,
+                "avg_response_time": 0.0,
+                "min_response_time": 0.0,
+                "max_response_time": 0.0,
+                "p50_response_time": 0.0,
+                "p95_response_time": 0.0,
+                "p99_response_time": 0.0,
+                "requests_per_second": 0.0,
                 "errors": errors,
             }
 

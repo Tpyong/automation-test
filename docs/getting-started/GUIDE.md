@@ -75,7 +75,7 @@ TEST_ENV=staging pytest
 ```python
 import allure
 import pytest
-from core.pages.base_page import BasePage
+from core.pages.base.base_page import BasePage
 from utils.api.assertions import Assertions
 
 @allure.epic("测试套件")
@@ -202,7 +202,7 @@ class TestUsersAPI:
 ```python
 # tests/e2e/test_order_flow.py
 import pytest
-from core.pages.login_page import LoginPage
+from core.pages.specific.login_page import LoginPage
 from core.pages.order_page import OrderPage
 
 class TestOrderFlow:
@@ -247,7 +247,7 @@ pytest tests/ -v
 ### 创建页面对象
 
 ```python
-from core.pages.base_page import BasePage
+from core.pages.base.base_page import BasePage
 
 class LoginPage(BasePage):
     def __init__(self, page):

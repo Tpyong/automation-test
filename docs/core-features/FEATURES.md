@@ -438,20 +438,24 @@ def test_with_data(test_data_manager):
 - **MyPy 集成**：集成 MyPy 类型检查工具，可通过 `make mypy` 或 `mypy .` 运行
 - **灵活配置**：MyPy 配置已调整为平衡模式，既保证类型安全，又允许逐步添加类型注解
 - **核心模块支持**：以下模块已添加完整的类型注解：
+  - `core/pages/base/base_page.py` - 基础页面
+  - `core/pages/specific/login_page.py` - 登录页面
+  - `core/pages/specific/login_page_semantic.py` - 语义化登录页面
   - `core/pages/locators.py` - 定位器管理
   - `utils/browser/browser_pool.py` - 浏览器池管理
-  - `core/pages/login_page.py` - 登录页面
-  - `core/pages/login_page_semantic.py` - 语义化定位登录页面
-  - `utils/security/secrets_manager.py` - 敏感信息管理
+  - `utils/browser/smart_waiter.py` - 智能等待
   - `utils/api/api_client.py` - API 客户端
   - `utils/data/data_cache.py` - 数据缓存
   - `utils/data/data_factory.py` - 数据工厂
+  - `utils/data/test_data_loader.py` - 测试数据加载器
+  - `utils/data/test_data_manager.py` - 测试数据管理器
   - `utils/reporting/allure_helper.py` - Allure 报告辅助
   - `utils/reporting/report_generator.py` - 报告生成器
   - `core/services/api/mock_server.py` - Mock 服务器
   - `config/settings.py` - 配置管理
+  - `core/exceptions/__init__.py` - 异常管理
+  - `core/models/__init__.py` - 数据模型
   - `conftest.py` - pytest 配置
-  - `scripts/secrets_tool.py` - 敏感信息管理工具
 
 ### 29. 交互式测试运行器
 

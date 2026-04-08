@@ -2,6 +2,7 @@
 智能等待策略模块
 
 提供智能化的等待机制，优化测试执行效率和稳定性
+与 pytest-playwright 集成，提供更可靠的等待方法
 """
 
 import random
@@ -9,7 +10,9 @@ import time
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Literal, Optional, Tuple, Union
+
+from playwright.sync_api import Locator, Page
 
 from utils.common.logger import get_logger
 
@@ -45,12 +48,25 @@ class SmartWaiter:
     """智能等待器"""
 
     def __init__(self, config: Optional[WaitConfig] = None):
+        """
+        初始化智能等待器
+
+        Args:
+            config: 等待配置
+        """
         self.config = config or WaitConfig()
         self._attempt_history: List[Dict[str, Any]] = []
         self._fibonacci_cache = [0, 1]
 
     def calculate_delay(self, attempt: int) -> float:
-        """计算延迟时间"""
+        """计算延迟时间
+
+        Args:
+            attempt: 尝试次数
+
+        Returns:
+            延迟时间（秒）
+        """
         delay = self.config.initial_delay  # 默认值
 
         if self.config.strategy == WaitStrategy.FIXED:
@@ -79,13 +95,27 @@ class SmartWaiter:
         return delay
 
     def _get_fibonacci(self, n: int) -> int:
-        """获取斐波那契数"""
+        """获取斐波那契数
+
+        Args:
+            n: 斐波那契数列的索引
+
+        Returns:
+            斐波那契数
+        """
         while len(self._fibonacci_cache) <= n:
             self._fibonacci_cache.append(self._fibonacci_cache[-1] + self._fibonacci_cache[-2])
         return self._fibonacci_cache[n]
 
     def _calculate_adaptive_delay(self, attempt: int) -> float:
-        """计算自适应延迟"""
+        """计算自适应延迟
+
+        Args:
+            attempt: 尝试次数
+
+        Returns:
+            延迟时间（秒）
+        """
         if not self._attempt_history:
             return self.config.initial_delay
 
@@ -155,20 +185,70 @@ class SmartWaiter:
         logger.warning("达到最大尝试次数 %d，条件仍未满足", self.config.max_attempts)
         return False
 
-    def wait_for_element(self, page: Any, selector: str, timeout: Optional[float] = None) -> bool:
-        """等待元素出现"""
+    def _get_locator(self, page: Page, selector: Union[str, Dict[str, Any]]) -> Locator:
+        """获取 Playwright 定位器
+
+        Args:
+            page: Playwright 页面实例
+            selector: CSS 选择器字符串或定位策略字典
+
+        Returns:
+            Playwright 定位器对象
+        """
+        if isinstance(selector, dict):
+            # 支持不同的定位策略
+            if "css" in selector:
+                return page.locator(selector["css"])
+            elif "xpath" in selector:
+                return page.locator(selector["xpath"])
+            elif "text" in selector:
+                return page.get_by_text(selector["text"])
+            elif "placeholder" in selector:
+                return page.get_by_placeholder(selector["placeholder"])
+            elif "role" in selector:
+                role = selector["role"]
+                options = selector.get("options", {})
+                if isinstance(options, dict):
+                    return page.get_by_role(role, **options)
+                else:
+                    return page.get_by_role(role)
+            else:
+                raise ValueError(f"不支持的定位策略: {selector}")
+        return page.locator(selector)
+
+    def wait_for_element(self, page: Page, selector: Union[str, Dict[str, Any]], timeout: Optional[float] = None) -> bool:
+        """等待元素出现
+
+        Args:
+            page: Playwright 页面实例
+            selector: CSS 选择器字符串或定位策略字典
+            timeout: 超时时间（秒）
+
+        Returns:
+            元素是否出现
+        """
 
         def element_exists():
-            return page.locator(selector).count() > 0
+            return self._get_locator(page, selector).count() > 0
 
         return self.wait(condition=element_exists, timeout=timeout, error_message=f"元素未找到: {selector}")
 
-    def wait_for_text(self, page: Any, selector: str, text: str, timeout: Optional[float] = None) -> bool:
-        """等待文本出现"""
+    def wait_for_text(self, page: Page, selector: Union[str, Dict[str, Any]], text: str, timeout: Optional[float] = None) -> bool:
+        """等待文本出现
+
+        Args:
+            page: Playwright 页面实例
+            selector: CSS 选择器字符串或定位策略字典
+            text: 要等待的文本
+            timeout: 超时时间（秒）
+
+        Returns:
+            文本是否出现
+        """
 
         def text_present():
-            element = page.locator(selector)
-            return element.count() > 0 and text in element.first.text_content()
+            element = self._get_locator(page, selector)
+            return element.count() > 0 and text in (element.first.text_content() or "")
 
         return self.wait(
             condition=text_present,
@@ -176,16 +256,91 @@ class SmartWaiter:
             error_message=f"文本未找到: {text} in {selector}",
         )
 
-    def wait_for_url(self, page: Any, url_pattern: str, timeout: Optional[float] = None) -> bool:
-        """等待URL匹配"""
+    def wait_for_url(self, page: Page, url_pattern: str, timeout: Optional[float] = None) -> bool:
+        """等待URL匹配
+
+        Args:
+            page: Playwright 页面实例
+            url_pattern: URL 模式
+            timeout: 超时时间（秒）
+
+        Returns:
+            URL 是否匹配
+        """
 
         def url_matches():
             return url_pattern in page.url
 
         return self.wait(condition=url_matches, timeout=timeout, error_message=f"URL未匹配: {url_pattern}")
 
+    def wait_for_element_visible(self, page: Page, selector: Union[str, Dict[str, Any]], timeout: Optional[float] = None) -> bool:
+        """等待元素可见
+
+        Args:
+            page: Playwright 页面实例
+            selector: CSS 选择器字符串或定位策略字典
+            timeout: 超时时间（秒）
+
+        Returns:
+            元素是否可见
+        """
+
+        def element_visible():
+            try:
+                return self._get_locator(page, selector).is_visible()
+            except Exception:
+                return False
+
+        return self.wait(condition=element_visible, timeout=timeout, error_message=f"元素不可见: {selector}")
+
+    def wait_for_element_hidden(self, page: Page, selector: Union[str, Dict[str, Any]], timeout: Optional[float] = None) -> bool:
+        """等待元素隐藏
+
+        Args:
+            page: Playwright 页面实例
+            selector: CSS 选择器字符串或定位策略字典
+            timeout: 超时时间（秒）
+
+        Returns:
+            元素是否隐藏
+        """
+
+        def element_hidden():
+            try:
+                return not self._get_locator(page, selector).is_visible()
+            except Exception:
+                return True
+
+        return self.wait(condition=element_hidden, timeout=timeout, error_message=f"元素未隐藏: {selector}")
+
+    def wait_for_load_state(self, page: Page, state: Literal["domcontentloaded", "load", "networkidle"] = "networkidle", timeout: Optional[float] = None) -> bool:
+        """等待页面加载状态
+
+        Args:
+            page: Playwright 页面实例
+            state: 加载状态 (load, domcontentloaded, networkidle)
+            timeout: 超时时间（秒）
+
+        Returns:
+            加载状态是否完成
+        """
+
+        def load_state_completed():
+            try:
+                page.wait_for_load_state(state, timeout=1000)
+                return True
+            except Exception:
+                return False
+
+        return self.wait(condition=load_state_completed, timeout=timeout, error_message=f"页面加载状态未完成: {state}")
+
     def _record_attempt(self, attempt: int, success: bool) -> None:
-        """记录尝试历史"""
+        """记录尝试历史
+
+        Args:
+            attempt: 尝试次数
+            success: 是否成功
+        """
         self._attempt_history.append(
             {
                 "timestamp": datetime.now().isoformat(),
@@ -196,7 +351,11 @@ class SmartWaiter:
         )
 
     def get_statistics(self) -> Dict[str, Any]:
-        """获取统计信息"""
+        """获取统计信息
+
+        Returns:
+            统计信息字典
+        """
         if not self._attempt_history:
             return {"total_attempts": 0}
 
@@ -216,7 +375,15 @@ class WaitStrategyFactory:
 
     @staticmethod
     def create_fixed_waiter(delay: float = 1.0, max_attempts: int = 3) -> SmartWaiter:
-        """创建固定等待器"""
+        """创建固定等待器
+
+        Args:
+            delay: 固定延迟时间（秒）
+            max_attempts: 最大尝试次数
+
+        Returns:
+            智能等待器实例
+        """
         config = WaitConfig(strategy=WaitStrategy.FIXED, initial_delay=delay, max_attempts=max_attempts)
         return SmartWaiter(config)
 
@@ -224,7 +391,16 @@ class WaitStrategyFactory:
     def create_exponential_waiter(
         initial_delay: float = 1.0, max_delay: float = 60.0, max_attempts: int = 5
     ) -> SmartWaiter:
-        """创建指数等待器"""
+        """创建指数等待器
+
+        Args:
+            initial_delay: 初始延迟时间（秒）
+            max_delay: 最大延迟时间（秒）
+            max_attempts: 最大尝试次数
+
+        Returns:
+            智能等待器实例
+        """
         config = WaitConfig(
             strategy=WaitStrategy.EXPONENTIAL,
             initial_delay=initial_delay,
@@ -237,7 +413,16 @@ class WaitStrategyFactory:
     def create_adaptive_waiter(
         initial_delay: float = 1.0, max_delay: float = 30.0, max_attempts: int = 5
     ) -> SmartWaiter:
-        """创建自适应等待器"""
+        """创建自适应等待器
+
+        Args:
+            initial_delay: 初始延迟时间（秒）
+            max_delay: 最大延迟时间（秒）
+            max_attempts: 最大尝试次数
+
+        Returns:
+            智能等待器实例
+        """
         config = WaitConfig(
             strategy=WaitStrategy.ADAPTIVE,
             initial_delay=initial_delay,
@@ -248,7 +433,11 @@ class WaitStrategyFactory:
 
     @staticmethod
     def create_fast_waiter() -> SmartWaiter:
-        """创建快速等待器（适用于快速失败场景）"""
+        """创建快速等待器（适用于快速失败场景）
+
+        Returns:
+            智能等待器实例
+        """
         config = WaitConfig(
             strategy=WaitStrategy.LINEAR,
             initial_delay=0.5,
@@ -260,7 +449,11 @@ class WaitStrategyFactory:
 
     @staticmethod
     def create_patient_waiter() -> SmartWaiter:
-        """创建耐心等待器（适用于不稳定环境）"""
+        """创建耐心等待器（适用于不稳定环境）
+
+        Returns:
+            智能等待器实例
+        """
         config = WaitConfig(
             strategy=WaitStrategy.EXPONENTIAL,
             initial_delay=2.0,
@@ -286,6 +479,15 @@ def smart_retry(
         def unstable_function():
             # 可能失败的代码
             pass
+
+    Args:
+        max_attempts: 最大尝试次数
+        strategy: 等待策略
+        initial_delay: 初始延迟时间（秒）
+        exceptions: 要捕获的异常类型
+
+    Returns:
+        装饰器函数
     """
 
     def decorator(func: Callable) -> Callable:
@@ -324,3 +526,4 @@ def smart_retry(
         return wrapper
 
     return decorator
+

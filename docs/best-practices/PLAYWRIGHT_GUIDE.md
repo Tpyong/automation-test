@@ -214,9 +214,38 @@ project/
 ├── tests/
 │   ├── e2e/
 │   │   ├── test_example.py  # 测试文件
+│   ├── api/
+│   │   ├── test_api.py  # API 测试文件
+│   ├── integration/
+│   │   ├── test_integration.py  # 集成测试文件
+│   ├── unit/
+│   │   ├── test_unit.py  # 单元测试文件
 │   ├── conftest.py  # 测试配置
+├── core/
+│   ├── pages/
+│   │   ├── base/
+│   │   │   ├── base_page.py  # 基础页面类
+│   │   ├── specific/
+│   │   │   ├── login_page.py  # 登录页面
+│   │   ├── locators.py  # 定位器管理
+│   ├── services/
+│   │   ├── api/
+│   │   │   ├── mock_server.py  # Mock 服务器
+│   ├── exceptions/  # 异常管理
+│   ├── models/  # 数据模型
+├── utils/
+│   ├── browser/
+│   │   ├── browser_pool.py  # 浏览器池管理
+│   │   ├── smart_waiter.py  # 智能等待
+│   ├── api/  # API 工具
+│   ├── data/  # 数据工具
+│   ├── reporting/  # 报告工具
+├── config/
+│   ├── envs/  # 环境配置文件
+│   ├── settings.py  # 配置管理
 ├── pyproject.toml  # 项目配置
-├── requirements.txt  # 依赖文件
+├── requirements.in  # 依赖定义
+├── requirements.lock  # 锁定版本依赖
 ```
 
 ## 八、总结
