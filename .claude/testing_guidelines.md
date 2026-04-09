@@ -326,72 +326,21 @@ class TestLogin:
 
 ### 4. conftest.py 使用指南
 
-`tests/conftest.py` 是项目 UI 测试的核心配置文件，提供了丰富的 fixture 和测试增强功能。
+`tests/conftest.py` 是项目 UI 测试的核心配置文件，提供了丰富的 fixture：
 
-**主要 Fixture**：
+- **settings**：配置管理
+- **page**：浏览器页面
+- **test_data_cleanup**：测试数据清理
+- **setup_teardown**：测试前后置操作
+- **db_session**：数据库会话
+- **mock_server**：Mock 服务器
 
-1. **settings** - 配置管理
-   ```python
-   def test_example(settings):
-       print(f"Base URL: {settings.base_url}")
-       print(f"Browser: {settings.browser}")
-   ```
-
-2. **page** - 浏览器页面
-   ```python
-   def test_login(page, settings):
-       page.goto(settings.base_url)
-       # 页面操作...
-   ```
-
-3. **test_data_cleanup** - 测试数据清理
-   ```python
-   def test_create_user(page, test_data_cleanup):
-       # 创建用户
-       user_id = create_user()
-       
-       # 注册清理函数
-       def cleanup():
-           delete_user(user_id)
-       
-       test_data_cleanup["cleanup_funcs"].append(cleanup)
-       
-       # 测试断言...
-   ```
-
-4. **setup_teardown** - 测试前后置操作
-   ```python
-   def test_with_setup_teardown(page, setup_teardown):
-       # 注册 setup 和 teardown 函数
-       def setup():
-           print("Setup: 准备测试环境")
-       
-       def teardown():
-           print("Teardown: 清理测试环境")
-       
-       setup_teardown(setup_func=setup, teardown_func=teardown)
-       
-       # 测试操作...
-   ```
-
-5. **db_session** - 数据库会话
-   ```python
-   def test_database_operation(db_session):
-       # 使用数据库会话进行操作
-       result = db_session.query(User).filter_by(id=1).first()
-       assert result is not None
-   ```
-
-6. **mock_server** - Mock 服务器
-   ```python
-   def test_api_with_mock(mock_server, page):
-       # 配置 Mock 响应
-       mock_server.add_response("/api/users", "GET", 200, {"users": []})
-       
-       # 访问页面，触发 API 请求
-       page.goto("/users")
-       # 测试断言...
-   ```
+**使用示例**：
+```python
+def test_login(page, settings):
+    page.goto(settings.base_url)
+    # 页面操作...
+```
 
 ### 5. 测试工具类使用
 

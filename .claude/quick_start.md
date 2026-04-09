@@ -58,16 +58,8 @@
 
 4. **了解测试框架核心**：
    - `tests/conftest.py` 是项目 UI 测试的核心配置文件
-   - 提供了丰富的 fixture 和测试增强功能
+   - 提供丰富的 fixture 和测试增强功能
    - 自动处理浏览器管理、视频录制、截图、报告生成等
-
-**主要 Fixture**：
-- `settings`：配置管理
-- `page`：浏览器页面
-- `test_data_cleanup`：测试数据清理
-- `setup_teardown`：测试前后置操作
-- `db_session`：数据库会话
-- `mock_server`：Mock 服务器
 
 ---
 
