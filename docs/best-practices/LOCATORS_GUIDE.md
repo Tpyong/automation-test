@@ -23,7 +23,7 @@
 ### YAML 格式（推荐）
 
 ```yaml
-# locators/login_page.yaml
+# resources/locators/web/login_page_example.yaml
 
 # 1. role 定位（最推荐）- 适用于按钮、链接等
 login_button:
@@ -443,9 +443,9 @@ A:
 
 A:
 
-- 放在 `locators/` 目录下
-- 按页面命名，如 `login_page.yaml`
-- 支持子目录，如 `locators/admin/dashboard.yaml`
+- 放在 `resources/locators/web/` 目录下
+- 按页面命名，如 `login_page_example.yaml`
+- 支持子目录，如 `resources/locators/web/admin/dashboard.yaml`
 
 ### Q: 如何迁移现有的 CSS 定位器？
 
@@ -460,7 +460,7 @@ A:
 
 查看以下示例文件：
 
-- `locators/login_page_semantic.yaml` - 语义化定位器示例
-- `core/pages/login_page_semantic.py` - 使用语义化定位的页面对象
-- `tests/e2e/test_todomvc.py` - 测试用例示例
+- `resources/locators/web/login_page_semantic_example.yaml` - 语义化定位器示例
+- `core/pages/specific/login_page_semantic_example.py` - 使用语义化定位的页面对象
+- `tests/e2e/test_todomvc_example.py` - 测试用例示例
 

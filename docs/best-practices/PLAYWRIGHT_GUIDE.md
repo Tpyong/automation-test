@@ -132,7 +132,7 @@ pytest --slowmo=100
 pytest --browser=chromium --browser=firefox
 
 # 运行特定测试在多个浏览器中
-pytest tests/e2e/test_todomvc.py --browser=chromium --browser=firefox
+pytest tests/e2e/test_todomvc_example.py --browser=chromium --browser=firefox
 ```
 
 ### 2. 并行执行
@@ -226,7 +226,7 @@ project/
 │   │   ├── base/
 │   │   │   ├── base_page.py  # 基础页面类
 │   │   ├── specific/
-│   │   │   ├── login_page.py  # 登录页面
+│   │   │   ├── login_page_example.py  # 登录页面
 │   │   ├── locators.py  # 定位器管理
 │   ├── services/
 │   │   ├── api/

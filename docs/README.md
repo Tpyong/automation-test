@@ -68,7 +68,7 @@
 
 1. **安装依赖**：`pip install -e .`
 2. **安装浏览器**：`playwright install`
-3. **运行测试**：`pytest tests/e2e/test_todomvc.py -v`
+3. **运行测试**：`pytest tests/e2e/test_todomvc_example.py -v`
 4. **查看报告**：`allure serve reports/allure-results`
 
 ## 联系与支持

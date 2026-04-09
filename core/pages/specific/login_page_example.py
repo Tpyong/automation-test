@@ -26,7 +26,7 @@ class LoginPage(BasePage):
         """
         super().__init__(page)
         # 加载定位器文件（自动识别 YAML/JSON）
-        self.locators = LocatorManager("login_page")
+        self.locators = LocatorManager("login_page_example")
         logger.info("登录页面对象初始化完成")
 
     @allure.step("导航到登录页面: {url}")

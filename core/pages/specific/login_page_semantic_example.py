@@ -27,7 +27,7 @@ class LoginPageSemantic(SmartPage):
             page: Playwright 页面实例
         """
         # 使用语义化定位器文件
-        super().__init__(page, page_name="login_page_semantic")
+        super().__init__(page, page_name="login_page_semantic_example")
         logger.info("登录页面对象（语义化定位）初始化完成")
 
     @allure.step("导航到登录页面: {url}")

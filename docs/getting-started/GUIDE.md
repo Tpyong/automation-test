@@ -595,13 +595,13 @@ PLAYWRIGHT_SLOWMO=100
 
 ```bash
 # 使用环境变量中配置的浏览器
-pytest -v tests/e2e/test_todomvc.py
+pytest -v tests/e2e/test_todomvc_example.py
 
 # 命令行参数覆盖环境变量
-pytest -v tests/e2e/test_todomvc.py --browser=chromium --browser=firefox
+pytest -v tests/e2e/test_todomvc_example.py --browser=chromium --browser=firefox
 
 # 多浏览器并行测试
-pytest -n auto -v tests/e2e/test_todomvc.py --browser=chromium --browser=firefox
+pytest -n auto -v tests/e2e/test_todomvc_example.py --browser=chromium --browser=firefox
 ```
 
 ### 查看多浏览器测试结果
@@ -660,7 +660,7 @@ addopts = --reruns=2 --reruns-delay=1
 
 #### 创建测试数据文件
 
-在 `data/test_data` 目录下创建 YAML 文件，例如 `login_data.yaml`：
+在 `resources/data/fixtures/` 目录下创建 YAML 文件，例如 `login_data_example.yaml`：
 
 ```yaml
 # 登录测试数据
