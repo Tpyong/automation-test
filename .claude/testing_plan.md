@@ -1,6 +1,6 @@
 # 自动化测试计划
 
-> **最后更新**：2026-04-08
+> **最后更新**：2026-04-09
 > **状态**：基础框架已搭建完成，直接从 PRD 分析开始
 
 ***
@@ -49,6 +49,36 @@
 
 ***
 
+## 代码编写约束
+
+### 禁止修改的文件
+
+以下文件只能使用，**禁止修改**：
+- ❌ `tests/conftest.py` - 测试框架核心配置
+- ❌ `config/settings.py` - 配置管理类
+- ❌ `tests/utils/` 下的所有工具类
+- ❌ `core/pages/base/` 下的基础页面类
+- ❌ `utils/` 下的通用工具模块
+
+### 允许创建/修改的文件
+
+以下文件可以**创建或修改**：
+- ✅ `tests/e2e/test_*.py` - 测试用例文件
+- ✅ `core/pages/specific/*.py` - 特定页面类
+- ✅ `resources/data/*.yaml` - 测试数据文件
+- ✅ `resources/locators/*.yaml` - 定位器文件
+- ✅ `output/testcases_docs/*.md` - 测试文档
+
+### 代码编写原则
+
+1. **只读使用**：使用现有 fixture 和工具类，不修改实现
+2. **扩展而非修改**：通过继承或组合扩展现有功能
+3. **遵循接口**：使用现有类和方法的公开接口
+4. **数据隔离**：测试数据使用 `at_` 前缀，避免污染生产数据
+5. **问题上报**：如需修改现有代码，记录到问题追踪文件并上报，不要自行修改
+
+***
+
 ## 测试阶段划分
 
 ### 阶段 0：PRD 整体分析与模块识别
@@ -77,9 +107,9 @@
 
 ### 阶段 2 起：UI 功能模块测试
 
-**目标**：完成 \[具体功能描述] 模块的 UI 自动化测试全流程实现，确保测试用例覆盖全面、执行稳定、结果可追溯
+**目标**：完成 [具体功能描述] 模块的 UI 自动化测试全流程实现，确保测试用例覆盖全面、执行稳定、结果可追溯
 
-**说明**：本阶段为标准化模板，后续每个功能模块（阶段 3、4、5...）都复制本阶段的任务结构，仅替换 \[模块名] 和具体功能内容
+**说明**：本阶段为标准化模板，后续每个功能模块（阶段 3、4、5...）都复制本阶段的任务结构，仅替换 [模块名] 和具体功能内容
 
 ***
 
@@ -87,27 +117,41 @@
 
 **参考文件**：
 
-- PRD/\[相关需求文档].md
-- testing\_guidelines.md（测试用例编写规范）
-- templates/module\_list.md（模块清单模板）
+- PRD 文档
+- `templates/module_list.md`（模块清单模板）
+- `templates/problem_tracking.md`（问题追踪模板）
+- testing_guidelines.md（页面分析规范）
 
 **任务内容**：
 
-1. 打开实际页面，设置视口为 1920x1080，获取**关键页面截图**（仅核心流程页面），保存到 `output/snapshots/[模块名]/`
-2. 识别所有交互元素（包括动态元素），触发显示后获取快照
-3. 主动触发关键交互（提交、校验、删除等），采集实际提示语和反馈信息
-4. 基于截图和快照，整理**困难元素定位清单**（只记录无法使用 getByRole/Label/Placeholder/Text 定位的元素），保存到 `output/testcases_docs/[模块名]_元素定位临时清单.md`
-5. 六维场景分析（**分级策略**：核心功能全覆盖，一般功能正向 + 负向 + 边界，简单功能正向为主）
-6. 编写用例表格文档，保存到 `output/testcases_docs/[模块名]_用例.md`
-7. 对比 PRD 与实际实现，记录差异到 `output/testcases_docs/[模块名]_问题追踪.md` 的"与 PRD 差异记录"章节
-8. 创建需求追溯矩阵条目，作为附录添加到 `output/testcases_docs/[模块名]_用例.md` 文档末尾
+1. **页面分析**：
+   - 打开页面，获取关键截图
+   - 识别页面元素，整理困难元素清单
+   - 分析页面交互逻辑
+
+2. **六维场景分析**：
+   - 正向场景：正常操作流程
+   - 负向场景：错误输入、异常操作
+   - 边界场景：极限值、空值、超长值
+   - 异常场景：网络异常、系统异常
+   - 安全场景：SQL 注入、XSS、越权访问
+   - 性能场景：大数据量、高并发
+
+3. **编写用例文档**：
+   - 参考 `templates/module_list.md` 格式
+   - 使用表格形式编写用例（字段：ID、场景、前置条件、操作步骤、预期结果、优先级）
+   - 确保覆盖所有六维场景
+   - 页面截图保存到 `output/snapshots/[模块名]/`
+
+4. **记录 PRD 差异**：
+   - 如发现 PRD 与页面实际不符，记录到 `[模块名]_问题追踪.md` 的"与 PRD 差异记录"章节
 
 **输出内容**：
 
-- `output/testcases_docs/[模块名]_用例.md`（含 RTM 附录）
-- `output/snapshots/[模块名]/`（关键页面截图）
-- `output/testcases_docs/[模块名]_元素定位临时清单.md`（只记录困难元素）
-- `output/testcases_docs/[模块名]_问题追踪.md`（问题统一追踪文件）
+- `output/testcases_docs/[模块名]_用例.md`（含场景矩阵、用例表格、截图）
+- `output/testcases_docs/[模块名]_问题追踪.md`（统一问题追踪文件，初始版本）
+- `output/snapshots/[模块名]/`（页面截图）
+- `output/testcases_docs/[模块名]_元素定位临时清单.md`（困难元素清单）
 
 **⚠️ 完成本任务后停止执行，等待 /compact**
 
@@ -117,20 +161,33 @@
 
 **参考文件**：
 
-- 任务 X.1 输出的用例文档、元素定位临时清单、页面截图
-- testing\_guidelines.md（Page Object 编写规范）
-- docs/development/DEVELOPMENT\_GUIDELINES.md（开发规范）
+- 任务 X.1 输出的用例文档和截图
+- 任务 X.1 输出的元素定位临时清单
+- testing_guidelines.md（Page Object 编写规范）
+- docs/best-practices/LOCATORS_GUIDE.md（定位器使用指南）
+- docs/best-practices/PLAYWRIGHT_GUIDE.md（Playwright 使用指南）
 
 **任务内容**：
 
-1. 创建 `pages/[模块名]_page.py` 页面类，继承 BasePage
-2. 定义定位器（严格遵循 testing\_guidelines.md 中的元素定位优先级），封装页面操作方法
-3. 如涉及公共组件（弹窗、表格、下拉框等），按规范编写 `components/` 下的组件类
-4. 如发现定位困难、页面结构与 PRD 不符等问题，追加到问题追踪文件
+1. **创建页面类**：
+   - 创建 `core/pages/specific/[模块名]_page.py`
+   - 继承 `BasePage` 类
+   - 定义页面元素定位器（优先使用语义化定位器）
+
+2. **实现页面方法**：
+   - 实现页面操作方法（如 `login()`、`submit_form()` 等）
+   - 添加页面验证方法（如 `is_logged_in()` 等）
+   - 添加页面等待方法（如 `wait_for_page_load()` 等）
+
+3. **元素定位策略**：
+   - 优先使用语义化定位器（getByRole > getByLabel > getByPlaceholder > getByText）
+   - 对于困难元素，使用 CSS/XPath 定位器，并添加注释说明原因
+   - 确保定位器稳定可靠
 
 **输出内容**：
 
-- `pages/[模块名]_page.py`
+- `core/pages/specific/[模块名]_page.py`
+- `resources/locators/[模块名]_page.yaml`（定位器文件）
 - `components/[组件名].py`（如需要）
 
 **⚠️ 完成本任务后停止执行，等待 /compact**
@@ -142,8 +199,8 @@
 **参考文件**：
 
 - 任务 X.1 输出的用例文档
-- testing\_guidelines.md（测试数据设计规范）
-- utils/data/test\_data\_loader.py（测试数据加载器）
+- testing_guidelines.md（测试数据设计规范）
+- utils/data/test_data_loader.py（测试数据加载器）
 
 **任务内容**：
 
@@ -162,7 +219,7 @@
    - `title`：用例标题
    - `priority`：优先级（P0/P1/P2）
    - `precondition`：前置条件
-   - `tags`：标签（如 \["smoke", "regression"]）
+   - `tags`：标签（如 ["smoke", "regression"]）
    - `estimated_duration`：预估执行时长（单位秒）
    - `input`：输入数据
    - `expect`：预期结果
@@ -182,7 +239,7 @@
 
 **输出内容**：
 
-- `data/[模块名]_data.yaml`（含 metadata、tags、estimated\_duration）
+- `data/[模块名]_data.yaml`（含 metadata、tags、estimated_duration）
 
 **⚠️ 完成本任务后停止执行，等待 /compact**
 
@@ -194,8 +251,16 @@
 
 - 任务 X.2 输出的 Page Object
 - 任务 X.3 输出的测试数据
-- testing\_guidelines.md（测试用例编写规范）
-- docs/development/DEVELOPMENT\_GUIDELINES.md（开发规范）
+- testing_guidelines.md（测试用例编写规范）
+- docs/development/DEVELOPMENT_GUIDELINES.md（开发规范）
+
+**约束条件**：
+
+- **只能创建新文件**，禁止修改现有项目代码
+- 必须使用 `tests/conftest.py` 提供的 fixture
+- 必须使用 `tests/utils/` 下的工具类
+- 禁止修改 `core/pages/base/` 下的基础页面类
+- 禁止修改 `config/settings.py` 和 `tests/utils/` 下的文件
 
 **任务内容**：
 
@@ -212,6 +277,16 @@
    - `isort tests/e2e/test_[模块名].py`
    - `flake8 tests/e2e/test_[模块名].py`
 
+**约束检查清单**：
+
+- [ ] 没有修改 `tests/conftest.py`
+- [ ] 没有修改 `config/settings.py`
+- [ ] 没有修改 `tests/utils/` 下的文件
+- [ ] 没有修改 `core/pages/base/` 下的文件
+- [ ] 只创建了新的测试文件和页面类
+- [ ] 使用了 `tests/conftest.py` 提供的 fixture
+- [ ] 使用了 `tests/utils/` 下的工具类
+
 **输出内容**：
 
 - `tests/e2e/test_[模块名].py`
@@ -225,7 +300,7 @@
 **参考文件**：
 
 - 任务 X.4 输出的测试用例
-- testing\_guidelines.md（执行验证规范）
+- testing_guidelines.md（执行验证规范）
 - 任务 X.1 输出的用例文档
 - config/settings.py（配置管理类）
 
@@ -268,7 +343,7 @@
 
 **✅ 阶段 X 完成标志**：
 
-- \[功能模块名称] UI 自动化用例全部通过
+- [功能模块名称] UI 自动化用例全部通过
 - Allure 报告完整可查
 - **核心质量指标**：
   - ✅ 需求覆盖率：100%（RTM 检查无遗漏）
@@ -283,13 +358,14 @@
 1. **PRD 分析**：仔细分析所有 PRD 文档，识别所有功能模块，确保无遗漏
 2. **模块化测试**：每个功能模块独立执行，形成完整的测试闭环
 3. **质量优先**：核心关注需求覆盖率、数据幂等性、定位器稳定性
-4. **问题追踪**：所有问题统一记录到 \[模块名]\_问题追踪.md，避免多文件维护
+4. **问题追踪**：所有问题统一记录到 [模块名]_问题追踪.md，避免多文件维护
 5. **修复上限**：3 次修复未通过时建议暂停，如 AI 判断有把握可继续但需说明理由
 6. **上下文管理**：文件顶部添加简短元信息，避免冗长模板
 7. **命名规范**：统一使用小写字母 + 下划线格式，便于维护
 8. **效率优先**：在保证核心质量的前提下，最大化执行效率
 9. **多浏览器支持**：考虑不同浏览器的兼容性，确保测试在 Chromium 和 Firefox 中都能正常运行
 10. **测试工具类使用**：充分利用 tests/utils/ 下的工具类来简化测试代码
+11. **代码编写约束**：严格遵守代码编写约束，禁止修改核心文件
 
 ***
 
@@ -299,6 +375,7 @@
 - **用例执行失败时**：分析根本原因 → 优先修复简单问题（定位器、数据）→ 复杂问题（业务逻辑、环境）评估 ROI 后决策
 - **修复上限参考**：同一用例修复 3 次仍未通过时，建议暂停并记录问题
 - **不确定场景**：PRD 描述模糊、页面行为异常、前后端不一致时，优先基于常识和最佳实践处理
+- **代码约束冲突**：如需修改核心文件，记录到问题追踪文件并上报，不要自行修改
 
 ***
 
@@ -320,12 +397,12 @@
 
 ### 任务 X.3 检查项
 
-- [ ] metadata 字段完整（generated\_by、module、version、last\_updated、author）
-- [ ] 每条数据都有 tags 和 estimated\_duration
-- [ ] 创建类数据使用了动态数据生成（at\_user\_{{random\_alpha\_8}} 等）
+- [ ] metadata 字段完整（generated_by、module、version、last_updated、author）
+- [ ] 每条数据都有 tags 和 estimated_duration
+- [ ] 创建类数据使用了动态数据生成（at_user_{{random_alpha_8}} 等）
 - [ ] 数据覆盖了所有六维场景（正向、负向、边界、异常、安全、性能）
-- [ ] P0 用例添加了 \["smoke", "regression"] 标签
-- [ ] P1 用例添加了 \["regression"] 标签
+- [ ] P0 用例添加了 ["smoke", "regression"] 标签
+- [ ] P1 用例添加了 ["regression"] 标签
 
 ### 任务 X.4 检查项
 
@@ -340,6 +417,12 @@
   - [ ] 已运行 `black` 格式化
   - [ ] 已运行 `isort` 排序
   - [ ] 已运行 `flake8` 检查
+- [ ] **代码编写约束检查**：
+  - [ ] 没有修改 `tests/conftest.py`
+  - [ ] 没有修改 `config/settings.py`
+  - [ ] 没有修改 `tests/utils/` 下的文件
+  - [ ] 没有修改 `core/pages/base/` 下的文件
+  - [ ] 只创建了新的测试文件和页面类
 
 ### 任务 X.5 检查项
 
@@ -347,7 +430,7 @@
 - [ ] Allure 报告生成成功并能正常打开
 - [ ] 失败用例均已记录到问题追踪文件
 - [ ] 修复历史统计已更新（修复轮次、成功率、根因分布）
-- [ ] knowledge\_base 目录已创建（如不存在）
+- [ ] knowledge_base 目录已创建（如不存在）
 - [ ] 有失败用例时，知识沉淀文档已创建
 - [ ] 核心质量指标达标：需求覆盖率 100%、P0/P1 自动化率 100%、数据幂等性
 - [ ] 多浏览器测试通过（Chromium 和 Firefox）
@@ -358,4 +441,4 @@
 - [ ] P0/P1 用例自动化率：100%
 - [ ] 测试数据幂等性：可重复执行
 - [ ] 多浏览器兼容性：在 Chromium 和 Firefox 中都能正常运行
-
+- [ ] 代码编写约束遵守：没有修改核心文件

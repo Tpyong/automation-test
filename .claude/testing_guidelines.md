@@ -1,21 +1,50 @@
 # 自动化测试指南
 
-> **最后更新**：2026-04-08
+> **最后更新**：2026-04-09
 > **目的**：提供统一的测试用例编写和代码规范指南
-
-***
 
 ## 目录
 
-1. [测试用例编写规范](#一测试用例编写规范)
-2. [Page Object 编写规范](#二page-object-编写规范)
-3. [测试用例编写规范](#三测试用例编写规范)
-4. [执行验证规范](#四执行验证规范)
-5. [最佳实践](#五最佳实践)
+1. [代码编写原则](#一代码编写原则)
+2. [测试用例编写规范](#二测试用例编写规范)
+3. [Page Object 编写规范](#三page-object-编写规范)
+4. [测试用例编写规范](#四测试用例编写规范)
+5. [执行验证规范](#五执行验证规范)
+6. [最佳实践](#六最佳实践)
 
 ***
 
-## 一、测试用例编写规范
+## 一、代码编写原则
+
+### 1. 禁止修改的文件
+
+以下文件只能使用，**禁止修改**：
+- ❌ `tests/conftest.py` - 测试框架核心配置
+- ❌ `config/settings.py` - 配置管理类
+- ❌ `tests/utils/` 下的所有工具类
+- ❌ `core/pages/base/` 下的基础页面类
+- ❌ `utils/` 下的通用工具模块
+
+### 2. 允许创建/修改的文件
+
+以下文件可以**创建或修改**：
+- ✅ `tests/e2e/test_*.py` - 测试用例文件
+- ✅ `core/pages/specific/*.py` - 特定页面类
+- ✅ `resources/data/*.yaml` - 测试数据文件
+- ✅ `resources/locators/*.yaml` - 定位器文件
+- ✅ `output/testcases_docs/*.md` - 测试文档
+
+### 3. 核心原则
+
+1. **只读使用**：使用现有 fixture 和工具类，不修改实现
+2. **扩展而非修改**：通过继承或组合扩展现有功能
+3. **遵循接口**：使用现有类和方法的公开接口
+4. **数据隔离**：测试数据使用 `at_` 前缀，避免污染生产数据
+5. **问题上报**：如需修改现有代码，记录到问题追踪文件并上报，不要自行修改
+
+***
+
+## 二、测试用例编写规范
 
 ### 1. 从需求到用例的转化流程
 
@@ -86,7 +115,7 @@ metadata:
   generated_by: AI
   module: [模块名称]
   version: "1.0"
-  last_updated: "2026-04-08"
+  last_updated: "2026-04-09"
   author: "tester_name"
 
 - case_id: LOGIN_001
@@ -106,7 +135,7 @@ metadata:
 
 ***
 
-## 二、Page Object 编写规范
+## 三、Page Object 编写规范
 
 ### 1. 页面类结构
 
@@ -139,25 +168,6 @@ class BasePage:
             url: 目标 URL
         """
         self.page.goto(url)
-
-    def click(self, locator) -> None:
-        """
-        点击元素
-
-        Args:
-            locator: 元素定位器
-        """
-        self.page.click(locator)
-
-    def fill(self, locator, value: str) -> None:
-        """
-        填写输入框
-
-        Args:
-            locator: 元素定位器
-            value: 填写值
-        """
-        self.page.fill(locator, value)
 
 
 """
@@ -192,9 +202,9 @@ class LoginPage(BasePage):
             username: 用户名
             password: 密码
         """
-        self.fill(self.username_input, username)
-        self.fill(self.password_input, password)
-        self.click(self.login_button)
+        self.page.fill(self.username_input, username)
+        self.page.fill(self.password_input, password)
+        self.page.click(self.login_button)
 
     def get_error_message(self) -> str:
         """
@@ -227,7 +237,7 @@ class LoginPage(BasePage):
 
 ***
 
-## 三、测试用例编写规范
+## 四、测试用例编写规范
 
 ### 1. 测试文件结构
 
@@ -400,7 +410,7 @@ class TestExample:
 
 ***
 
-## 四、执行验证规范
+## 五、执行验证规范
 
 ### 1. 测试执行命令
 
@@ -428,7 +438,7 @@ class TestExample:
 
 ***
 
-## 五、最佳实践
+## 六、最佳实践
 
 ### 1. 测试分层
 
@@ -514,33 +524,33 @@ pre-commit run --all-files
 
 使用 Page Object 模式封装页面操作，提高代码的可维护性和可重用性
 
-### 3. 数据驱动
+### 4. 数据驱动
 
 使用 YAML 文件管理测试数据，提高测试数据的可维护性
 
-### 4. 语义化定位
+### 5. 语义化定位
 
 优先使用 `getByRole()`、`getByLabel()` 等语义化定位器，提高测试稳定性
 
-### 5. 智能等待
+### 6. 智能等待
 
 使用 `page.wait_for_selector()` 等显式等待方法，避免使用硬编码的等待时间
 
-### 6. 多浏览器测试
+### 7. 多浏览器测试
 
 确保测试在不同浏览器中都能正常运行，提高测试的覆盖率
 
-### 7. 问题追踪
+### 8. 问题追踪
 
 及时记录和追踪测试过程中发现的问题，确保问题得到及时解决
 
-### 8. 知识沉淀
+### 9. 知识沉淀
 
 将测试过程中的经验和解决方案沉淀到知识库中，供后续参考
 
 ***
 
-## 六、常见问题及解决方案
+## 七、常见问题及解决方案
 
 ### 1. 元素定位失败
 
@@ -567,12 +577,16 @@ pre-commit run --all-files
 - **解决方案**：优化测试代码，减少不必要的操作
 - **最佳实践**：使用性能断言，监控页面加载时间
 
+### 6. 代码约束冲突
+
+- **解决方案**：如需修改核心文件，记录到问题追踪文件并上报
+- **最佳实践**：不要自行修改核心文件，遵循代码编写原则
+
 ***
 
-## 七、参考文档
+## 八、参考文档
 
 - [系统架构文档](../docs/architecture/SYSTEM_ARCHITECTURE.md)
 - [开发规范文档](../docs/development/DEVELOPMENT_GUIDELINES.md)
 - [定位器使用指南](../docs/best-practices/LOCATORS_GUIDE.md)
 - [Playwright 使用指南](../docs/best-practices/PLAYWRIGHT_GUIDE.md)
-
