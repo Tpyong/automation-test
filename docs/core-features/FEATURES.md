@@ -93,7 +93,7 @@ pytest
 - 支持分页查询和数据验证
 - 所有 9 个 API 测试用例都能通过
 
-**API 契约测试**（`core/utils/api_contract_tester.py`）：
+**API 契约测试**（`utils/api/api_contract_tester.py`）：
 - 支持从 OpenAPI/Swagger 规范加载 API 契约
 - 自动验证 API 响应是否符合契约定义
 - 支持状态码、响应结构、必填字段验证
@@ -439,8 +439,8 @@ def test_with_data(test_data_manager):
 - **灵活配置**：MyPy 配置已调整为平衡模式，既保证类型安全，又允许逐步添加类型注解
 - **核心模块支持**：以下模块已添加完整的类型注解：
   - `core/pages/base/base_page.py` - 基础页面
-  - `core/pages/specific/login_page.py` - 登录页面
-  - `core/pages/specific/login_page_semantic.py` - 语义化登录页面
+  - `core/pages/specific/login_page_example.py` - 登录页面
+  - `core/pages/specific/login_page_semantic_example.py` - 语义化登录页面
   - `core/pages/locators.py` - 定位器管理
   - `utils/browser/browser_pool.py` - 浏览器池管理
   - `utils/browser/smart_waiter.py` - 智能等待

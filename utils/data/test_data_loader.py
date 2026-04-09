@@ -60,7 +60,7 @@ class TestDataLoader:
         Returns:
             登录测试数据列表
         """
-        return TestDataLoader.get_test_data("login_data.yaml", section)
+        return TestDataLoader.get_test_data("login_data_example.yaml", section)
 
     @staticmethod
     def clear_cache():

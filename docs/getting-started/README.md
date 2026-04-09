@@ -63,16 +63,16 @@ playwright install
 
 ```bash
 # 运行 E2E 测试示例（推荐）
-pytest tests/e2e/test_todomvc.py -v
+pytest tests/e2e/test_todomvc_example.py -v
 
 # 运行 API 测试示例
-pytest tests/api/test_mock_api.py -v
+pytest tests/api/test_mock_api_example.py -v
 
 # 运行集成测试示例
-pytest tests/integration/test_mock_server.py -v
+pytest tests/integration/test_mock_server_example.py -v
 
 # 运行单元测试示例
-pytest tests/unit/test_sample.py -v
+pytest tests/unit/test_sample_example.py -v
 ```
 
 **测试分层说明：**
@@ -224,8 +224,8 @@ def test_example(page):
 **已添加类型注解的模块**：
 
 - 基础页面（`core/pages/base/base_page.py`）
-- 登录页面（`core/pages/specific/login_page.py`）
-- 语义化登录页面（`core/pages/specific/login_page_semantic.py`）
+- 登录页面（`core/pages/specific/login_page_example.py`）
+- 语义化登录页面（`core/pages/specific/login_page_semantic_example.py`）
 - 定位器管理（`core/pages/locators.py`）
 - 浏览器池管理（`utils/browser/browser_pool.py`）
 - 智能等待（`utils/browser/smart_waiter.py`）

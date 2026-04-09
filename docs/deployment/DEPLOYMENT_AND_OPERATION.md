@@ -292,7 +292,7 @@ pytest -n 4     # 使用 4 个进程
 
 ```bash
 pytest -k "test_name"  # 运行特定测试
-pytest tests/e2e/test_todomvc.py::test_add_todo  # 运行特定测试方法
+pytest tests/e2e/test_todomvc_example.py::test_add_todo  # 运行特定测试方法
 ```
 
 3. **使用标记**：

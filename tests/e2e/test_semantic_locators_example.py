@@ -8,7 +8,7 @@ import pytest
 from playwright.sync_api import Page
 
 from core.pages.locators import SmartLocator
-from core.pages.specific.login_page_semantic import LoginPageSemantic
+from core.pages.specific.login_page_semantic_example import LoginPageSemantic
 from utils.api.assertions import Assertions
 
 

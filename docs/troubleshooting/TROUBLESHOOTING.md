@@ -334,13 +334,13 @@
 
 - **cProfile**：Python 性能分析工具
   ```bash
-  python -m cProfile -o profile.out pytest tests/e2e/test_todomvc.py
+  python -m cProfile -o profile.out pytest tests/e2e/test_todomvc_example.py
   ```
 
 - **memory_profiler**：内存分析工具
   ```bash
   pip install memory_profiler
-  python -m memory_profiler pytest tests/e2e/test_todomvc.py
+  python -m memory_profiler pytest tests/e2e/test_todomvc_example.py
   ```
 
 ### 3.4 安全扫描工具

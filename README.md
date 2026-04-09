@@ -316,8 +316,8 @@ allure open reports/allure-report
 │   │   │   └── base_page.py
 │   │   ├── components/        # 页面组件
 │   │   ├── specific/          # 特定页面对象
-│   │   │   ├── login_page.py
-│   │   │   └── login_page_semantic.py
+│   │   │   ├── login_page_example.py
+│   │   │   └── login_page_semantic_example.py
 │   │   ├── locators.py        # 定位器管理器
 │   │   └── __init__.py
 │   ├── services/              # 服务层
@@ -573,10 +573,10 @@ def test_mock_get_users(mock_server):
 pytest tests/api/ -v
 
 # 运行 Mock API 测试（推荐先试这个，无需真实 API）
-pytest tests/api/test_mock_api.py -v
+pytest tests/api/test_mock_api_example.py -v
 
 # 运行真实 API 测试（需要配置 .env 中的 API_BASE_URL）
-pytest tests/api/test_user_api.py -v
+pytest tests/api/test_user_api_example.py -v
 ```
 
 详细文档请查看：[tests/api/README.md](tests/api/README.md)

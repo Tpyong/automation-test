@@ -101,5 +101,8 @@ env/
 config/secrets/.secrets.key
 config/secrets/.secrets.salt
 
+# PRD
+PRD/
+
 # Temporary test files
 # test_*.py
