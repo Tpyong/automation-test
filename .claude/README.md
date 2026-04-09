@@ -49,8 +49,19 @@
 | [docs/getting-started/GUIDE.md](../docs/getting-started/GUIDE.md) | 完整使用指南 |
 | [docs/architecture/SYSTEM_ARCHITECTURE.md](../docs/architecture/SYSTEM_ARCHITECTURE.md) | 系统架构文档 |
 | [docs/development/DEVELOPMENT_GUIDELINES.md](../docs/development/DEVELOPMENT_GUIDELINES.md) | 开发规范 |
+| [docs/core-features/FEATURES.md](../docs/core-features/FEATURES.md) | 功能特性 |
+| [docs/ci-cd/CI_CD.md](../docs/ci-cd/CI_CD.md) | CI/CD 配置 |
+| [docs/ci-cd/GITHUB_SETUP.md](../docs/ci-cd/GITHUB_SETUP.md) | GitHub Actions 配置 |
+| [docs/ci-cd/GITHUB_PAGES_SETUP.md](../docs/ci-cd/GITHUB_PAGES_SETUP.md) | GitHub Pages 配置 |
+| [docs/ci-cd/TROUBLESHOOTING.md](../docs/ci-cd/TROUBLESHOOTING.md) | CI/CD 故障排除 |
 | [docs/best-practices/LOCATORS_GUIDE.md](../docs/best-practices/LOCATORS_GUIDE.md) | 定位器使用指南 |
 | [docs/best-practices/PLAYWRIGHT_GUIDE.md](../docs/best-practices/PLAYWRIGHT_GUIDE.md) | Playwright 使用指南 |
+| [docs/best-practices/DIRECTORY_STRUCTURE.md](../docs/best-practices/DIRECTORY_STRUCTURE.md) | 目录结构 |
+| [docs/api/API_DOCUMENTATION.md](../docs/api/API_DOCUMENTATION.md) | API 文档 |
+| [docs/deployment/DEPLOYMENT_AND_OPERATION.md](../docs/deployment/DEPLOYMENT_AND_OPERATION.md) | 部署与运维 |
+| [docs/troubleshooting/TROUBLESHOOTING.md](../docs/troubleshooting/TROUBLESHOOTING.md) | 故障排除 |
+| [docs/core-features/ALLURE_CATEGORIES.md](../docs/core-features/ALLURE_CATEGORIES.md) | Allure 分类配置 |
+| [core/pages/locators.py](../core/pages/locators.py) | 定位器管理模块 |
 
 ---
 

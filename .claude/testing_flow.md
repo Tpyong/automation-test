@@ -319,7 +319,18 @@ flowchart TD
 
 **详细约束请参考**：`.trae/rules/project-rule.md`
 
-## 五、测试执行决策规则
+## 五、参考文档
+
+- [系统架构文档](../docs/architecture/SYSTEM_ARCHITECTURE.md)
+- [开发规范文档](../docs/development/DEVELOPMENT_GUIDELINES.md)
+- [功能特性](../docs/core-features/FEATURES.md)
+- [CI/CD 配置](../docs/ci-cd/CI_CD.md)
+- [GitHub Actions 配置](../docs/ci-cd/GITHUB_SETUP.md)
+- [定位器使用指南](../docs/best-practices/LOCATORS_GUIDE.md)
+- [Playwright 使用指南](../docs/best-practices/PLAYWRIGHT_GUIDE.md)
+- [目录结构](../docs/best-practices/DIRECTORY_STRUCTURE.md)
+
+## 六、测试执行决策规则
 
 - **元素定位失败时**：按优先级尝试 → getByRole() → getByLabel() → getByPlaceholder() → getByText() → data-testid → CSS → XPath
 - **用例执行失败时**：分析根本原因 → 优先修复简单问题（定位器、数据）→ 复杂问题（业务逻辑、环境）评估 ROI 后决策
@@ -327,7 +338,7 @@ flowchart TD
 - **不确定场景**：PRD 描述模糊、页面行为异常、前后端不一致时，优先基于常识和最佳实践处理
 - **代码约束冲突**：如需修改核心文件，记录到问题追踪文件并上报，不要自行修改
 
-## 六、统一检查清单
+## 七、统一检查清单
 
 ### 任务 X.1 检查项
 - [ ] 用例文档包含：模块信息头、场景矩阵、用例统计、用例列表表格、备注章节、RTM 附录
@@ -385,7 +396,7 @@ flowchart TD
 - [ ] 多浏览器兼容性：在 Chromium 和 Firefox 中都能正常运行
 - [ ] 代码编写约束遵守：没有修改核心文件
 
-## 七、工具与脚本使用
+## 八、工具与脚本使用
 
 ### 1. 代码检查脚本
 - **使用方法**：`python scripts/ai_code_checker.py`
@@ -410,7 +421,7 @@ flowchart TD
 - **格式化代码**：`black core/ tests/ && isort core/ tests/`
 - **检查代码**：`flake8 core/ tests/ && mypy core/`
 
-## 八、执行建议
+## 九、执行建议
 
 1. **循序渐进**：按照流程顺序执行，确保每个步骤都完成后再进入下一步
 2. **质量优先**：在保证质量的前提下，最大化执行效率

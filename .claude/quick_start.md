@@ -134,6 +134,11 @@
 | 测试计划模板 | `templates/testing_plan_template.md` |
 | 项目架构 | `docs/architecture/SYSTEM_ARCHITECTURE.md` |
 | 开发规范 | `docs/development/DEVELOPMENT_GUIDELINES.md` |
+| 功能特性 | `docs/core-features/FEATURES.md` |
+| CI/CD 配置 | `docs/ci-cd/CI_CD.md` |
+| 定位器使用指南 | `docs/best-practices/LOCATORS_GUIDE.md` |
+| Playwright 使用指南 | `docs/best-practices/PLAYWRIGHT_GUIDE.md` |
+| 目录结构 | `docs/best-practices/DIRECTORY_STRUCTURE.md` |
 
 ---
 

@@ -604,7 +604,7 @@ pre-commit run --all-files
 项目中已有的样例文件可以作为 AI 生成代码的参考：
 
 ### 测试用例样例
-- **文件**：`tests/e2e/test_todomvc.py`
+- **文件**：`tests/e2e/test_todomvc_example.py`
 - **用途**：展示了如何编写符合项目规范的测试用例
 - **参考点**：
   - Allure 注解的使用
@@ -613,7 +613,7 @@ pre-commit run --all-files
   - 断言的写法
 
 ### 页面类样例
-- **文件**：`core/pages/specific/` 下的页面类文件
+- **文件**：`core/pages/specific/login_page_example.py`、`core/pages/specific/login_page_semantic_example.py`
 - **用途**：展示了 PageObject 模式的实现
 - **参考点**：
   - 元素定位器的定义
@@ -621,7 +621,7 @@ pre-commit run --all-files
   - 页面验证方法的编写
 
 ### 测试数据样例
-- **文件**：`resources/data/` 下的测试数据文件
+- **文件**：`resources/data/fixtures/login_data_example.yaml`
 - **用途**：展示了测试数据的组织方式
 - **参考点**：
   - 数据结构的设计
@@ -629,7 +629,7 @@ pre-commit run --all-files
   - 数据隔离的实现
 
 ### 定位器样例
-- **文件**：`resources/locators/` 下的定位器文件
+- **文件**：`resources/locators/web/login_page_example.yaml`、`resources/locators/web/login_page_semantic_example.yaml`、`resources/locators/web/todo_page_example.yaml`
 - **用途**：展示了元素定位器的管理方式
 - **参考点**：
   - 定位器的命名规范
@@ -642,6 +642,14 @@ pre-commit run --all-files
 
 - [系统架构文档](../docs/architecture/SYSTEM_ARCHITECTURE.md)
 - [开发规范文档](../docs/development/DEVELOPMENT_GUIDELINES.md)
+- [功能特性](../docs/core-features/FEATURES.md)
+- [CI/CD 配置](../docs/ci-cd/CI_CD.md)
+- [GitHub Actions 配置](../docs/ci-cd/GITHUB_SETUP.md)
 - [定位器使用指南](../docs/best-practices/LOCATORS_GUIDE.md)
 - [Playwright 使用指南](../docs/best-practices/PLAYWRIGHT_GUIDE.md)
+- [目录结构](../docs/best-practices/DIRECTORY_STRUCTURE.md)
+- [API 文档](../docs/api/API_DOCUMENTATION.md)
+- [部署与运维](../docs/deployment/DEPLOYMENT_AND_OPERATION.md)
+- [Allure 分类配置](../docs/core-features/ALLURE_CATEGORIES.md)
+- [定位器管理模块](../core/pages/locators.py)
 

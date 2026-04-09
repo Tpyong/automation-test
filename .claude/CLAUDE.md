@@ -267,9 +267,14 @@ allure generate reports/allure-results -o reports/login_allure_report --clean
 
 ### 参考样例
 请参考以下项目样例文件的风格和结构：
-- tests/e2e/test_todomvc.py
-- core/pages/specific/[现有页面类文件]
-- resources/data/[现有测试数据文件]
+- tests/e2e/test_todomvc_example.py
+- tests/e2e/test_semantic_locators_example.py
+- core/pages/specific/login_page_example.py
+- core/pages/specific/login_page_semantic_example.py
+- resources/data/fixtures/login_data_example.yaml
+- resources/locators/web/login_page_example.yaml
+- resources/locators/web/login_page_semantic_example.yaml
+- resources/locators/web/todo_page_example.yaml
 
 ### 输出要求
 1. 代码需符合 PEP8 规范，无语法错误
@@ -282,6 +287,18 @@ allure generate reports/allure-results -o reports/login_allure_report --clean
 - **PRD 文档**：`<项目根目录>/PRD/`
 - **测试流程**：`<项目根目录>/.claude/testing_flow.md`
 - **测试指南**：`<项目根目录>/.claude/testing_guidelines.md`
-- **项目架构**：`<项目根目录>/docs/architecture/SYSTEM_ARCHITECTURE.md`
+- **文档中心**：`<项目根目录>/docs/README.md`
+- **快速开始指南**：`<项目根目录>/docs/getting-started/README.md`
+- **完整使用指南**：`<项目根目录>/docs/getting-started/GUIDE.md`
+- **系统架构**：`<项目根目录>/docs/architecture/SYSTEM_ARCHITECTURE.md`
 - **开发规范**：`<项目根目录>/docs/development/DEVELOPMENT_GUIDELINES.md`
+- **功能特性**：`<项目根目录>/docs/core-features/FEATURES.md`
+- **CI/CD 配置**：`<项目根目录>/docs/ci-cd/CI_CD.md`
+- **GitHub Actions 配置**：`<项目根目录>/docs/ci-cd/GITHUB_SETUP.md`
+- **定位器使用指南**：`<项目根目录>/docs/best-practices/LOCATORS_GUIDE.md`
+- **Playwright 使用指南**：`<项目根目录>/docs/best-practices/PLAYWRIGHT_GUIDE.md`
+- **API 文档**：`<项目根目录>/docs/api/API_DOCUMENTATION.md`
+- **部署与运维**：`<项目根目录>/docs/deployment/DEPLOYMENT_AND_OPERATION.md`
+- **目录结构**：`<项目根目录>/docs/best-practices/DIRECTORY_STRUCTURE.md`
+- **定位器管理模块**：`<项目根目录>/core/pages/locators.py`
 
