@@ -5,42 +5,17 @@
 
 ## 目录
 
-1. [代码编写原则](#一代码编写原则)
-2. [测试用例编写规范](#二测试用例编写规范)
-3. [Page Object 编写规范](#三page-object-编写规范)
-4. [测试用例编写规范](#四测试用例编写规范)
-5. [执行验证规范](#五执行验证规范)
-6. [最佳实践](#六最佳实践)
+1. [测试用例编写规范](#二测试用例编写规范)
+2. [Page Object 编写规范](#三page-object-编写规范)
+3. [测试用例编写规范](#四测试用例编写规范)
+4. [执行验证规范](#五执行验证规范)
+5. [最佳实践](#六最佳实践)
 
 ***
 
-## 一、代码编写原则
+## 代码编写约束
 
-### 1. 禁止修改的文件
-
-以下文件只能使用，**禁止修改**：
-- ❌ `tests/conftest.py` - 测试框架核心配置
-- ❌ `config/settings.py` - 配置管理类
-- ❌ `tests/utils/` 下的所有工具类
-- ❌ `core/pages/base/` 下的基础页面类
-- ❌ `utils/` 下的通用工具模块
-
-### 2. 允许创建/修改的文件
-
-以下文件可以**创建或修改**：
-- ✅ `tests/e2e/test_*.py` - 测试用例文件
-- ✅ `core/pages/specific/*.py` - 特定页面类
-- ✅ `resources/data/*.yaml` - 测试数据文件
-- ✅ `resources/locators/*.yaml` - 定位器文件
-- ✅ `output/testcases_docs/*.md` - 测试文档
-
-### 3. 核心原则
-
-1. **只读使用**：使用现有 fixture 和工具类，不修改实现
-2. **扩展而非修改**：通过继承或组合扩展现有功能
-3. **遵循接口**：使用现有类和方法的公开接口
-4. **数据隔离**：测试数据使用 `at_` 前缀，避免污染生产数据
-5. **问题上报**：如需修改现有代码，记录到问题追踪文件并上报，不要自行修改
+**详细约束请参考**：`.trae/rules/project-rule.md`
 
 ***
 
@@ -340,12 +315,13 @@ class TestLogin:
 
 - **settings**：配置管理
 - **page**：浏览器页面
-- **test_data_cleanup**：测试数据清理
-- **setup_teardown**：测试前后置操作
-- **db_session**：数据库会话
-- **mock_server**：Mock 服务器
+- **test\_data\_cleanup**：测试数据清理
+- **setup\_teardown**：测试前后置操作
+- **db\_session**：数据库会话
+- **mock\_server**：Mock 服务器
 
 **使用示例**：
+
 ```python
 def test_login(page, settings):
     page.goto(settings.base_url)
@@ -414,27 +390,66 @@ class TestExample:
 
 ### 1. 测试执行命令
 
-- **执行单个模块测试**：
-  ```bash
-  pytest tests/e2e/test_login.py --alluredir=reports/allure-results
-  ```
-- **执行多浏览器测试**：
-  ```bash
-  pytest tests/e2e/test_login.py --alluredir=reports/allure-results --browser chromium --browser firefox
-  ```
-- **生成 Allure 报告**：
-  ```bash
-  allure generate reports/allure-results -o reports/login_allure_report --clean
-  allure serve reports/allure-results
-  ```
+**执行测试**：
+- **单个模块测试**：`pytest tests/e2e/test_[模块名].py --alluredir=reports/allure-results`
+- **指定浏览器测试**：`pytest tests/e2e/test_[模块名].py --alluredir=reports/allure-results --browser chromium`
+- **生成 Allure 报告**：`allure generate reports/allure-results -o reports/[模块名]_allure_report --clean`
+
+**代码质量检查**：
+- **格式化代码**：`black core/ tests/ && isort core/ tests/`
+- **检查代码**：`flake8 core/ tests/ && mypy core/`
+
+**依赖安装**：
+- **安装依赖**：`pip install -r requirements.txt`
+- **安装 Playwright 浏览器**：`playwright install`
 
 ### 2. 质量评估
 
 - **需求覆盖率**：确保所有 PRD 需求都有对应的测试用例
 - **测试通过率**：目标通过率 ≥95%
 - **自动化率**：P0/P1 用例自动化率 100%
-- **多浏览器兼容性**：确保测试在 Chromium 和 Firefox 中都能正常运行
 - **性能指标**：核心页面加载时间 P0≤3s, P1≤5s, P2≤10s
+
+### 3. 计划执行指导
+
+**根据 /plan 命令生成的测试计划执行测试任务的步骤**：
+
+1. **计划分析**：
+   - 仔细阅读生成的测试计划，了解项目信息、执行计划、执行顺序和质量目标
+   - 确认模块优先级和依赖关系
+
+2. **阶段 1 执行**：
+   - 读取 PRD 文档，分析功能模块
+   - 生成 `output/testcases_docs/module_list.md`
+   - 检查模块识别完整性和优先级合理性
+
+3. **阶段 2+ 执行**：
+   - 按照计划顺序执行每个模块的测试任务
+   - 完成一个模块后，更新问题追踪文件
+   - 生成 Allure 报告并分析结果
+
+4. **任务执行顺序**：
+   - **任务 X.1**：页面分析与用例设计 → 生成用例文档和问题追踪文件
+   - **任务 X.2**：Page Object 编写 → 生成页面类和定位器文件
+   - **任务 X.3**：测试数据编写 → 生成测试数据文件
+   - **任务 X.4**：测试用例编写 → 生成测试用例文件
+   - **任务 X.5**：执行验证与报告生成 → 生成 Allure 报告和最佳实践文档
+
+5. **质量控制**：
+   - 每个任务完成后进行质量检查
+   - 确保需求覆盖率达到 100%
+   - 确保测试数据隔离和幂等性
+   - 确保代码质量通过检查
+
+6. **问题处理**：
+   - 记录所有发现的问题到 `[模块名]_问题追踪.md`
+   - 同一用例修复 3 次未通过时暂停并上报
+   - 定期分析问题，总结经验教训
+
+7. **报告生成**：
+   - 每个模块测试完成后生成 Allure 报告
+   - 分析测试结果，提取失败用例的根本原因
+   - 创建最佳实践文档，沉淀测试经验
 
 ***
 
@@ -580,7 +595,46 @@ pre-commit run --all-files
 ### 6. 代码约束冲突
 
 - **解决方案**：如需修改核心文件，记录到问题追踪文件并上报
-- **最佳实践**：不要自行修改核心文件，遵循代码编写原则
+- **最佳实践**：不要自行修改核心文件，遵循代码编写约束
+
+***
+
+## 七、项目样例参考
+
+项目中已有的样例文件可以作为 AI 生成代码的参考：
+
+### 测试用例样例
+- **文件**：`tests/e2e/test_todomvc.py`
+- **用途**：展示了如何编写符合项目规范的测试用例
+- **参考点**：
+  - Allure 注解的使用
+  - fixture 的使用
+  - 测试步骤的组织
+  - 断言的写法
+
+### 页面类样例
+- **文件**：`core/pages/specific/` 下的页面类文件
+- **用途**：展示了 PageObject 模式的实现
+- **参考点**：
+  - 元素定位器的定义
+  - 页面方法的实现
+  - 页面验证方法的编写
+
+### 测试数据样例
+- **文件**：`resources/data/` 下的测试数据文件
+- **用途**：展示了测试数据的组织方式
+- **参考点**：
+  - 数据结构的设计
+  - 动态数据的使用
+  - 数据隔离的实现
+
+### 定位器样例
+- **文件**：`resources/locators/` 下的定位器文件
+- **用途**：展示了元素定位器的管理方式
+- **参考点**：
+  - 定位器的命名规范
+  - 定位策略的选择
+  - 定位器的组织方式
 
 ***
 
@@ -590,3 +644,4 @@ pre-commit run --all-files
 - [开发规范文档](../docs/development/DEVELOPMENT_GUIDELINES.md)
 - [定位器使用指南](../docs/best-practices/LOCATORS_GUIDE.md)
 - [Playwright 使用指南](../docs/best-practices/PLAYWRIGHT_GUIDE.md)
+
