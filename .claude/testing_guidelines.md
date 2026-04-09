@@ -10,6 +10,8 @@
 3. [测试用例编写规范](#四测试用例编写规范)
 4. [执行验证规范](#五执行验证规范)
 5. [最佳实践](#六最佳实践)
+6. [常见问题及解决方案](#七常见问题及解决方案)
+7. [项目样例参考](#八项目样例参考)
 
 ***
 
@@ -113,6 +115,8 @@ metadata:
 ## 三、Page Object 编写规范
 
 ### 1. 页面类结构
+
+**重要要求**：必须使用 `core/pages/locators.py` 中的 `SmartPage` 类和定位器管理功能来创建页面对象，以确保使用语义化定位和统一的定位器管理方式。
 
 ```python
 """
@@ -638,7 +642,7 @@ pre-commit run --all-files
 
 ***
 
-## 八、参考文档
+## 九、参考文档
 
 - [系统架构文档](../docs/architecture/SYSTEM_ARCHITECTURE.md)
 - [开发规范文档](../docs/development/DEVELOPMENT_GUIDELINES.md)
