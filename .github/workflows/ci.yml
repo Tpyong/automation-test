@@ -249,7 +249,7 @@ jobs:
           --cov-report=html:reports/coverage-html \
           --cov-report=xml:reports/coverage.xml \
           --cov-fail-under=20 \
-          --ignore=tests/unit/test_categories_demo.py
+          --ignore=tests/unit/test_categories_demo_example.py
 
     - name: Upload coverage report
       uses: actions/upload-artifact@v4
