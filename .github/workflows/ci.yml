@@ -129,7 +129,7 @@ jobs:
         # 排除演示用的 Categories 测试（仅用于本地验证）
         export TEST_BROWSER=${{ matrix.browser }}
         pytest -v -m "smoke or ui" \
-          --ignore=tests/unit/test_categories_demo.py \
+          --ignore=tests/unit/test_categories_demo_example.py \
           --alluredir=reports/allure-results
 
     - name: Generate Allure report
