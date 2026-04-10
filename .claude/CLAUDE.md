@@ -10,7 +10,6 @@
 | ------ | --------------------------------------------------------------- |
 | 测试流程   | [testing\_flow.md](testing_flow.md)                             |
 | 测试指南   | [testing\_guidelines.md](testing_guidelines.md)                 |
-| 模块模板   | [templates/module\_list.md](templates/module_list.md)           |
 | 问题追踪模板 | [templates/problem\_tracking.md](templates/problem_tracking.md) |
 
 ## AI 执行流程

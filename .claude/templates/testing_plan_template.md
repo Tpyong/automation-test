@@ -9,6 +9,19 @@
 
 ## 执行计划
 
+### 六维场景分析法说明
+
+**六维场景分析法**是一种全面的测试场景设计方法，用于确保测试覆盖各种可能的使用场景：
+
+| 维度     | 定义            | 示例（以登录功能为例）            |
+| ------ | ------------- | ---------------------- |
+| **正向** | 符合业务规则的正常流程   | 正确的用户名 + 密码登录成功，跳转首页   |
+| **负向** | 不符合业务规则的输入或操作 | 错误密码、未注册账号、账号被锁定       |
+| **边界** | 输入参数的临界值      | 密码长度最小值（6 位）、最大值（20 位） |
+| **异常** | 系统异常状态或非预期操作  | 网络中断、服务超时、并发登录         |
+| **安全** | 验证安全机制有效性     | SQL 注入、XSS 攻击、暴力破解防护   |
+| **性能** | 验证响应时间和资源占用   | 页面加载速度、并发性能            |
+
 ### 阶段 1：PRD 分析与模块识别
 
 **输入**：
@@ -43,13 +56,14 @@
 **输入**：
 - 模块清单（`output/testcases_docs/module_list.md`）
 - 测试用例设计指南（`.claude/testing_guidelines.md` 章节 一、测试用例设计规范）
+- 问题追踪模板（`.claude/templates/problem_tracking.md`）
 - PRD 文档（`/PRD/[相关需求文档].md`）
 
 **流程**：
 1. 以 1920×1080 视口访问目标页面，自动触发全量交互与关键操作（提交、校验、删除等），同步截取截图并采集界面反馈信息，输出至 `output/snapshots/[模块名]/`。
 2. 整理无法通过标准方式定位的困难元素，保存到 `output/testcases_docs/[模块名]_元素定位临时清单.md` 。
-3. 对比 PRD 与实际实现，记录差异至 `output/testcases_docs/[模块名]_问题追踪.md` 。
-4. 按照六维场景分析法设计测试用例，生成符合 `.claude/testing_guidelines.md` 章节 4. 用例表格规范，输出 `output/testcases_docs/[模块名]_用例.md`。
+3. 对比 PRD 与实际实现，使用 `.claude/templates/problem_tracking.md` 模板创建 `output/testcases_docs/[模块名]_问题追踪.md` 并记录差异。
+4. 按照六维场景分析法设计测试用例，生成符合 `.claude/testing_guidelines.md` 章节 一、测试用例设计规范 - 4. 用例表格规范，输出 `output/testcases_docs/[模块名]_用例.md`。
 5. 构建需求追溯矩阵，作为附录添加到 `output/testcases_docs/[模块名]_用例.md`。
 
 **约束**：
@@ -109,7 +123,7 @@
 #### 任务 2.3：测试数据编写
 **输入**：
 - 用例文档（`output/testcases_docs/[模块名]_用例.md`）
-- 测试用例设计指南（`.claude/testing_guidelines.md` 5. 测试数据设计规范）
+- 测试用例设计指南（`.claude/testing_guidelines.md` 章节 一、测试用例设计规范 - 5. 测试数据设计规范）
 
 **流程**：
 1. **数据文件结构**：
@@ -129,9 +143,6 @@
    - 名称类字段使用 `at_` 前缀（如 `at_user_{{random_alpha_8}}`）
    - 使用动态数据生成，确保数据幂等性
 
-**输出**：
-- `resources/data/[模块名]_data.yaml`
-
 **质量检查点**：
 - [ ] 数据隔离：是否使用 `at_` 前缀
 - [ ] 数据完整性：是否包含所有必要字段
@@ -148,7 +159,7 @@
 **输入**：
 - Page Object（`core/pages/specific/[模块名]_page.py`）
 - 测试数据（`resources/data/[模块名]_data.yaml`）
-- 测试用例设计指南（`.claude/testing_guidelines.md` 三、测试用例实现规范）
+- 测试用例设计指南（`.claude/testing_guidelines.md` 章节 三、测试用例实现规范）
 
 **流程**：
 1. **创建测试文件**：
@@ -182,6 +193,7 @@
 
 **输入**：
 - 测试用例（`tests/e2e/test_[模块名].py`）
+- 问题追踪文件（`output/testcases_docs/[模块名]_问题追踪.md`）
 
 **流程**：
 1. **执行测试**：
@@ -189,17 +201,12 @@
 2. **结果验证**：
    - 分析测试结果
    - 修复失败用例（上限 3 次）
-   - 记录问题到 `[模块名]_问题追踪.md`
+   - 记录问题到 `output/testcases_docs/[模块名]_问题追踪.md`
 3. **生成报告**：
    - 生成 Allure 报告：`allure generate reports/allure-results -o reports/[模块名]_allure_report --clean`
    - 提取失败用例的根本原因分类
 4. **知识沉淀**：
    - 创建 `output/testcases_docs/knowledge_base/[模块名]_最佳实践.md`
-
-**输出**：
-- `reports/[模块名]_allure_report/`
-- `output/testcases_docs/[模块名]_问题追踪.md`（更新）
-- `output/testcases_docs/knowledge_base/[模块名]_最佳实践.md`
 
 **质量检查点**：
 - [ ] 测试通过率：是否达到 ≥95%
