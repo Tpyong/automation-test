@@ -71,7 +71,7 @@ flowchart TD
 - 前置条件：PRD 文档已准备就绪
 - 后置输出：`output/testcases_docs/module_list.md`（作为后续模块测试的输入）
 
-**⚠️ 完成本任务后停止执行，等待 /compact**
+**⚠️ 完成本任务后停止执行，等待确认**
 
 ### 2. 模块级页面分析（任务 X.1）
 
@@ -110,7 +110,7 @@ flowchart TD
 - 前置条件：`output/testcases_docs/module_list.md` 已生成
 - 后置输出：`output/testcases_docs/[模块名]_用例.md`、`output/testcases_docs/[模块名]_问题追踪.md`
 
-**⚠️ 完成本任务后停止执行，等待 /compact**
+**⚠️ 完成本任务后停止执行，等待确认**
 
 ### 3. 用例设计与文档生成（任务 X.1 续）
 
@@ -172,7 +172,7 @@ flowchart TD
 - 前置条件：`output/testcases_docs/[模块名]_用例.md`（完整版）已生成
 - 后置输出：`core/pages/specific/[模块名]_page.py`、`resources/locators/[模块名]_page.yaml`
 
-**⚠️ 完成本任务后停止执行，等待 /compact**
+**⚠️ 完成本任务后停止执行，等待确认**
 
 ### 5. 测试数据编写（任务 X.3）
 
@@ -210,7 +210,7 @@ flowchart TD
 - 前置条件：`output/testcases_docs/[模块名]_用例.md`（完整版）已生成
 - 后置输出：`resources/data/[模块名]_data.yaml`
 
-**⚠️ 完成本任务后停止执行，等待 /compact**
+**⚠️ 完成本任务后停止执行，等待确认**
 
 ### 6. 测试用例编写（任务 X.4）
 
@@ -247,7 +247,7 @@ flowchart TD
 - 前置条件：`core/pages/specific/[模块名]_page.py` 和 `resources/data/[模块名]_data.yaml` 已生成
 - 后置输出：`tests/e2e/test_[模块名].py`
 
-**⚠️ 完成本任务后停止执行，等待 /compact**
+**⚠️ 完成本任务后停止执行，等待确认**
 
 ### 7. 执行验证与报告生成（任务 X.5）
 
@@ -282,7 +282,7 @@ flowchart TD
 - 前置条件：`tests/e2e/test_[模块名].py` 已生成
 - 后置输出：`reports/[模块名]_allure_report/`、`output/testcases_docs/[模块名]_问题追踪.md`（更新）、`output/testcases_docs/knowledge_base/[模块名]_最佳实践.md`
 
-**⚠️ 完成本任务后停止执行，等待 /compact**
+**⚠️ 完成本任务后停止执行，等待确认**
 
 ## 三、测试环境配置
 

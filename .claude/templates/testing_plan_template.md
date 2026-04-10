@@ -11,52 +11,215 @@
 
 ### 阶段 1：PRD 分析与模块识别
 
-- **任务**：分析 PRD 文档，识别功能模块
-- **输出**：`output/testcases_docs/module_list.md`
-- **预期结果**：完整的模块清单，包含优先级和复杂度评估
+**输入**：
+- PRD 文档（`/PRD/` 目录下的所有文件）
+
+**流程**：
+1. **读取 PRD**：分析所有 PRD 文档，提取功能模块
+2. **模块识别**：
+   - 按页面/业务域划分模块
+   - 评估每个模块的复杂度和自动化可行性
+   - 确定模块执行顺序（考虑依赖关系）
+3. **输出模块清单**：
+   - 生成 `output/testcases_docs/module_list.md`
+   - 包含模块 ID、名称、优先级、复杂度、预估工作量等
+
+**约束**：
+- 只创建新的文档文件，不修改现有代码
+- 遵循代码编写约束
+
+**质量检查点**：
+- [ ] 模块识别完整性：是否覆盖所有 PRD 需求
+- [ ] 优先级合理性：是否正确评估模块优先级
+- [ ] 依赖关系明确：是否明确模块间的依赖关系
+- [ ] 复杂度评估准确性：是否合理评估模块复杂度
+
+**输出**：
+- `output/testcases_docs/module_list.md`（作为后续模块测试的输入）
 
 ### 阶段 2：\[模块名 1] 测试
 
-- **任务 2.1**：页面分析与用例设计
-  - **输出**：`output/testcases_docs/[模块名 1]_用例.md`、`output/testcases_docs/[模块名 1]_问题追踪.md`
-  - **预期结果**：完整的用例文档和问题追踪文件
-- **任务 2.2**：Page Object 编写
-  - **输出**：`core/pages/specific/[模块名 1]_page.py`、`resources/locators/[模块名 1]_page.yaml`
-  - **预期结果**：完整的页面类和定位器文件
-- **任务 2.3**：测试数据编写
-  - **输出**：`resources/data/[模块名 1]_data.yaml`
-  - **预期结果**：完整的测试数据文件
-- **任务 2.4**：测试用例编写
-  - **输出**：`tests/e2e/test_[模块名 1].py`
-  - **预期结果**：完整的测试用例文件
-- **任务 2.5**：执行验证与报告生成
-  - **输出**：`reports/[模块名 1]_allure_report/`、`output/testcases_docs/[模块名]_问题追踪.md`（更新）、`output/testcases_docs/knowledge_base/[模块名 1]_最佳实践.md`
-  - **预期结果**：完整的测试报告和知识沉淀文档
+#### 任务 2.1：页面分析与用例设计
+**输入**：
+- 模块清单（`output/testcases_docs/module_list.md`）
+- 测试用例设计指南（`.claude/testing_guidelines.md` 章节 一、测试用例设计规范）
+- PRD 文档（`/PRD/[相关需求文档].md`）
 
-### 阶段 3：\[模块名 2] 测试
+**流程**：
+1. 以 1920×1080 视口访问目标页面，自动触发全量交互与关键操作（提交、校验、删除等），同步截取截图并采集界面反馈信息，输出至 `output/snapshots/[模块名]/`。
+2. 整理无法通过标准方式定位的困难元素，保存到 `output/testcases_docs/[模块名]_元素定位临时清单.md` 。
+3. 对比 PRD 与实际实现，记录差异至 `output/testcases_docs/[模块名]_问题追踪.md` 。
+4. 按照六维场景分析法设计测试用例，生成符合 `.claude/testing_guidelines.md` 章节 4. 用例表格规范，输出 `output/testcases_docs/[模块名]_用例.md`。
+5. 构建需求追溯矩阵，作为附录添加到 `output/testcases_docs/[模块名]_用例.md`。
 
-- **任务 3.1**：页面分析与用例设计
-  - **输出**：`output/testcases_docs/[模块名 2]_用例.md`、`output/testcases_docs/[模块名 2]_问题追踪.md`
-  - **预期结果**：完整的用例文档和问题追踪文件
-- **任务 3.2**：Page Object 编写
-  - **输出**：`core/pages/specific/[模块名 2]_page.py`、`resources/locators/[模块名 2]_page.yaml`
-  - **预期结果**：完整的页面类和定位器文件
-- **任务 3.3**：测试数据编写
-  - **输出**：`resources/data/[模块名 2]_data.yaml`
-  - **预期结果**：完整的测试数据文件
-- **任务 3.4**：测试用例编写
-  - **输出**：`tests/e2e/test_[模块名 2].py`
-  - **预期结果**：完整的测试用例文件
-- **任务 3.5**：执行验证与报告生成
-  - **输出**：`reports/[模块名 2]_allure_report/`、`output/testcases_docs/[模块名]_问题追踪.md`（更新）、`output/testcases_docs/knowledge_base/[模块名 2]_最佳实践.md`
-  - **预期结果**：完整的测试报告和知识沉淀文档
+**约束**：
+- 只创建新的文档和截图文件
+- 不修改现有代码
+
+**质量检查点**：
+- [ ] 需求覆盖率：是否覆盖所有 PRD 需求
+- [ ] 场景完整性：是否包含六维场景
+- [ ] 元素识别准确性：是否准确识别页面元素
+- [ ] 困难元素记录：是否记录困难元素并提出解决方案
+
+**输出**：
+- `output/testcases_docs/[模块名]_用例.md`（含 RTM 附录）
+- `output/snapshots/[模块名]/`（**关键页面截图**，非全部页面）
+- `output/testcases_docs/[模块名]_元素定位临时清单.md`（**只记录困难元素**）
+- `output/testcases_docs/[模块名]_问题追踪.md`（问题统一追踪文件，初始包含与 PRD 差异记录）
+
+**⚠️ 完成本任务后停止执行，等待确认**
+
+#### 任务 2.2：Page Object 编写
+**输入**：
+- 用例文档（`output/testcases_docs/[模块名]_用例.md`）
+- 页面截图（`output/snapshots/[模块名]/`）
+- 元素定位临时清单（`output/testcases_docs/[模块名]_元素定位临时清单.md`）
+- 测试用例设计指南（`.claude/testing_guidelines.md` 章节 二、Page Object 编写规范）
+
+**流程**：
+1. **创建页面类**：
+   - 创建 `core/pages/specific/[模块名]_page.py`
+   - 继承 `BasePage` 类
+   - 定义页面元素定位器（优先使用语义化定位器）
+2. **实现页面方法**：
+   - 实现页面操作方法（如 `login()`、`submit_form()` 等）
+   - 添加页面验证方法（如 `is_logged_in()` 等）
+   - 添加页面等待方法（如 `wait_for_page_load()` 等）
+3. **定位器文件**：
+   - 创建 `resources/locators/[模块名]_page.yaml`
+   - 存储页面元素定位器
+
+**约束**：
+- 只创建新的页面类和定位器文件
+- 不修改 `core/pages/base/` 下的基础页面类
+
+**质量检查点**：
+- [ ] 代码质量：是否符合 PEP8 规范
+- [ ] 定位器稳定性：是否使用语义化定位器
+- [ ] 方法完整性：是否实现所有必要的页面方法
+- [ ] 继承关系：是否正确继承 BasePage 类
+
+**输出**：
+- `core/pages/specific/[模块名]_page.py`
+- `resources/locators/[模块名]_page.yaml`
+
+**⚠️ 完成本任务后停止执行，等待确认**
+
+#### 任务 2.3：测试数据编写
+**输入**：
+- 用例文档（`output/testcases_docs/[模块名]_用例.md`）
+- 测试用例设计指南（`.claude/testing_guidelines.md` 5. 测试数据设计规范）
+
+**流程**：
+1. **数据文件结构**：
+   - 创建 `resources/data/[模块名]_data.yaml`
+   - 添加完整的 metadata 信息
+2. **数据字段**：
+   - `case_id`：用例 ID
+   - `title`：用例标题
+   - `priority`：优先级（P0/P1/P2）
+   - `precondition`：前置条件
+   - `tags`：标签（如 ["smoke", "regression"]）
+   - `estimated_duration`：预估执行时长
+   - `input`：输入数据
+   - `expect`：预期结果
+   - `remark`：备注
+3. **数据隔离**：
+   - 名称类字段使用 `at_` 前缀（如 `at_user_{{random_alpha_8}}`）
+   - 使用动态数据生成，确保数据幂等性
+
+**输出**：
+- `resources/data/[模块名]_data.yaml`
+
+**质量检查点**：
+- [ ] 数据隔离：是否使用 `at_` 前缀
+- [ ] 数据完整性：是否包含所有必要字段
+- [ ] 数据幂等性：是否使用动态数据生成
+- [ ] 数据格式：是否符合 YAML 格式规范
+
+**输出**：
+- `resources/data/[模块名]_data.yaml`
+
+**⚠️ 完成本任务后停止执行，等待确认**
+
+#### 任务 2.4：测试用例编写
+
+**输入**：
+- Page Object（`core/pages/specific/[模块名]_page.py`）
+- 测试数据（`resources/data/[模块名]_data.yaml`）
+- 测试用例设计指南（`.claude/testing_guidelines.md` 三、测试用例实现规范）
+
+**流程**：
+1. **创建测试文件**：
+   - 创建 `tests/e2e/test_[模块名].py`
+   - 编写测试类，添加 Allure 标记
+2. **编写测试方法**：
+   - 编写独立用例和参数化用例
+   - 给涉及数据修改的用例添加 `@pytest.mark.serial` 标记
+   - 确保用例覆盖六维场景
+3. **使用 fixture 和工具类**：
+   - 使用 `tests/conftest.py` 提供的 fixture（`settings`、`page`、`test_data_cleanup` 等）
+   - 使用 `tests/utils/` 下的工具类（`VideoManager`、`AttachmentManager`、`ReportManager`）
+4. **代码质量检查**：
+   - 运行 `black`、`isort`、`flake8` 检查
+
+**约束**：
+- 只创建新的测试文件
+- 不修改 `tests/conftest.py` 和 `tests/utils/` 下的文件
+- 严格遵守代码编写约束
+
+**质量检查点**：
+- [ ] 代码质量：是否通过 flake8、black、isort 检查
+- [ ] 测试逻辑：是否覆盖六维场景
+- [ ] Allure 注解：是否添加了必要的 Allure 注解
+- [ ] Fixture 使用：是否正确使用 tests/conftest.py 提供的 fixture
+
+**输出**：
+- `tests/e2e/test_[模块名].py`
+
+#### 任务 2.5：执行验证与报告生成
+
+**输入**：
+- 测试用例（`tests/e2e/test_[模块名].py`）
+
+**流程**：
+1. **执行测试**：
+   - `pytest tests/e2e/test_[模块名].py --alluredir=reports/allure-results`
+2. **结果验证**：
+   - 分析测试结果
+   - 修复失败用例（上限 3 次）
+   - 记录问题到 `[模块名]_问题追踪.md`
+3. **生成报告**：
+   - 生成 Allure 报告：`allure generate reports/allure-results -o reports/[模块名]_allure_report --clean`
+   - 提取失败用例的根本原因分类
+4. **知识沉淀**：
+   - 创建 `output/testcases_docs/knowledge_base/[模块名]_最佳实践.md`
+
+**输出**：
+- `reports/[模块名]_allure_report/`
+- `output/testcases_docs/[模块名]_问题追踪.md`（更新）
+- `output/testcases_docs/knowledge_base/[模块名]_最佳实践.md`
+
+**质量检查点**：
+- [ ] 测试通过率：是否达到 ≥95%
+- [ ] 报告完整性：是否生成完整的 Allure 报告
+- [ ] 问题记录：是否记录所有发现的问题
+- [ ] 知识沉淀：是否创建最佳实践文档
+
+**输出**：
+- `reports/[模块名]_allure_report/`
+- `output/testcases_docs/[模块名]_问题追踪.md`（更新）
+- `output/testcases_docs/knowledge_base/[模块名]_最佳实践.md`
+
+**⚠️ 完成本任务后停止执行，等待确认**
+
 
 ## 执行顺序
 
 1. 阶段 1：PRD 分析与模块识别
 2. 阶段 2：\[模块名 1] 测试
-3. 阶段 3：\[模块名 2] 测试
-4. ...
+3. ...
 
 ## 质量目标
 
